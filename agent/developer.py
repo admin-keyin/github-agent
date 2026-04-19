@@ -35,17 +35,22 @@ def update_task_status(status, branch_name=None):
         pass
 
 def call_gemini(prompt):
-    """Google Gemini API 호출 (1.5-flash + v1 정식 엔드포인트)"""
-    # RPM 제한 방지를 위한 넉넉한 대기
+    """Google Gemini API 호출 (카멜케이스 필드명 준수)"""
     time.sleep(12) 
     
     last_error = None
     for i, api_key in enumerate(GEMINI_KEYS):
-        # v1 정식 엔드포인트와 gemini-1.5-flash는 무료 티어에서 가장 안정적입니다.
+        # v1 정식 엔드포인트 사용
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+        
+        # 구글 API는 JSON 바디에서 camelCase를 엄격하게 요구합니다.
         payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"response_mime_type": "application/json"}
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }],
+            "generationConfig": {
+                "responseMimeType": "application/json" # snake_case에서 camelCase로 수정
+            }
         }
         
         try:
