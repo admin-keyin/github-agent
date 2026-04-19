@@ -44,11 +44,12 @@ def update_task_status(status, branch_name=None):
         print(f"❌ DB 업데이트 중 예외 발생: {e}")
 
 def call_gemini(prompt):
-    """Google Gemini API 호출 (키 자동 전환 기능 포함)"""
+    """Google Gemini API 호출 (키 자동 전환 및 상세 로깅)"""
     last_error = None
     
     for i, api_key in enumerate(GEMINI_KEYS):
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+        # 안정적인 1.5-flash 모델로 우선 시도
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
         payload = {
             "contents": [{
                 "parts": [{
@@ -61,24 +62,22 @@ def call_gemini(prompt):
         }
         
         try:
-            response = requests.post(url, json=payload, timeout=30)
+            response = requests.post(url, json=payload, timeout=60)
             res_json = response.json()
             
             if response.status_code == 200:
                 return res_json['candidates'][0]['content']['parts'][0]['text']
-            elif response.status_code == 429:
-                print(f"⚠️ API 키 {i+1}번 사용량 초과. 다음 키로 전환합니다...")
-                continue
             else:
-                print(f"❌ API 키 {i+1}번 에러 ({response.status_code}): {res_json}")
-                last_error = res_json
+                error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
+                print(f"❌ API 키 {i+1}번 실패 (HTTP {response.status_code}): {error_msg}")
+                last_error = f"HTTP {response.status_code} - {error_msg}"
                 continue
         except Exception as e:
-            print(f"⚠️ API 키 {i+1}번 호출 중 예외 발생: {e}")
-            last_error = e
+            print(f"⚠️ API 키 {i+1}번 예외 발생: {e}")
+            last_error = str(e)
             continue
             
-    raise Exception(f"모든 Gemini API 키가 실패했습니다. 마지막 에러: {last_error}")
+    raise Exception(f"모든 Gemini API 키가 실패했습니다.\n사유: {last_error}")
 
 def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
