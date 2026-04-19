@@ -1,0 +1,52 @@
+name: Email-to-Code Agent
+on:
+  repository_dispatch:
+    types: [email-task]
+
+jobs:
+  develop:
+    runs-on: ubuntu-latest # GitHub 제공 무료 서버 사용
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run Agent Logic
+        env:
+          TASK_ID: ${{ github.event.client_payload.id }}
+          TASK_SUBJECT: ${{ github.event.client_payload.subject }}
+          TASK_BODY: ${{ github.event.client_payload.body }}
+          SENDER: ${{ github.event.client_payload.from }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # Gemini API 키 추가
+        run: |
+          python agent/developer.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feat: ${{ github.event.client_payload.subject }} 구현"
+          title: "🚀 [에이전트] ${{ github.event.client_payload.subject }}"
+          body: |
+            ## 에이전트 자동화 작업
+            - **작업 ID**: ${{ github.event.client_payload.id }}
+            - **발신자**: ${{ github.event.client_payload.from }}
+            - **내용**: ${{ github.event.client_payload.body }}
+            
+            ---
+            *이 PR은 AI 개발 에이전트에 의해 자동 생성되었습니다.*
+          branch: "agent/feature-${{ github.event.client_payload.id }}"
+          base: main
