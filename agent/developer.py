@@ -3,13 +3,13 @@ import requests
 import json
 import subprocess
 import traceback
+import time
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 TASK_ID = os.getenv("TASK_ID")
 
-# 여러 개의 Gemini API 키 리스트로 관리 (Fallback Mechanism)
 GEMINI_KEYS = [
     os.getenv("GEMINI_API_KEY"),
     os.getenv("GEMINI_API_KEY_2")
@@ -17,11 +17,8 @@ GEMINI_KEYS = [
 GEMINI_KEYS = [k for k in GEMINI_KEYS if k]
 
 def update_task_status(status, branch_name=None):
-    """Supabase REST API를 통해 상태를 업데이트합니다."""
     if not SUPABASE_URL or not SUPABASE_KEY or not TASK_ID:
-        print(f"⚠️ 상태 업데이트 스킵 (환경변수 부족): URL={bool(SUPABASE_URL)}, KEY={bool(SUPABASE_KEY)}, ID={bool(TASK_ID)}")
         return
-        
     url = f"{SUPABASE_URL}/rest/v1/agent_tasks?id=eq.{TASK_ID}"
     headers = {
         "apikey": SUPABASE_KEY,
@@ -32,33 +29,23 @@ def update_task_status(status, branch_name=None):
     data = {"status": status}
     if branch_name:
         data["branch_name"] = branch_name
-        
     try:
-        res = requests.patch(url, headers=headers, json=data, timeout=10)
-        if res.status_code >= 200 and res.status_code < 300:
-            print(f"📡 DB 업데이트 성공: {status} (HTTP {res.status_code})")
-        else:
-            print(f"❌ DB 업데이트 실패: HTTP {res.status_code} - {res.text}")
-            print("💡 팁: Supabase RLS 설정이 켜져 있다면 SERVICE_ROLE_KEY를 사용해야 합니다.")
-    except Exception as e:
-        print(f"❌ DB 업데이트 중 예외 발생: {e}")
+        requests.patch(url, headers=headers, json=data, timeout=10)
+    except:
+        pass
 
 def call_gemini(prompt):
-    """Google Gemini API 호출 (키 자동 전환 및 상세 로깅)"""
-    last_error = None
+    """Google Gemini API 호출 (키 자동 전환 + 속도 조절)"""
+    # 무료 티어 429 에러 방지를 위한 짧은 대기
+    time.sleep(5) 
     
+    last_error = None
     for i, api_key in enumerate(GEMINI_KEYS):
-        # 안정적인 1.5-flash 모델로 우선 시도
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        # 2.0-flash 모델이 현재 가장 고성능이며 v1beta에서 작동 확인됨
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
         payload = {
-            "contents": [{
-                "parts": [{
-                    "text": prompt
-                }]
-            }],
-            "generationConfig": {
-                "response_mime_type": "application/json",
-            }
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"response_mime_type": "application/json"}
         }
         
         try:
@@ -71,9 +58,9 @@ def call_gemini(prompt):
                 error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
                 print(f"❌ API 키 {i+1}번 실패 (HTTP {response.status_code}): {error_msg}")
                 last_error = f"HTTP {response.status_code} - {error_msg}"
+                # 429(사용량 초과) 발생 시 다음 키로 즉시 넘어감
                 continue
         except Exception as e:
-            print(f"⚠️ API 키 {i+1}번 예외 발생: {e}")
             last_error = str(e)
             continue
             
@@ -84,78 +71,56 @@ def run_command(command):
     return result.stdout, result.stderr
 
 def get_repo_context():
-    """파일 구조 추출 (GitHub Actions 환경 최적화)"""
-    tree, _ = run_command("find . -maxdepth 3 -not -path '*/.*' -not -path './node_modules*'")
+    # 파일 구조 추출 (더 가볍게 수정)
+    tree, _ = run_command("find . -maxdepth 2 -not -path '*/.*' -not -path './node_modules*'")
     return tree
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "No Body")
     
-    print(f"🚀 작업 시작 (Cloud Mode): {subject}")
+    print(f"🚀 작업 시작: {subject}")
     update_task_status("running")
     
     try:
-        # 1. 컨텍스트 파악
         context = get_repo_context()
         
-        # 2. 에이전트 전략 수립
-        plan_prompt = f"""
-        당신은 시니어 풀스택 개발자입니다. 다음 요구사항을 해결하기 위한 상세 계획을 JSON으로 답변하세요.
-        요구사항: {subject} / {body}
-        현재 프로젝트 구조:
-        {context}
-        
-        응답 형식:
-        {{
-          "explanation": "작업 전략 설명",
-          "new_branch": "agent/feature-task"
-        }}
-        """
+        # 전략 수립
+        plan_prompt = f"당신은 시니어 개발자입니다. 다음 요구사항의 해결 계획을 JSON으로 답변하세요.\n요구사항: {subject} / {body}\n구조: {context}\n형식: {{\"explanation\": \"...\", \"new_branch\": \"...\"}}"
         plan_raw = call_gemini(plan_prompt)
         plan = json.loads(plan_raw)
         print(f"📝 전략: {plan['explanation']}")
         
-        # 3. 브랜치 생성
-        branch_name = f"agent/task-{os.urandom(4).hex()}"
-        run_command(f"git checkout -b {branch_name}")
+        # 10초 대기 (무료 티어 RPM 제한 방지)
+        time.sleep(10)
 
-        # 4. 파일 구현
-        implementation_prompt = f"""
-        요구사항: {subject} / {body}
-        전략: {plan['explanation']}
-        현재 프로젝트 구조: {context}
-        
-        위 내용을 바탕으로 실제 코딩을 수행하세요. 반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.
-        응답 형식:
-        {{
-          "changes": [
-            {{"path": "경로", "content": "전체 코드", "action": "create|update"}}
-          ]
-        }}
-        """
+        # 구현
+        implementation_prompt = f"다음 전략에 따라 코드를 작성하세요.\n전략: {plan['explanation']}\n요구사항: {subject}\n반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\", \"action\": \"update\" }}]}}"
         implementation_raw = call_gemini(implementation_prompt)
         implementation = json.loads(implementation_raw)
         
         for change in implementation.get('changes', []):
             path = change['path']
-            print(f"🛠  파일 수정 중: {path}")
+            print(f"🛠 파일 수정 중: {path}")
             os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
             with open(path, "w") as f:
                 f.write(change['content'])
 
-        # 5. Git 커밋 & 푸시
+        # Git 작업
         run_command("git config user.name 'github-actions[bot]'")
         run_command("git config user.email 'github-actions[bot]@users.noreply.github.com'")
         run_command("git add .")
         run_command(f'git commit -m "feat: {subject}"')
+        
+        branch_name = f"agent/task-{os.urandom(2).hex()}"
+        run_command(f"git checkout -b {branch_name}")
         run_command(f"git push origin {branch_name}")
         
-        print(f"✅ 작업 완료! 브랜치: {branch_name}")
+        print(f"✅ 작업 완료: {branch_name}")
         update_task_status("completed", branch_name=branch_name)
 
     except Exception as e:
-        print(f"❌ 에이전트 실행 중 오류 발생:\n{traceback.format_exc()}")
+        print(f"❌ 에러 발생:\n{traceback.format_exc()}")
         update_task_status("failed")
 
 if __name__ == "__main__":
