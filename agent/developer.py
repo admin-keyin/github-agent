@@ -35,14 +35,14 @@ def update_task_status(status, branch_name=None):
         pass
 
 def call_gemini(prompt):
-    """Google Gemini API 호출 (2.0-flash 모델 고정)"""
-    # RPM 제한 방지를 위한 대기
-    time.sleep(10) 
+    """Google Gemini API 호출 (1.5-flash + v1 정식 엔드포인트)"""
+    # RPM 제한 방지를 위한 넉넉한 대기
+    time.sleep(12) 
     
     last_error = None
     for i, api_key in enumerate(GEMINI_KEYS):
-        # v1beta에서 2.0-flash는 현재 가장 안정적인 모델명입니다.
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+        # v1 정식 엔드포인트와 gemini-1.5-flash는 무료 티어에서 가장 안정적입니다.
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {"response_mime_type": "application/json"}
@@ -77,7 +77,7 @@ def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "No Body")
     
-    print(f"🚀 작업 시작 (Cloud Mode): {subject}")
+    print(f"🚀 작업 시작 (Stable Mode): {subject}")
     update_task_status("running")
     
     try:
@@ -89,7 +89,7 @@ def main():
         plan = json.loads(plan_raw)
         print(f"📝 전략: {plan['explanation']}")
         
-        time.sleep(10)
+        time.sleep(12)
 
         # 2. 구현
         implementation_prompt = f"다음 전략에 따라 코드를 작성하세요.\n전략: {plan['explanation']}\n요구사항: {subject}\n반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\", \"action\": \"update\" }}]}}"
