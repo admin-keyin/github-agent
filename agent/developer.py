@@ -5,30 +5,50 @@ import subprocess
 import traceback
 
 # --- 설정 ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-# Gemini 2.0 Flash 모델 사용 (빠르고 무료 티어 제공)
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+# 여러 개의 API 키를 리스트로 관리
+GEMINI_KEYS = [
+    os.getenv("GEMINI_API_KEY"),
+    os.getenv("GEMINI_API_KEY_2") # 예비 키
+]
+# None 값 제거
+GEMINI_KEYS = [k for k in GEMINI_KEYS if k]
 
 def call_gemini(prompt):
-    """Google Gemini API 호출"""
-    payload = {
-        "contents": [{
-            "parts": [{
-                "text": prompt
-            }]
-        }],
-        "generationConfig": {
-            "response_mime_type": "application/json",
+    """Google Gemini API 호출 (키 자동 전환 기능 포함)"""
+    last_error = None
+    
+    for i, api_key in enumerate(GEMINI_KEYS):
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+            }
         }
-    }
-    response = requests.post(GEMINI_URL, json=payload)
-    res_json = response.json()
-    try:
-        # Gemini 응답 파싱
-        return res_json['candidates'][0]['content']['parts'][0]['text']
-    except Exception as e:
-        print(f"Gemini API 응답 오류: {res_json}")
-        raise e
+        
+        try:
+            response = requests.post(url, json=payload, timeout=30)
+            res_json = response.json()
+            
+            if response.status_code == 200:
+                return res_json['candidates'][0]['content']['parts'][0]['text']
+            elif response.status_code == 429:
+                print(f"⚠️ API 키 {i+1}번 사용량 초과. 다음 키로 전환합니다...")
+                continue
+            else:
+                print(f"❌ API 키 {i+1}번 에러 ({response.status_code}): {res_json}")
+                last_error = res_json
+                continue
+        except Exception as e:
+            print(f"⚠️ API 키 {i+1}번 호출 중 예외 발생: {e}")
+            last_error = e
+            continue
+            
+    raise Exception(f"모든 Gemini API 키가 실패했습니다. 마지막 에러: {last_error}")
 
 def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
