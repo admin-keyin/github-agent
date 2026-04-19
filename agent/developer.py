@@ -5,13 +5,39 @@ import subprocess
 import traceback
 
 # --- 설정 ---
-# 여러 개의 API 키를 리스트로 관리
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+TASK_ID = os.getenv("TASK_ID")
+
+# 여러 개의 Gemini API 키 리스트로 관리 (Fallback Mechanism)
 GEMINI_KEYS = [
     os.getenv("GEMINI_API_KEY"),
-    os.getenv("GEMINI_API_KEY_2") # 예비 키
+    os.getenv("GEMINI_API_KEY_2")
 ]
-# None 값 제거
 GEMINI_KEYS = [k for k in GEMINI_KEYS if k]
+
+def update_task_status(status, branch_name=None):
+    """Supabase REST API를 통해 상태를 업데이트합니다."""
+    if not SUPABASE_URL or not SUPABASE_KEY or not TASK_ID:
+        print(f"⚠️ 상태 업데이트 스킵 (환경변수 부족): URL={bool(SUPABASE_URL)}, KEY={bool(SUPABASE_KEY)}, ID={bool(TASK_ID)}")
+        return
+        
+    url = f"{SUPABASE_URL}/rest/v1/agent_tasks?id=eq.{TASK_ID}"
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+    }
+    data = {"status": status}
+    if branch_name:
+        data["branch_name"] = branch_name
+        
+    try:
+        res = requests.patch(url, headers=headers, json=data, timeout=10)
+        print(f"📡 상태 업데이트 완료: {status} (HTTP {res.status_code})")
+    except Exception as e:
+        print(f"❌ 상태 업데이트 실패: {e}")
 
 def call_gemini(prompt):
     """Google Gemini API 호출 (키 자동 전환 기능 포함)"""
@@ -55,9 +81,8 @@ def run_command(command):
     return result.stdout, result.stderr
 
 def get_repo_context():
-    """파일 구조 추출"""
-    # GitHub Action 환경에 맞는 find 명령어
-    tree, _ = run_command("find . -maxdepth 2 -not -path '*/.*' -not -path './node_modules*'")
+    """파일 구조 추출 (GitHub Actions 환경 최적화)"""
+    tree, _ = run_command("find . -maxdepth 3 -not -path '*/.*' -not -path './node_modules*'")
     return tree
 
 def main():
@@ -96,6 +121,7 @@ def main():
         implementation_prompt = f"""
         요구사항: {subject} / {body}
         전략: {plan['explanation']}
+        현재 프로젝트 구조: {context}
         
         위 내용을 바탕으로 실제 코딩을 수행하세요. 반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.
         응답 형식:
@@ -111,12 +137,11 @@ def main():
         for change in implementation.get('changes', []):
             path = change['path']
             print(f"🛠  파일 수정 중: {path}")
-            # 보안: .env 파일 등은 수정하지 못하도록 방어 로직 추가 가능
             os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
             with open(path, "w") as f:
                 f.write(change['content'])
 
-        # 5. Git 커밋
+        # 5. Git 커밋 & 푸시
         run_command("git config user.name 'github-actions[bot]'")
         run_command("git config user.email 'github-actions[bot]@users.noreply.github.com'")
         run_command("git add .")
