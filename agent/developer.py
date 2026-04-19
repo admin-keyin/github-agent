@@ -4,6 +4,7 @@ import json
 import subprocess
 import traceback
 import time
+import re
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -34,23 +35,28 @@ def update_task_status(status, branch_name=None):
     except:
         pass
 
+def parse_json_garbage(text):
+    """Gemini가 응답에 섞어놓은 마크다운 코드 블록 등을 제거하고 순수 JSON만 추출"""
+    # ```json ... ``` 또는 ``` ... ``` 블록 추출
+    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
+
 def call_gemini(prompt):
-    """Google Gemini API 호출 (카멜케이스 필드명 준수)"""
+    """Google Gemini API 호출 (가장 안전한 기본 설정 사용)"""
     time.sleep(12) 
     
     last_error = None
     for i, api_key in enumerate(GEMINI_KEYS):
-        # v1 정식 엔드포인트 사용
+        # 가장 안정적인 v1 / 1.5-flash 조합 사용
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
         
-        # 구글 API는 JSON 바디에서 camelCase를 엄격하게 요구합니다.
+        # 400 에러를 피하기 위해 generationConfig 설정을 아예 제거합니다.
         payload = {
             "contents": [{
-                "parts": [{"text": prompt}]
-            }],
-            "generationConfig": {
-                "responseMimeType": "application/json" # snake_case에서 camelCase로 수정
-            }
+                "parts": [{"text": prompt + "\n\n반드시 다른 설명 없이 순수 JSON 형식으로만 답변하세요."}]
+            }]
         }
         
         try:
@@ -58,7 +64,8 @@ def call_gemini(prompt):
             res_json = response.json()
             
             if response.status_code == 200:
-                return res_json['candidates'][0]['content']['parts'][0]['text']
+                raw_text = res_json['candidates'][0]['content']['parts'][0]['text']
+                return parse_json_garbage(raw_text)
             else:
                 error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
                 print(f"❌ API 키 {i+1}번 실패 (HTTP {response.status_code}): {error_msg}")
@@ -82,7 +89,7 @@ def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "No Body")
     
-    print(f"🚀 작업 시작 (Stable Mode): {subject}")
+    print(f"🚀 작업 시작 (Failsafe Mode): {subject}")
     update_task_status("running")
     
     try:
