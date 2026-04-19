@@ -35,9 +35,13 @@ def update_task_status(status, branch_name=None):
         
     try:
         res = requests.patch(url, headers=headers, json=data, timeout=10)
-        print(f"📡 상태 업데이트 완료: {status} (HTTP {res.status_code})")
+        if res.status_code >= 200 and res.status_code < 300:
+            print(f"📡 DB 업데이트 성공: {status} (HTTP {res.status_code})")
+        else:
+            print(f"❌ DB 업데이트 실패: HTTP {res.status_code} - {res.text}")
+            print("💡 팁: Supabase RLS 설정이 켜져 있다면 SERVICE_ROLE_KEY를 사용해야 합니다.")
     except Exception as e:
-        print(f"❌ 상태 업데이트 실패: {e}")
+        print(f"❌ DB 업데이트 중 예외 발생: {e}")
 
 def call_gemini(prompt):
     """Google Gemini API 호출 (키 자동 전환 기능 포함)"""
