@@ -116,7 +116,10 @@ def main():
         run_command(f"git checkout -b {branch_name}", cwd=work_dir)
         run_command("git add .", cwd=work_dir)
         run_command(f'git commit -m "feat: {subject}"', cwd=work_dir)
-        _, err, code = run_command(f"git push origin {branch_name}", cwd=work_dir)
+        
+        # 푸시 시 URL에 PAT 명시 (인증 오류 방지)
+        push_url = target_repo_url.replace("https://", f"https://{GITHUB_PAT}@")
+        _, err, code = run_command(f"git push {push_url} {branch_name}", cwd=work_dir)
         
         if code != 0:
             raise Exception(f"대상 레포지토리로 푸시 실패 (권한 확인 필요): {err}")
