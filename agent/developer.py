@@ -157,11 +157,18 @@ def main():
         run_command(f"git push origin {branch_name}", cwd=work_dir)
 
         # 6. PR 생성
+        print(f"🚀 PR 생성 중: {repo_full_name} (Base: {target_base_branch})")
+        time.sleep(2) # 푸시 안정화 대기
         pr_res = create_github_pr(repo_full_name, branch_name, f"🚀 [에이전트] {subject}", f"작업 내용: {body}", base_branch=target_base_branch)
-        pr_url = pr_res.get("html_url", "PR 생성 실패")
         
-        print(f"✅ 완료: {pr_url}")
-        update_task_status("completed", branch_name=branch_name, pr_url=pr_url)
+        if "html_url" in pr_res:
+            pr_url = pr_res["html_url"]
+            print(f"✅ 완료: {pr_url}")
+            update_task_status("completed", branch_name=branch_name, pr_url=pr_url)
+        else:
+            error_detail = json.dumps(pr_res, indent=2)
+            print(f"❌ PR 생성 실패 상세:\n{error_detail}")
+            update_task_status("completed", branch_name=branch_name, pr_url="PR 생성 실패 (로그 확인)")
 
     except Exception as e:
         print(f"❌ 에러:\n{traceback.format_exc()}")
