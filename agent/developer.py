@@ -150,10 +150,16 @@ def main():
         for change in impl.get('changes', []):
             path = os.path.join(work_dir, change['path'].lstrip('./'))
             content = change.get('content', '')
+            
             if content:
+                # 데이터가 딕셔너리(JSON 객체)인 경우 문자열로 변환
+                if isinstance(content, (dict, list)):
+                    content = json.dumps(content, indent=2, ensure_ascii=False)
+                
                 print(f"🛠 파일 생성: {change['path']} ({len(content)} bytes)")
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-                with open(path, "w") as f: f.write(content)
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(content)
 
         # 5. 푸시 및 PR
         branch_name = f"agent/google-quality-{int(time.time())}"
