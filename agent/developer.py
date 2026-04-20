@@ -61,7 +61,12 @@ def call_gemini_cli(prompt, phase_name="Thinking"):
     
     # gemini CLI 명령어 구성
     # --model (-m), --prompt (-p) 플래그 사용
-    cmd = f"gemini -m {GEMINI_MODEL} -p \"{full_prompt.replace('\"', '\\\"')}\""
+    # 프롬프트를 임시 파일로 저장하여 전달하면 특수문자 문제를 완벽히 해결할 수 있습니다.
+    prompt_path = "/tmp/gemini_prompt.txt"
+    with open(prompt_path, "w", encoding="utf-8") as f:
+        f.write(full_prompt)
+    
+    cmd = f"gemini -m {GEMINI_MODEL} -p \"$(cat {prompt_path})\""
     
     start_time = time.time()
     stdout, stderr, code = run_command(cmd)
