@@ -32,7 +32,7 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           OLLAMA_MODEL: "llama3"
         run: |
-          python agent/developer.py
+          python3 agent/developer.py
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
