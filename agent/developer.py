@@ -93,12 +93,15 @@ def main():
         time.sleep(2)
 
         # 2. 구현
-        implementation_prompt = f"다음 전략에 따라 코드를 작성하세요.\n전략: {plan['explanation']}\n요구사항: {subject}\n반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\", \"action\": \"update\" }}]}}"
+        implementation_prompt = f"다음 전략에 따라 코드를 작성하세요.\n전략: {plan['explanation']}\n요구사항: {subject}\n반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.\n\n**중요: 경로는 반드시 './app/page.js'와 같이 현재 디렉토리 기준의 상대 경로여야 합니다.**\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\", \"action\": \"update\" }}]}}"
         implementation_raw = call_ollama(implementation_prompt)
         implementation = json.loads(implementation_raw)
         
         for change in implementation.get('changes', []):
-            path = change['path']
+            path = change['path'].lstrip('/') # 절대 경로 방지 (앞의 / 제거)
+            # 프로젝트 외부 경로 접근 방지 (.. 제거 등)
+            path = os.path.normpath(path).replace("../", "")
+            
             print(f"🛠 파일 수정 중: {path}")
             os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
             with open(path, "w") as f:
