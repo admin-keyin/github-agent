@@ -39,37 +39,42 @@ def parse_json_garbage(text):
         return match.group(1).strip()
     return text.strip()
 
-def call_ollama(prompt):
+def call_ollama(prompt, retry=1):
     """Local Ollama API 호출"""
     url = f"{OLLAMA_HOST}/api/generate"
     
+    # JSON 강제 옵션 제거 (일부 모델에서 빈 응답 유발 가능)
     payload = {
         "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        "format": "json"
+        "prompt": prompt + "\n\n반드시 다른 설명 없이 오직 순수 JSON 데이터만 출력하세요.",
+        "stream": False
+        # "format": "json"  <-- 제거
     }
     
     try:
         print(f"📡 Ollama 요청 중... (Model: {OLLAMA_MODEL})")
-        response = requests.post(url, json=payload, timeout=180) # 타임아웃 3분으로 연장
+        response = requests.post(url, json=payload, timeout=180)
         res_json = response.json()
         
         if response.status_code == 200:
             raw_text = res_json.get('response', '')
             if not raw_text.strip():
-                print("⚠️ Ollama가 빈 응답을 반환했습니다.")
-                raise Exception("Empty response from Ollama")
+                if retry > 0:
+                    print(f"⚠️ 빈 응답 수신. 재시도 중... (남은 횟수: {retry})")
+                    time.sleep(2)
+                    return call_ollama(prompt, retry - 1)
+                raise Exception("Empty response from Ollama after retries")
             
-            # 디버깅용: 응답의 일부 출력
             print(f"📥 Ollama 응답 수신 (길이: {len(raw_text)})")
             return parse_json_garbage(raw_text)
         else:
             error_msg = res_json.get('error', 'Unknown Error')
-            print(f"❌ Ollama 호출 실패 (HTTP {response.status_code}): {error_msg}")
             raise Exception(f"HTTP {response.status_code} - {error_msg}")
     except Exception as e:
-        print(f"❌ Ollama 호출 중 예외 발생: {str(e)}")
+        if retry > 0:
+            print(f"❌ 에러 발생 ({str(e)}). 재시도 중...")
+            time.sleep(2)
+            return call_ollama(prompt, retry - 1)
         raise e
 
 def run_command(command):
