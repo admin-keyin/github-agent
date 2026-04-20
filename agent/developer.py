@@ -46,6 +46,10 @@ def run_command(command, cwd=None):
 
 def accept_repo_invitation(repo_full_name):
     """대기 중인 레포지토리 초대를 자동으로 수락"""
+    if not GITHUB_PAT:
+        print("❌ GITHUB_PAT이 설정되지 않았습니다.")
+        return False
+
     print(f"🔍 '{repo_full_name}' 초대 확인 중...")
     url = "https://api.github.com/user/repository_invitations"
     headers = {
@@ -54,15 +58,31 @@ def accept_repo_invitation(repo_full_name):
     }
     try:
         res = requests.get(url, headers=headers)
+        if res.status_code != 200:
+            print(f"❌ 초대 목록 조회 실패 (HTTP {res.status_code}): {res.text}")
+            return False
+            
         invites = res.json()
+        if not isinstance(invites, list):
+            print(f"❌ 응답이 리스트 형식이 아닙니다: {invites}")
+            return False
+            
         for invite in invites:
-            if invite.get('repository', {}).get('full_name').lower() == repo_full_name.lower():
+            repo_info = invite.get('repository', {})
+            if not isinstance(repo_info, dict): continue
+            
+            full_name = repo_info.get('full_name', '')
+            if full_name.lower() == repo_full_name.lower():
                 invite_id = invite.get('id')
                 print(f"📦 초대 발견 (ID: {invite_id}). 수락 진행...")
                 accept_url = f"https://api.github.com/user/repository_invitations/{invite_id}"
-                requests.patch(accept_url, headers=headers)
-                print("✅ 초대 수락 완료!")
-                return True
+                accept_res = requests.patch(accept_url, headers=headers)
+                if accept_res.status_code == 204:
+                    print("✅ 초대 수락 성공!")
+                    return True
+                else:
+                    print(f"❌ 초대 수락 실패 (HTTP {accept_res.status_code}): {accept_res.text}")
+                    return False
     except Exception as e:
         print(f"⚠️ 초대 확인 중 에러: {e}")
     return False
@@ -86,6 +106,9 @@ def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
     
+    if not GITHUB_PAT:
+        print("CRITICAL ERROR: GITHUB_PAT environment variable is missing!")
+    
     target_base_branch = extract_target_branch(body)
     print(f"🚀 작업 시작: {subject} (Target: {target_base_branch})")
     update_task_status("running")
@@ -107,10 +130,9 @@ def main():
         # 2. 초대 자동 수락
         accept_repo_invitation(repo_full_name)
         
-        print(f"📦 타겟 레포지토리: {target_repo_url}")
-        
         # 3. 클론 (인증 정보 포함)
-        auth_url = target_repo_url.replace("https://", f"https://oauth2:{GITHUB_PAT}@")
+        print(f"📦 타겟 레포지토리 클론 시도: {target_repo_url}")
+        auth_url = target_repo_url.replace("https://", f"https://{GITHUB_PAT}@")
         _, err, code = run_command(f"git clone -b {target_base_branch} {auth_url} {work_dir}")
         if code != 0:
             print("⚠️ 지정 브랜치 클론 실패, 기본 브랜치로 재시도...")
@@ -118,19 +140,18 @@ def main():
             if code != 0: raise Exception(f"클론 실패: {err}")
             target_base_branch = "main"
 
-        # 4. 컨텍스트 및 AI 호출
+        # 4. 컨텍스트 파악 및 AI 호출
         tree, _, _ = run_command("find . -maxdepth 2 -not -path '*/.*' -not -path './node_modules*'", cwd=work_dir)
         
-        # 전략 수립
-        plan_prompt = f"요구사항: {subject} / {body}\n파일 구조: {tree}"
-        plan_res = requests.post(f"{OLLAMA_HOST}/api/generate", json={"model": OLLAMA_MODEL, "prompt": plan_prompt + "\n반드시 다른 설명 없이 오직 순수 JSON 데이터만 출력하세요. 형식: {\"explanation\": \"...\"}", "stream": False, "format": "json"}, timeout=600)
-        plan = json.loads(plan_res.json().get('response', '{}'))
+        # 전략 및 구현 (Ollama 호출)
+        def call_ai(prompt):
+            res = requests.post(f"{OLLAMA_HOST}/api/generate", json={"model": OLLAMA_MODEL, "prompt": prompt + "\n반드시 다른 설명 없이 오직 순수 JSON 데이터만 출력하세요.", "stream": False, "format": "json"}, timeout=600)
+            return json.loads(res.json().get('response', '{}'))
+
+        plan = call_ai(f"요구사항: {subject} / {body}\n파일 구조: {tree}\n형식: {{\"explanation\": \"...\"}}")
         print(f"📝 전략: {plan.get('explanation', '계획 수립 완료')}")
 
-        # 구현
-        impl_prompt = f"전략: {plan.get('explanation')}\n요구사항: {subject}"
-        impl_res = requests.post(f"{OLLAMA_HOST}/api/generate", json={"model": OLLAMA_MODEL, "prompt": impl_prompt + "\n반드시 다른 설명 없이 오직 순수 JSON 데이터만 출력하세요. 형식: {\"changes\": [{\"path\": \"...\", \"content\": \"...\"}]}", "stream": False, "format": "json"}, timeout=600)
-        impl = json.loads(impl_res.json().get('response', '{}'))
+        impl = call_ai(f"전략: {plan.get('explanation')}\n요구사항: {subject}\n형식: {{\"changes\": [{\"path\": \"...\", \"content\": \"...\"}]}}")
         
         for change in impl.get('changes', []):
             path = os.path.join(work_dir, change['path'].lstrip('./').lstrip('/'))
@@ -147,7 +168,7 @@ def main():
         run_command("git add .", cwd=work_dir)
         run_command(f'git commit -m "feat: {subject}"', cwd=work_dir)
         
-        # 원격지 URL 업데이트 (인증 강제 주입)
+        # 원격지 URL 업데이트 (인증 정보 명시)
         run_command(f"git remote set-url origin {auth_url}", cwd=work_dir)
         print(f"📡 푸시 시도 중: {branch_name}")
         _, err, code = run_command(f"git push origin {branch_name}", cwd=work_dir)
@@ -156,6 +177,7 @@ def main():
             raise Exception(f"푸시 실패: {err}")
 
         # 6. PR 생성
+        print(f"🚀 PR 생성 중: {repo_full_name}")
         pr_url_api = f"https://api.github.com/repos/{repo_full_name}/pulls"
         headers = {"Authorization": f"token {GITHUB_PAT}", "Accept": "application/vnd.github+json"}
         pr_data = {"title": f"🚀 [에이전트] {subject}", "body": f"작업 내용: {body}", "head": branch_name, "base": target_base_branch}
@@ -170,7 +192,7 @@ def main():
             update_task_status("completed", branch_name=branch_name, pr_url="PR 생성 실패")
 
     except Exception as e:
-        print(f"❌ 에러:\n{traceback.format_exc()}")
+        print(f"❌ 에러 발생:\n{traceback.format_exc()}")
         update_task_status("failed")
 
 if __name__ == "__main__":
