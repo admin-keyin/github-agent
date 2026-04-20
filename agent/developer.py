@@ -45,24 +45,31 @@ def call_ollama(prompt):
     
     payload = {
         "model": OLLAMA_MODEL,
-        "prompt": prompt + "\n\n반드시 다른 설명 없이 순수 JSON 형식으로만 답변하세요.",
+        "prompt": prompt,
         "stream": False,
         "format": "json"
     }
     
     try:
-        response = requests.post(url, json=payload, timeout=120)
+        print(f"📡 Ollama 요청 중... (Model: {OLLAMA_MODEL})")
+        response = requests.post(url, json=payload, timeout=180) # 타임아웃 3분으로 연장
         res_json = response.json()
         
         if response.status_code == 200:
             raw_text = res_json.get('response', '')
+            if not raw_text.strip():
+                print("⚠️ Ollama가 빈 응답을 반환했습니다.")
+                raise Exception("Empty response from Ollama")
+            
+            # 디버깅용: 응답의 일부 출력
+            print(f"📥 Ollama 응답 수신 (길이: {len(raw_text)})")
             return parse_json_garbage(raw_text)
         else:
             error_msg = res_json.get('error', 'Unknown Error')
             print(f"❌ Ollama 호출 실패 (HTTP {response.status_code}): {error_msg}")
             raise Exception(f"HTTP {response.status_code} - {error_msg}")
     except Exception as e:
-        print(f"❌ Ollama 연결 에러: {str(e)}")
+        print(f"❌ Ollama 호출 중 예외 발생: {str(e)}")
         raise e
 
 def run_command(command):
@@ -84,17 +91,40 @@ def main():
         context = get_repo_context()
         
         # 1. 전략 수립
-        plan_prompt = f"당신은 시니어 개발자입니다. 다음 요구사항의 해결 계획을 JSON으로 답변하세요.\n요구사항: {subject} / {body}\n구조: {context}\n형식: {{\"explanation\": \"...\", \"new_branch\": \"...\"}}"
+        plan_prompt = f"""당신은 시니어 개발자입니다. 다음 요구사항의 해결 계획을 JSON으로 답변하세요.
+요구사항: {subject} / {body}
+파일 구조: {context}
+
+반드시 다음 JSON 형식을 엄격히 지켜서 답변하세요:
+{{
+  "explanation": "작업 계획 설명",
+  "new_branch": "기능구현_브랜치명"
+}}"""
         plan_raw = call_ollama(plan_prompt)
+        print(f"DEBUG: Raw Plan: {plan_raw}")
         plan = json.loads(plan_raw)
         print(f"📝 전략: {plan['explanation']}")
         
-        # Ollama는 로컬 실행이므로 Gemini와 달리 대기 시간이 크게 필요하지 않을 수 있음
-        time.sleep(2)
+        time.sleep(1)
 
         # 2. 구현
-        implementation_prompt = f"다음 전략에 따라 코드를 작성하세요.\n전략: {plan['explanation']}\n요구사항: {subject}\n반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.\n\n**중요: 경로는 반드시 './app/page.js'와 같이 현재 디렉토리 기준의 상대 경로여야 합니다.**\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\", \"action\": \"update\" }}]}}"
+        implementation_prompt = f"""다음 전략에 따라 코드를 작성하세요.
+전략: {plan['explanation']}
+요구사항: {subject} / {body}
+
+반드시 다음 JSON 형식을 엄격히 지켜서 전체 파일 내용을 포함해 답변하세요:
+{{
+  "changes": [
+    {{
+      "path": "./path/to/file.js",
+      "content": "전체 파일 내용...",
+      "action": "update"
+    }}
+  ]
+}}
+**중요: 경로는 반드시 './'로 시작하는 상대 경로여야 합니다.**"""
         implementation_raw = call_ollama(implementation_prompt)
+        print(f"DEBUG: Raw Implementation: {implementation_raw}")
         implementation = json.loads(implementation_raw)
         
         for change in implementation.get('changes', []):
