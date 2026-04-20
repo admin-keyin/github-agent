@@ -30,7 +30,7 @@ jobs:
           TASK_SUBJECT: ${{ github.event.client_payload.subject }}
           TASK_BODY: ${{ github.event.client_payload.body }}
           SENDER: ${{ github.event.client_payload.from }}
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }} # 스크립트에서 직접 사용
+          GITHUB_PAT: ${{ secrets.MY_GITHUB_PAT }} # 기본 토큰 대신 수동 등록한 PAT 사용
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           OLLAMA_MODEL: "qwen2.5-coder:3b"

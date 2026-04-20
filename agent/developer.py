@@ -81,7 +81,8 @@ def main():
         print(f"📦 타겟 레포지토리 발견: {target_repo_url}")
         
         # 2. 클론 (인증 정보 포함)
-        auth_url = target_repo_url.replace("https://", f"https://{GITHUB_PAT}@")
+        # oauth2 prefix를 사용하면 토큰 인증이 더 확실해집니다.
+        auth_url = target_repo_url.replace("https://", f"https://oauth2:{GITHUB_PAT}@")
         _, err, code = run_command(f"git clone -b {target_base_branch} {auth_url} {work_dir}")
         if code != 0:
             print("⚠️ 지정 브랜치 클론 실패, 기본 브랜치로 재시도...")
