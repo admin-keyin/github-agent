@@ -5,16 +5,18 @@ import subprocess
 import traceback
 import time
 import re
+import shutil
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 TASK_ID = os.getenv("TASK_ID")
+GITHUB_PAT = os.getenv("GITHUB_PAT")
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:3b")
 
-def update_task_status(status, branch_name=None):
+def update_task_status(status, branch_name=None, pr_url=None):
     if not SUPABASE_URL or not SUPABASE_KEY or not TASK_ID:
         return
     url = f"{SUPABASE_URL}/rest/v1/agent_tasks?id=eq.{TASK_ID}"
@@ -25,128 +27,133 @@ def update_task_status(status, branch_name=None):
         "Prefer": "return=minimal"
     }
     data = {"status": status}
-    if branch_name:
-        data["branch_name"] = branch_name
+    if branch_name: data["branch_name"] = branch_name
+    if pr_url: data["pr_url"] = pr_url
     try:
         requests.patch(url, headers=headers, json=data, timeout=10)
-    except:
-        pass
+    except: pass
 
 def parse_json_garbage(text):
-    """Ollama가 응답에 섞어놓은 마크다운 코드 블록 등을 제거하고 순수 JSON만 추출"""
     match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
     if match:
         return match.group(1).strip()
     return text.strip()
 
 def call_ollama(prompt, retry=1):
-    """Local Ollama API 호출"""
     url = f"{OLLAMA_HOST}/api/generate"
-    
-    # JSON 강제 옵션 제거 (일부 모델에서 빈 응답 유발 가능)
     payload = {
         "model": OLLAMA_MODEL,
         "prompt": prompt + "\n\n반드시 다른 설명 없이 오직 순수 JSON 데이터만 출력하세요.",
         "stream": False
-        # "format": "json"  <-- 제거
     }
-    
     try:
-        print(f"📡 Ollama 요청 중... (Model: {OLLAMA_MODEL}, Timeout: 600s)")
-        response = requests.post(url, json=payload, timeout=600) # 10분으로 대폭 연장
+        print(f"📡 Ollama 요청 중... (Model: {OLLAMA_MODEL})")
+        response = requests.post(url, json=payload, timeout=600)
         res_json = response.json()
-        
         if response.status_code == 200:
             raw_text = res_json.get('response', '')
             if not raw_text.strip():
-                if retry > 0:
-                    print(f"⚠️ 빈 응답 수신. 재시도 중... (남은 횟수: {retry})")
-                    time.sleep(2)
-                    return call_ollama(prompt, retry - 1)
-                raise Exception("Empty response from Ollama after retries")
-            
-            print(f"📥 Ollama 응답 수신 (길이: {len(raw_text)})")
+                if retry > 0: return call_ollama(prompt, retry - 1)
+                raise Exception("Empty response from Ollama")
             return parse_json_garbage(raw_text)
         else:
-            error_msg = res_json.get('error', 'Unknown Error')
-            raise Exception(f"HTTP {response.status_code} - {error_msg}")
+            raise Exception(f"HTTP {response.status_code}")
     except Exception as e:
-        if retry > 0:
-            print(f"❌ 에러 발생 ({str(e)}). 재시도 중...")
-            time.sleep(2)
-            return call_ollama(prompt, retry - 1)
+        if retry > 0: return call_ollama(prompt, retry - 1)
         raise e
 
-def run_command(command):
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+def run_command(command, cwd=None):
+    result = subprocess.run(command, shell=True, capture_output=True, text=True, cwd=cwd)
     return result.stdout, result.stderr
 
-def get_repo_context():
-    tree, _ = run_command("find . -maxdepth 2 -not -path '*/.*' -not -path './node_modules*'")
-    return tree
+def extract_git_url(text):
+    # https://github.com/owner/repo 형태 추출
+    match = re.search(r"https://github\.com/[\w\-/.]+", text)
+    if match:
+        url = match.group(0)
+        if url.endswith('.'): url = url[:-1]
+        if not url.endswith('.git'): url += '.git'
+        return url
+    return None
+
+def create_github_pr(repo_full_name, branch, title, body):
+    url = f"https://api.github.com/repos/{repo_full_name}/pulls"
+    headers = {
+        "Authorization": f"token {GITHUB_PAT}",
+        "Accept": "application/vnd.github+json"
+    }
+    data = {
+        "title": title,
+        "body": body,
+        "head": branch,
+        "base": "main" 
+    }
+    res = requests.post(url, headers=headers, json=data)
+    return res.json()
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
-    body = os.getenv("TASK_BODY", "No Body")
+    body = os.getenv("TASK_BODY", "")
     
-    print(f"🚀 작업 시작 (Ollama Mode): {subject}")
+    print(f"🚀 외부 프로젝트 작업 시작: {subject}")
     update_task_status("running")
     
+    # 작업 디렉토리 설정
+    work_dir = os.path.join(os.getcwd(), "external_repo")
+    if os.path.exists(work_dir):
+        shutil.rmtree(work_dir)
+
     try:
-        context = get_repo_context()
+        # 1. 대상 레포지토리 추출 및 클론
+        target_repo_url = extract_git_url(body)
+        if not target_repo_url:
+            print("⚠️ URL 미발견. 현재 레포지토리 대상 작업.")
+            target_repo_url = run_command("git remote get-url origin")[0].strip()
         
-        # 1. 전략 수립
-        plan_prompt = f"""당신은 시니어 개발자입니다. 다음 요구사항의 해결 계획을 JSON으로 답변하세요.
-요구사항: {subject} / {body}
-파일 구조: {context}
+        print(f"📦 타겟 레포지토리: {target_repo_url}")
+        auth_url = target_repo_url.replace("https://", f"https://{GITHUB_PAT}@")
+        run_command(f"git clone {auth_url} {work_dir}")
 
-반드시 다음 JSON 형식을 엄격히 지켜서 답변하세요:
-{{
-  "explanation": "작업 계획 설명",
-  "new_branch": "기능구현_브랜치명"
-}}"""
-        plan_raw = call_ollama(plan_prompt)
-        print(f"DEBUG: Raw Plan: {plan_raw}")
-        plan = json.loads(plan_raw)
+        repo_match = re.search(r"github\.com/([\w\-]+/[\w\-.]+)", target_repo_url)
+        repo_full_name = repo_match.group(1).replace(".git", "")
+
+        # 2. 컨텍스트 파악
+        tree, _ = run_command("find . -maxdepth 2 -not -path '*/.*' -not -path './node_modules*'", cwd=work_dir)
+        
+        # 3. 전략 수립
+        plan_prompt = f"요구사항: {subject} / {body}\n구조: {tree}\n형식: {{\"explanation\": \"...\"}}"
+        plan = json.loads(call_ollama(plan_prompt))
         print(f"📝 전략: {plan['explanation']}")
-        
-        time.sleep(1)
 
-        # 2. 구현
-        implementation_prompt = f"""다음 전략에 따라 코드를 작성하세요.
-전략: {plan['explanation']}
-요구사항: {subject} / {body}
-
-반드시 다음 JSON 형식을 엄격히 지켜서 전체 파일 내용을 포함해 답변하세요:
-{{
-  "changes": [
-    {{
-      "path": "./path/to/file.js",
-      "content": "전체 파일 내용...",
-      "action": "update"
-    }}
-  ]
-}}
-**중요: 경로는 반드시 './'로 시작하는 상대 경로여야 합니다.**"""
-        implementation_raw = call_ollama(implementation_prompt)
-        print(f"DEBUG: Raw Implementation: {implementation_raw}")
-        implementation = json.loads(implementation_raw)
+        # 4. 구현 및 파일 수정
+        impl_prompt = f"전략: {plan['explanation']}\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\" }}]}}"
+        impl = json.loads(call_ollama(impl_prompt))
         
-        for change in implementation.get('changes', []):
-            path = change['path'].lstrip('/') # 절대 경로 방지 (앞의 / 제거)
-            # 프로젝트 외부 경로 접근 방지 (.. 제거 등)
-            path = os.path.normpath(path).replace("../", "")
-            
-            print(f"🛠 파일 수정 중: {path}")
-            os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+        for change in impl.get('changes', []):
+            path = os.path.join(work_dir, change['path'].lstrip('./').lstrip('/'))
+            print(f"🛠 파일 수정: {path}")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "w") as f:
                 f.write(change['content'])
 
-        print(f"✅ 파일 수정 완료")
-        update_task_status("completed")
+        # 5. Git 커밋 및 푸시
+        branch_name = f"agent/fix-{int(time.time())}"
+        run_command(f"git config user.name 'github-actions[bot]'", cwd=work_dir)
+        run_command(f"git config user.email 'github-actions[bot]@users.noreply.github.com'", cwd=work_dir)
+        run_command(f"git checkout -b {branch_name}", cwd=work_dir)
+        run_command("git add .", cwd=work_dir)
+        run_command(f'git commit -m "feat: {subject}"', cwd=work_dir)
+        run_command(f"git push origin {branch_name}", cwd=work_dir)
+
+        # 6. PR 생성
+        pr_res = create_github_pr(repo_full_name, branch_name, f"🚀 [에이전트] {subject}", f"작업 내용: {body}")
+        pr_url = pr_res.get("html_url", "PR 생성 실패 (권한 또는 브랜치 확인)")
+        
+        print(f"✅ 완료: {pr_url}")
+        update_task_status("completed", branch_name=branch_name, pr_url=pr_url)
 
     except Exception as e:
-        print(f"❌ 에러 발생:\n{traceback.format_exc()}")
+        print(f"❌ 에러:\n{traceback.format_exc()}")
         update_task_status("failed")
 
 if __name__ == "__main__":
