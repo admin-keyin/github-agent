@@ -31,6 +31,7 @@ jobs:
           TASK_BODY: ${{ github.event.client_payload.body }}
           SENDER: ${{ github.event.client_payload.from }}
           GITHUB_PAT: ${{ secrets.MY_GITHUB_PAT }} # 기본 토큰 대신 수동 등록한 PAT 사용
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }} # 구글 검색용 API 키
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           OLLAMA_MODEL: "qwen2.5-coder:7b"
