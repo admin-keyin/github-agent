@@ -65,7 +65,7 @@ def call_gemini_cli(prompt, phase_name="Thinking"):
     full_prompt = f"{prompt}\n\n반드시 다른 설명 없이 오직 순수 JSON 데이터만 반환하세요. 키와 값에는 반드시 쌍따옴표(\")를 사용하세요."
     
     # CLI 호출 (리스트 방식 사용으로 따옴표 문제 해결)
-    cmd = ["gemini", "-m", GEMINI_MODEL, "--raw-output", "-p", full_prompt]
+    cmd = ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", full_prompt]
     
     start_time = time.time()
     stdout, stderr, code = run_command_list(cmd)
