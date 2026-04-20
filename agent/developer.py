@@ -52,8 +52,8 @@ def call_ollama(prompt, retry=1):
     }
     
     try:
-        print(f"📡 Ollama 요청 중... (Model: {OLLAMA_MODEL})")
-        response = requests.post(url, json=payload, timeout=180)
+        print(f"📡 Ollama 요청 중... (Model: {OLLAMA_MODEL}, Timeout: 600s)")
+        response = requests.post(url, json=payload, timeout=600) # 10분으로 대폭 연장
         res_json = response.json()
         
         if response.status_code == 200:
