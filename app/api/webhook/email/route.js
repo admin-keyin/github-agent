@@ -5,13 +5,17 @@ import { supabase } from "@/utils/supabase";
 export async function POST(req) {
   try {
     const payload = await req.json();
-    
-    const { from, subject, text, body } = payload;
-    const taskBody = text || body || '';
+    console.log("Received Webhook Payload:", JSON.stringify(payload)); // 디버깅용
+
+    // Cloudmailin JSON 포맷에 맞게 필드 추출 (상단 필드 또는 headers 내 필드)
+    const from = payload.from || (payload.headers && payload.headers.from) || "";
+    const subject = payload.subject || (payload.headers && payload.headers.subject) || "No Subject";
+    const taskBody = payload.plain || payload.text || payload.body || "";
 
     // 1. 보안 체크
     const ALLOWED_SENDER = process.env.ALLOWED_SENDER;
-    if (from !== ALLOWED_SENDER && ALLOWED_SENDER !== "*") {
+    if (!from || (ALLOWED_SENDER !== "*" && from !== ALLOWED_SENDER)) {
+      console.warn(`Unauthorized sender: ${from}`);
       return NextResponse.json({ message: "Unauthorized sender" }, { status: 403 });
     }
 
