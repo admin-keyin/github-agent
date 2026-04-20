@@ -20,168 +20,126 @@ def update_task_status(status, branch_name=None, pr_url=None):
     if not SUPABASE_URL or not SUPABASE_KEY or not TASK_ID:
         return
     url = f"{SUPABASE_URL}/rest/v1/agent_tasks?id=eq.{TASK_ID}"
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json"
-    }
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
     data = {"status": status}
     if branch_name: data["branch_name"] = branch_name
     if pr_url: data["pr_url"] = pr_url
-    try:
-        requests.patch(url, headers=headers, json=data, timeout=10)
+    try: requests.patch(url, headers=headers, json=data, timeout=10)
     except: pass
 
 def run_command_list(args, cwd=None):
-    print(f"Executing: {' '.join(args)}")
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
     env["GIT_ASKPASS"] = "true"
     env["GEMINI_CLI_NON_INTERACTIVE"] = "true"
-    
     result = subprocess.run(args, capture_output=True, text=True, cwd=cwd, env=env)
     return result.stdout.strip(), result.stderr.strip(), result.returncode
 
+def get_repo_contents(work_dir):
+    """주요 파일들의 실제 내용을 수집하여 AI에게 전달"""
+    context = ""
+    for root, _, files in os.walk(work_dir):
+        if any(x in root for x in ['node_modules', '.git', '.next']): continue
+        for file in files:
+            if file.endswith(('.js', '.jsx', '.ts', '.tsx', '.json', '.md')):
+                rel_path = os.path.relpath(os.path.join(root, file), work_dir)
+                try:
+                    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        context += f"\n-- File: {rel_path} --\n{content}\n"
+                except: pass
+    return context
+
 def clean_json_output(text):
-    """설명이 섞인 텍스트에서 JSON 블록만 정밀하게 추출"""
-    # 1. ```json ... ``` 또는 ``` ... ``` 블록 우선 추출
     code_blocks = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
-    if code_blocks:
-        return code_blocks[-1].strip() # 가장 마지막 블록 반환
-    
-    # 2. { ... } 형태의 가장 큰 블록 찾기
+    if code_blocks: return code_blocks[-1].strip()
     json_match = re.search(r"(\{.*\})", text, re.DOTALL)
-    if json_match:
-        return json_match.group(1).strip()
-    
+    if json_match: return json_match.group(1).strip()
     return text.strip()
 
 def call_gemini_cli(prompt, phase_name="Thinking"):
-    print(f"🧠 Gemini ({GEMINI_MODEL})가 {phase_name} 중...")
-    
-    # 지시사항 강화: 서론/결론 금지
-    full_prompt = f"System: 당신은 시니어 개발자입니다. 절대 친절한 설명이나 서론을 적지 마세요. 오직 요청한 JSON 데이터만 출력하세요.\n\nUser: {prompt}\n\n결과는 반드시 쌍따옴표(\")를 사용한 순수 JSON이어야 합니다."
-    
+    print(f"🧠 Gemini가 {phase_name} 중...")
+    full_prompt = f"System: 당신은 세계 최고의 시니어 풀스택 개발자입니다. 코드를 생략하거나 '나머지 코드 생략'과 같은 주석을 절대 사용하지 마세요. 모든 파일은 즉시 프로덕션에 배포 가능한 수준으로 완벽하게 작성해야 합니다.\n\nUser: {prompt}\n\n응답은 반드시 JSON 형식을 엄격히 지켜야 합니다."
     cmd = ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", full_prompt]
     
     start_time = time.time()
     stdout, stderr, code = run_command_list(cmd)
+    if code != 0: return {}
     
-    if code != 0:
-        print(f"❌ Gemini CLI 호출 실패: {stderr[:200]}")
-        return {}
-    
-    cleaned = clean_json_output(stdout)
     try:
+        cleaned = clean_json_output(stdout)
         result = json.loads(cleaned)
         print(f"✅ {phase_name} 완료! ({time.time() - start_time:.1f}초)")
         return result
-    except Exception as e:
-        print(f"❌ JSON 파싱 실패: {str(e)[:50]}")
-        print(f"DEBUG: AI 응답 원본 (첫 300자):\n{stdout[:300]}...")
+    except:
+        print(f"❌ {phase_name} 파싱 실패. 원본: {stdout[:200]}...")
         return {}
-
-def search_google(query):
-    if not SERPER_API_KEY: return "검색 키 없음"
-    url = "https://google.serper.dev/search"
-    headers = {'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'}
-    try:
-        res = requests.post(url, headers=headers, json={"q": query, "num": 5}, timeout=10)
-        items = res.json().get('organic', [])
-        return "\n".join([f"- {i['title']}: {i['snippet']}" for i in items])
-    except: return "검색 실패"
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
-    
     git_match = re.search(r"https://github\.com/([\w\-]+/[\w\-.]+)", body)
     if not git_match: return
-        
     repo_full_name = git_match.group(1).replace(".git", "")
     auth_url = f"https://oauth2:{GITHUB_PAT}@github.com/{repo_full_name}.git"
     work_dir = os.path.join(os.getcwd(), "external_repo")
     if os.path.exists(work_dir): shutil.rmtree(work_dir)
 
-    print(f"🚀 Gemini 2.5 고품질 에이전트 시작: {repo_full_name}")
+    print(f"🚀 [고품질 모드] 에이전트 가동: {repo_full_name}")
     update_task_status("running")
 
     try:
         # 1. Google 검색
-        search_results = search_google(f"Latest React components and best practices for {subject}")
+        search_results = requests.post("https://google.serper.dev/search", headers={'X-API-KEY': os.getenv("SERPER_API_KEY"), 'Content-Type': 'application/json'}, json={"q": f"Next.js professional dashboard with circular graphs recharts guide {subject}"}).json()
+        search_data = "\n".join([f"- {i['title']}: {i['snippet']}" for i in search_results.get('organic', [])[:3]])
 
-        # 2. 클론
+        # 2. 클론 및 컨텍스트 수집
         run_command_list(["git", "clone", auth_url, work_dir])
+        repo_context = get_repo_contents(work_dir)
         
-        # 3. 전략 수립
-        plan_prompt = f"참고자료:\n{search_results}\n\n요구사항: {subject}\n본문: {body}\n구현 계획을 JSON으로 작성하세요. 형식: {{\"explanation\": \"...\"}}"
+        # 3. 전략 수립 (사양서 작성)
+        plan_prompt = f"현재 코드:\n{repo_context}\n\n검색 정보:\n{search_data}\n\n요구사항: {subject} / {body}\n구현할 파일 목록과 구체적인 로직을 포함한 계획을 JSON으로 작성하세요. 형식: {{\"explanation\": \"...\"}}"
         plan = call_gemini_cli(plan_prompt, "전략 수립")
-        explanation = plan.get('explanation', '작업 진행')
+        spec = plan.get('explanation', '')
 
-        # 4. 구현
-        impl_prompt = f"전략: {explanation}\n요구사항: {subject}\n전체 소스 코드를 포함한 JSON 형식으로 작성하세요. 형식: {{\"changes\": [{{\"path\": \"...\", \"content\": \"...\"}}]}}"
+        # 4. 고품질 구현 (강력한 지시)
+        impl_prompt = f"사양서: {spec}\n요구사항: {subject}\n\n" + \
+                      "위 사양서에 따라 전체 코드를 작성하세요. 절대 샘플 코드가 아닌 '실제 완성된 코드'여야 합니다.\n" + \
+                      "1. 원형 그래프는 'recharts' 또는 'chart.js'를 사용하여 화려하게 구현하세요.\n" + \
+                      "2. package.json에 필요한 의존성을 모두 추가하세요.\n" + \
+                      "3. 필요한 모든 신규 파일을 생성하고 기존 파일을 업데이트하세요.\n" + \
+                      "형식: {\"changes\": [{\"path\": \"경로\", \"content\": \"전체코드\"}]}"
         impl = call_gemini_cli(impl_prompt, "코드 작성")
         
         has_changes = False
         for change in impl.get('changes', []):
             path = os.path.join(work_dir, change['path'].lstrip('./'))
             content = change.get('content', '')
-            if content:
+            if content and "code here" not in content.lower():
                 has_changes = True
-                if isinstance(content, (dict, list)): content = json.dumps(content, indent=2, ensure_ascii=False)
                 os.makedirs(os.path.dirname(path), exist_ok=True)
                 with open(path, "w", encoding="utf-8") as f: f.write(content)
-                print(f"🛠 파일 수정됨: {change['path']} ({len(content)} bytes)")
+                print(f"🛠 파일 완성: {change['path']} ({len(content)} bytes)")
 
         if not has_changes:
-            print("⚠️ 변경된 사항이 없어 작업을 중단합니다.")
-            update_task_status("completed", pr_url="변경 사항 없음")
+            print("⚠️ 유의미한 코드 변경이 없어 종료합니다.")
             return
 
-        # 5. Git 작업 및 푸시
-        branch_name = f"agent/gemini-fix-{int(time.time())}"
-        run_command_list(["git", "config", "user.name", "github-actions[bot]"], cwd=work_dir)
-        run_command_list(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=work_dir)
-        run_command_list(["git", "checkout", "-b", branch_name], cwd=work_dir)
-        run_command_list(["git", "add", "."], cwd=work_dir)
+        # 5. Git & PR
+        branch_name = f"agent/feature-{int(time.time())}"
+        for cmd in [["git", "config", "user.name", "github-actions[bot]"], ["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], ["git", "checkout", "-b", branch_name], ["git", "add", "."], ["git", "commit", "-m", f"feat: professional implementation via Gemini"]]:
+            run_command_list(cmd, cwd=work_dir)
         
-        # 변경사항 실제 존재 확인
-        diff_out, _, _ = run_command_list(["git", "diff", "--staged"], cwd=work_dir)
-        if not diff_out:
-            print("⚠️ 커밋할 내용이 없습니다.")
-            update_task_status("completed", pr_url="커밋 내용 없음")
-            return
-
-        run_command_list(["git", "commit", "-m", f"feat: improved via {GEMINI_MODEL}"], cwd=work_dir)
         run_command_list(["git", "remote", "set-url", "origin", auth_url], cwd=work_dir)
-        
-        print(f"📡 푸시 중: {branch_name}")
         _, _, push_code = run_command_list(["git", "push", "origin", branch_name], cwd=work_dir)
         
         if push_code == 0:
-            # 6. PR 생성
-            print(f"🚀 PR 생성 중 (Base: main)")
-            pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", 
-                                   headers={"Authorization": f"token {GITHUB_PAT}", "Accept": "application/vnd.github+json"},
-                                   json={
-                                       "title": f"🚀 [Gemini] {subject}",
-                                       "body": f"### 💡 구현 내용\n{explanation}\n\n### 🔍 참고 자료\n{search_results}",
-                                       "head": branch_name, "base": "main"
-                                   }).json()
-            
-            if "html_url" in pr_res:
-                final_url = pr_res["html_url"]
-                print(f"✅ 성공: {final_url}")
-                update_task_status("completed", branch_name=branch_name, pr_url=final_url)
-            else:
-                print(f"❌ PR 생성 실패: {pr_res.get('message')}")
-                update_task_status("completed", branch_name=branch_name, pr_url="PR 생성 실패")
-        else:
-            raise Exception("푸시 실패")
+            pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {GITHUB_PAT}"}, json={"title": f"🚀 [Professional] {subject}", "body": f"### 🛠 구현 상세\n{spec}\n\n### 🔍 참고 자료\n{search_data}", "head": branch_name, "base": "main"}).json()
+            print(f"✅ 완료: {pr_res.get('html_url')}")
+            update_task_status("completed", branch_name=branch_name, pr_url=pr_res.get("html_url"))
 
     except Exception as e:
-        print(f"❌ 에러 발생:\n{traceback.format_exc()}")
+        print(f"❌ 에러:\n{traceback.format_exc()}")
         update_task_status("failed")
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
