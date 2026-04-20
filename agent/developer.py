@@ -94,10 +94,15 @@ def main():
         explanation = plan.get('explanation', 'Next.js 패키지 구성')
         print("📝 전략: " + explanation)
 
-        # 구현 프롬프트 (가장 중요)
-        impl_prompt = "다음 전략에 따라 실제 코드를 작성하세요: " + explanation + "\n요구사항: " + subject + "\n" + \
-                      "반드시 'package.json', 'pages/index.js', 'README.md' 등 필요한 모든 파일의 '전체 소스 코드'를 포함해야 합니다.\n" + \
-                      "형식: {\"changes\": [{\"path\": \"pages/index.js\", \"content\": \"import React from... (전체코드)\"}]}"
+        # 구현 프롬프트 (가장 중요: 실행 가능성 강제)
+        impl_prompt = "다음 전략에 따라 '실제 실행 가능한' 코드를 작성하세요: " + explanation + "\n" + \
+                      "요구사항: " + subject + "\n\n" + \
+                      "**반드시 준수할 사항:**\n" + \
+                      "1. package.json에는 'next', 'react', 'react-dom'이 반드시 포함되어야 합니다.\n" + \
+                      "2. package.json에 'dev', 'build', 'start' 스크립트를 반드시 넣으세요.\n" + \
+                      "3. 소스 코드는 생략 없이 전체 내용을 작성하세요.\n" + \
+                      "4. 'public/favicon.ico'나 'styles/globals.css' 같은 기본 파일도 필요하다면 포함하세요.\n\n" + \
+                      "형식: {\"changes\": [{\"path\": \"package.json\", \"content\": \"...\"}, {\"path\": \"pages/index.js\", \"content\": \"...\"}]}"
         
         impl = call_ai(impl_prompt)
         changes = impl.get('changes', [])
