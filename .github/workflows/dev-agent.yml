@@ -5,7 +5,7 @@ on:
 
 jobs:
   develop:
-    runs-on: ubuntu-latest # GitHub 제공 무료 서버 사용
+    runs-on: self-hosted # 로컬 Runner 사용
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -21,6 +21,11 @@ jobs:
         run: |
           pip install requests
 
+      - name: Check Ollama Status
+        run: |
+          echo "Checking if Ollama is running locally..."
+          curl -s http://localhost:11434/api/tags || (echo "Ollama is NOT running!" && exit 1)
+
       - name: Run Agent Logic
         env:
           TASK_ID: ${{ github.event.client_payload.id }}
@@ -30,8 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }} # 예비 키 추가
+          OLLAMA_MODEL: "llama3"
         run: |
           python agent/developer.py
 

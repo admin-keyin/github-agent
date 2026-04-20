@@ -11,11 +11,8 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 TASK_ID = os.getenv("TASK_ID")
 
-GEMINI_KEYS = [
-    os.getenv("GEMINI_API_KEY"),
-    os.getenv("GEMINI_API_KEY_2")
-]
-GEMINI_KEYS = [k for k in GEMINI_KEYS if k]
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
 
 def update_task_status(status, branch_name=None):
     if not SUPABASE_URL or not SUPABASE_KEY or not TASK_ID:
@@ -36,46 +33,37 @@ def update_task_status(status, branch_name=None):
         pass
 
 def parse_json_garbage(text):
-    """Gemini가 응답에 섞어놓은 마크다운 코드 블록 등을 제거하고 순수 JSON만 추출"""
-    # ```json ... ``` 또는 ``` ... ``` 블록 추출
+    """Ollama가 응답에 섞어놓은 마크다운 코드 블록 등을 제거하고 순수 JSON만 추출"""
     match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
     if match:
         return match.group(1).strip()
     return text.strip()
 
-def call_gemini(prompt):
-    """Google Gemini API 호출 (가장 안전한 기본 설정 사용)"""
-    time.sleep(12) 
+def call_ollama(prompt):
+    """Local Ollama API 호출"""
+    url = f"{OLLAMA_HOST}/api/generate"
     
-    last_error = None
-    for i, api_key in enumerate(GEMINI_KEYS):
-        # 가장 안정적인 v1 / 1.5-flash 조합 사용
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt + "\n\n반드시 다른 설명 없이 순수 JSON 형식으로만 답변하세요.",
+        "stream": False,
+        "format": "json"
+    }
+    
+    try:
+        response = requests.post(url, json=payload, timeout=120)
+        res_json = response.json()
         
-        # 400 에러를 피하기 위해 generationConfig 설정을 아예 제거합니다.
-        payload = {
-            "contents": [{
-                "parts": [{"text": prompt + "\n\n반드시 다른 설명 없이 순수 JSON 형식으로만 답변하세요."}]
-            }]
-        }
-        
-        try:
-            response = requests.post(url, json=payload, timeout=60)
-            res_json = response.json()
-            
-            if response.status_code == 200:
-                raw_text = res_json['candidates'][0]['content']['parts'][0]['text']
-                return parse_json_garbage(raw_text)
-            else:
-                error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
-                print(f"❌ API 키 {i+1}번 실패 (HTTP {response.status_code}): {error_msg}")
-                last_error = f"HTTP {response.status_code} - {error_msg}"
-                continue
-        except Exception as e:
-            last_error = str(e)
-            continue
-            
-    raise Exception(f"모든 Gemini API 키가 실패했습니다.\n사유: {last_error}")
+        if response.status_code == 200:
+            raw_text = res_json.get('response', '')
+            return parse_json_garbage(raw_text)
+        else:
+            error_msg = res_json.get('error', 'Unknown Error')
+            print(f"❌ Ollama 호출 실패 (HTTP {response.status_code}): {error_msg}")
+            raise Exception(f"HTTP {response.status_code} - {error_msg}")
+    except Exception as e:
+        print(f"❌ Ollama 연결 에러: {str(e)}")
+        raise e
 
 def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -89,7 +77,7 @@ def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "No Body")
     
-    print(f"🚀 작업 시작 (Failsafe Mode): {subject}")
+    print(f"🚀 작업 시작 (Ollama Mode): {subject}")
     update_task_status("running")
     
     try:
@@ -97,15 +85,16 @@ def main():
         
         # 1. 전략 수립
         plan_prompt = f"당신은 시니어 개발자입니다. 다음 요구사항의 해결 계획을 JSON으로 답변하세요.\n요구사항: {subject} / {body}\n구조: {context}\n형식: {{\"explanation\": \"...\", \"new_branch\": \"...\"}}"
-        plan_raw = call_gemini(plan_prompt)
+        plan_raw = call_ollama(plan_prompt)
         plan = json.loads(plan_raw)
         print(f"📝 전략: {plan['explanation']}")
         
-        time.sleep(12)
+        # Ollama는 로컬 실행이므로 Gemini와 달리 대기 시간이 크게 필요하지 않을 수 있음
+        time.sleep(2)
 
         # 2. 구현
         implementation_prompt = f"다음 전략에 따라 코드를 작성하세요.\n전략: {plan['explanation']}\n요구사항: {subject}\n반드시 전체 파일 내용을 포함한 JSON으로 응답하세요.\n형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\", \"action\": \"update\" }}]}}"
-        implementation_raw = call_gemini(implementation_prompt)
+        implementation_raw = call_ollama(implementation_prompt)
         implementation = json.loads(implementation_raw)
         
         for change in implementation.get('changes', []):
