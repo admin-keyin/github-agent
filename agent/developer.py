@@ -76,7 +76,14 @@ def extract_git_url(text):
         return url
     return None
 
-def create_github_pr(repo_full_name, branch, title, body):
+def extract_target_branch(text):
+    # 'target branch: develop' 또는 '대상 브랜치: develop' 형태 추출
+    match = re.search(r"(?:target branch|대상 브랜치):\s*([\w\-/.]+)", text, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+    return "main" # 기본값
+
+def create_github_pr(repo_full_name, branch, title, body, base_branch="main"):
     url = f"https://api.github.com/repos/{repo_full_name}/pulls"
     headers = {
         "Authorization": f"token {GITHUB_PAT}",
@@ -86,7 +93,7 @@ def create_github_pr(repo_full_name, branch, title, body):
         "title": title,
         "body": body,
         "head": branch,
-        "base": "main" 
+        "base": base_branch
     }
     res = requests.post(url, headers=headers, json=data)
     return res.json()
@@ -94,10 +101,12 @@ def create_github_pr(repo_full_name, branch, title, body):
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
-    
-    print(f"🚀 외부 프로젝트 작업 시작: {subject}")
+
+    # 타겟 브랜치 결정
+    target_base_branch = extract_target_branch(body)
+    print(f"🚀 외부 프로젝트 작업 시작: {subject} (Target: {target_base_branch})")
     update_task_status("running")
-    
+
     # 작업 디렉토리 설정
     work_dir = os.path.join(os.getcwd(), "external_repo")
     if os.path.exists(work_dir):
@@ -109,17 +118,20 @@ def main():
         if not target_repo_url:
             print("⚠️ URL 미발견. 현재 레포지토리 대상 작업.")
             target_repo_url = run_command("git remote get-url origin")[0].strip()
-        
-        print(f"📦 타겟 레포지토리: {target_repo_url}")
+
+        print(f"📦 타겟 레포지토리: {target_repo_url} (Base: {target_base_branch})")
         auth_url = target_repo_url.replace("https://", f"https://{GITHUB_PAT}@")
-        run_command(f"git clone {auth_url} {work_dir}")
 
-        repo_match = re.search(r"github\.com/([\w\-]+/[\w\-.]+)", target_repo_url)
-        repo_full_name = repo_match.group(1).replace(".git", "")
-
-        # 2. 컨텍스트 파악
-        tree, _ = run_command("find . -maxdepth 2 -not -path '*/.*' -not -path './node_modules*'", cwd=work_dir)
-        
+        # 지정된 타겟 브랜치로 클론 시도
+        clone_res = run_command(f"git clone -b {target_base_branch} {auth_url} {work_dir}")
+        if "fatal" in clone_res[1]: # 브랜치가 없으면 기본 클론 후 체크
+            print(f"⚠️ 브랜치 '{target_base_branch}'를 찾을 수 없어 기본 브랜치로 클론합니다.")
+            run_command(f"git clone {auth_url} {work_dir}")
+            target_base_branch = "main" # 폴백
+...
+        # 6. PR 생성
+        pr_res = create_github_pr(repo_full_name, branch_name, f"🚀 [에이전트] {subject}", f"작업 내용: {body}", base_branch=target_base_branch)
+        pr_url = pr_res.get("html_url", "PR 생성 실패 (권한 또는 브랜치 확인)")
         # 3. 전략 수립
         plan_prompt = f"요구사항: {subject} / {body}\n구조: {tree}\n형식: {{\"explanation\": \"...\"}}"
         plan = json.loads(call_ollama(plan_prompt))
