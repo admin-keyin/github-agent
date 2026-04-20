@@ -33,7 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          OLLAMA_MODEL: "qwen2.5-coder:7b"
+          OLLAMA_MODEL: "qwen2.5-coder:3b"
         run: |
           python3 agent/developer.py
 
