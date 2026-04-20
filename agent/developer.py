@@ -58,6 +58,9 @@ def accept_repo_invitation(repo_full_name):
     }
     try:
         res = requests.get(url, headers=headers)
+        if res.status_code == 401:
+            print("❌ GITHUB_PAT 인증 실패 (Bad credentials). 토큰이 유효한지 확인하세요.")
+            return False
         if res.status_code != 200:
             print(f"❌ 초대 목록 조회 실패 (HTTP {res.status_code}): {res.text}")
             return False
