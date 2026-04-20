@@ -5,7 +5,10 @@ on:
 
 jobs:
   develop:
-    runs-on: self-hosted # 로컬 Runner 사용
+    runs-on: self-hosted
+    permissions: # PR 생성을 위해 추가적인 권한 부여
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -50,3 +53,4 @@ jobs:
             *이 PR은 AI 개발 에이전트에 의해 자동 생성되었습니다.*
           branch: "agent/feature-${{ github.event.client_payload.id }}"
           base: main
+          delete-branch: true # 작업 완료 후 브랜치 삭제 옵션 추가

@@ -107,18 +107,8 @@ def main():
             with open(path, "w") as f:
                 f.write(change['content'])
 
-        # 3. Git 작업
-        run_command("git config user.name 'github-actions[bot]'")
-        run_command("git config user.email 'github-actions[bot]@users.noreply.github.com'")
-        run_command("git add .")
-        run_command(f'git commit -m "feat: {subject}"')
-        
-        branch_name = f"agent/task-{os.urandom(2).hex()}"
-        run_command(f"git checkout -b {branch_name}")
-        run_command(f"git push origin {branch_name}")
-        
-        print(f"✅ 작업 완료: {branch_name}")
-        update_task_status("completed", branch_name=branch_name)
+        print(f"✅ 파일 수정 완료")
+        update_task_status("completed")
 
     except Exception as e:
         print(f"❌ 에러 발생:\n{traceback.format_exc()}")
