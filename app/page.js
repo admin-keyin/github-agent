@@ -26,10 +26,10 @@ export default async function Home() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작업명</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작업 정보</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">브랜치 / PR</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">요청자</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">의뢰 시간</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">PR 브랜치</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">시간</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -49,18 +49,23 @@ export default async function Home() {
                     <div className="text-sm font-medium text-gray-900">{task.subject}</div>
                     <div className="text-xs text-gray-500 truncate max-w-xs">{task.body}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.sender_email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(task.created_at).toLocaleString('ko-KR')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     {task.branch_name ? (
-                      <span className="text-indigo-600 hover:text-indigo-900 font-mono text-xs bg-indigo-50 px-2 py-1 rounded">
-                        {task.branch_name}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600 block">
+                          {task.branch_name}
+                        </span>
+                        {task.pr_url && task.pr_url !== "PR 생성 실패" && (
+                          <a href={task.pr_url} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:underline flex items-center">
+                             PR 링크 바로가기 🔗
+                          </a>
+                        )}
+                      </div>
+                    ) : <span className="text-gray-400 text-xs">-</span>}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.sender_email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-400 font-mono">
+                    {new Date(task.created_at).toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>
               ))}
