@@ -140,23 +140,42 @@ def main():
         run_command_list(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=work_dir)
         run_command_list(["git", "checkout", "-b", branch_name], cwd=work_dir)
         run_command_list(["git", "add", "."], cwd=work_dir)
-        run_command_list(["git", "commit", "-m", f"feat: updated via {GEMINI_MODEL}"], cwd=work_dir)
+        run_command_list(["git", "commit", "-m", f"feat: high quality update via {GEMINI_MODEL}"], cwd=work_dir)
         run_command_list(["git", "remote", "set-url", "origin", auth_url], cwd=work_dir)
-        _, err, code = run_command_list(["git", "push", "origin", branch_name], cwd=work_dir)
         
-        if code == 0:
-            pr_data = {
-                "title": f"🚀 [{GEMINI_MODEL}] {subject}",
-                "body": f"### 💡 구현 내용\n{explanation}\n\n### 🔍 검색 참고\n{search_results}",
-                "head": branch_name, "base": "main"
+        print(f"📡 타겟 레포지토리로 브랜치 푸시 중: {branch_name}")
+        _, push_err, push_code = run_command_list(["git", "push", "origin", branch_name], cwd=work_dir)
+        
+        if push_code == 0:
+            # 6. PR 생성 (Target: main)
+            print(f"🚀 PR 생성 요청 중: {repo_full_name} (Base: main)")
+            pr_api_url = f"https://api.github.com/repos/{repo_full_name}/pulls"
+            headers = {
+                "Authorization": f"token {GITHUB_PAT}",
+                "Accept": "application/vnd.github+json"
             }
-            pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", 
-                                   headers={"Authorization": f"token {GITHUB_PAT}"},
-                                   json=pr_data).json()
-            update_task_status("completed", branch_name=branch_name, pr_url=pr_res.get("html_url"))
-            print(f"✅ 성공: {pr_res.get('html_url')}")
+            pr_data = {
+                "title": f"🚀 [Gemini] {subject}",
+                "body": f"### 💡 구현 계획\n{explanation}\n\n### 🔍 기술 정보\n{search_results}\n\n---\n*이 PR은 AI 에이전트에 의해 자동 생성되었습니다.*",
+                "head": branch_name,
+                "base": "main" # 메인 브랜치 대상
+            }
+            
+            pr_res = requests.post(pr_api_url, headers=headers, json=pr_data).json()
+            
+            if "html_url" in pr_res:
+                final_pr_url = pr_res["html_url"]
+                print(f"✅ PR 생성 성공: {final_pr_url}")
+                update_task_status("completed", branch_name=branch_name, pr_url=final_pr_url)
+            else:
+                error_msg = pr_res.get('message', '알 수 없는 에러')
+                print(f"❌ PR 생성 실패: {error_msg}")
+                # 이미 PR이 있거나 변경사항이 없는 경우를 위해 상세 로깅
+                if "errors" in pr_res:
+                    print(f"상세 에러: {json.dumps(pr_res['errors'])}")
+                update_task_status("completed", branch_name=branch_name, pr_url="PR 생성 실패")
         else:
-            raise Exception(f"푸시 실패: {err}")
+            raise Exception(f"푸시 실패: {push_err}")
 
     except Exception as e:
         print(f"❌ 에러 발생:\n{traceback.format_exc()}")
