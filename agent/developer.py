@@ -37,7 +37,7 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
     private_key = os.getenv("EMAILJS_PRIVATE_KEY")
     
     if not all([service_id, template_id, public_key, private_key]):
-        log("⚠️ EmailJS 설정 누락으로 메일을 보내지 못했습니다.")
+        log("⚠️ EmailJS 설정 누락")
         return
 
     to_email = to_email.strip() if to_email else ""
@@ -96,13 +96,15 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
     try:
         res = requests.post("https://api.emailjs.com/api/v1.0/email/send", json=data, timeout=15)
         if res.status_code == 200: log("📧 이메일 발송 완료!")
-        else: log(f"❌ 이메일 발송 실패: {res.status_code} {res.text}")
-    except Exception as e: log(f"❌ 이메일 예외: {e}")
+    except: pass
 
 def run_command_list(args, cwd=None):
+    # 빈 인자 필터링 (중요: fatal: invalid refspec '' 방지)
+    clean_args = [str(arg) for arg in args if arg and str(arg).strip()]
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
-    result = subprocess.run(args, capture_output=True, text=True, cwd=cwd, env=env)
+    log(f"💻 CMD: {' '.join(clean_args)}") # 실행되는 명령 확인
+    result = subprocess.run(clean_args, capture_output=True, text=True, cwd=cwd, env=env)
     return result.stdout.strip(), result.stderr.strip(), result.returncode
 
 def get_repo_contents(work_dir):
@@ -128,18 +130,13 @@ def extract_json(text):
     text = text.strip()
     code_block = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
     if code_block: text = code_block.group(1)
-    
     start, end = text.find('{'), text.rfind('}')
-    if start != -1 and end != -1:
-        text = text[start:end+1]
+    if start != -1 and end != -1: text = text[start:end+1]
     
     def repair_quotes(match):
-        content = match.group(1)
-        content = content.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        content = match.group(1).replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
         return f'"{content}"'
-    
-    text = re.sub(r"'''(.*?)'''", repair_quotes, text, flags=re.DOTALL)
-    return text
+    return re.sub(r"'''(.*?)'''", repair_quotes, text, flags=re.DOTALL)
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
@@ -147,7 +144,6 @@ def main():
     sender = os.getenv("SENDER", "")
     lang_code = "ko" if any(ord(c) > 0x1100 for c in body) else "en"
 
-    # 옵션 추출
     vars = {
         "gh_token": extract_from_body(body, "GITHUB_TOKEN"),
         "gl_token": extract_from_body(body, "GITLAB_TOKEN"),
@@ -172,29 +168,24 @@ def main():
         repo_full_name = repo_path
     else:
         repo_name = f"agent-task-{int(time.time())}"
-        log(f"🆕 새 저장소 생성 시도: {repo_name}")
+        log(f"🆕 New Repo: {repo_name}")
         headers = {"Authorization": f"token {token}", "Accept": "vnd.github.v3+json"}
         res = requests.post("https://api.github.com/user/repos", headers=headers, json={"name": repo_name, "auto_init": True}).json()
         repo_full_name = res.get("full_name")
         auth_url = res.get("clone_url", "").replace("https://", f"https://oauth2:{token}@")
         is_new_repo = True
 
-    log(f"🚀 에이전트 가동: {repo_full_name} (Base: {vars['base_br']})")
+    log(f"🚀 가동: {repo_full_name} (Base: {vars['base_br']})")
     update_task_status("running")
-
-    if not auth_url:
-        log("❌ 인증 URL을 생성할 수 없습니다.")
-        return
 
     work_dir = os.path.join(os.getcwd(), "external_repo")
     if os.path.exists(work_dir): shutil.rmtree(work_dir)
 
     try:
-        log("📡 저장소 클론 중...")
+        log("📡 클론 중...")
         _, stderr, code = run_command_list(["git", "clone", auth_url, work_dir])
         if code != 0:
-            log(f"❌ 클론 실패: {stderr}")
-            send_agent_email(sender, subject, f"저장소 접근 실패: {stderr}", f"https://{domain}/{repo_full_name}" if not is_new_repo else "", lang_code, "Denied")
+            send_agent_email(sender, subject, f"접근 실패: {stderr}", "", lang_code, "Denied")
             update_task_status("failed")
             return
 
@@ -203,27 +194,13 @@ def main():
             run_command_list(["git", "fetch", "origin", vars['base_br']], cwd=work_dir)
             run_command_list(["git", "checkout", vars['base_br']], cwd=work_dir)
 
-        log("📂 코드 분석 및 Gemini 호출 중...")
+        log("📂 Gemini 호출 중...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"""YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.
-CRITICAL: Use ONLY standard JSON strings for 'content' with proper escaping (\\n, \\").
-DO NOT USE Python triple quotes (''') for multiline strings.
-
-Task: {subject}
-Body: {body}
-Context:
-{repo_context}
-
-Format: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"""
-        
+        prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\nTask: {subject}\nContext:\n{repo_context}\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
         stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", prompt])
-        if code != 0:
-            log(f"❌ Gemini 실행 실패: {stderr}")
-            raise Exception("Gemini execution failed")
-
+        
         try:
-            cleaned = extract_json(stdout)
-            res_data = json.loads(cleaned)
+            res_data = json.loads(extract_json(stdout))
             spec = res_data.get('explanation', '작업 완료')
             for c in res_data.get('changes', []):
                 p = os.path.join(work_dir, c['path'].lstrip('./'))
@@ -231,10 +208,10 @@ Format: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\
                 with open(p, "w", encoding="utf-8") as f: f.write(c['content'])
                 log(f"🛠 파일 작성: {c['path']}")
         except:
-            log(f"❌ 파싱 실패. AI 응답 원본:\n{stdout}")
+            log(f"❌ 파싱 실패. 원본:\n{stdout}")
             raise Exception("JSON 파싱 실패")
 
-        log("📤 변경 사항 푸시 중...")
+        log("📤 푸시 중...")
         new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
         run_command_list(["git", "config", "user.name", "Agent"], cwd=work_dir)
         run_command_list(["git", "config", "user.email", "agent@internal.com"], cwd=work_dir)
@@ -242,20 +219,17 @@ Format: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\
         run_command_list(["git", "add", "."], cwd=work_dir)
         run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
         
-        # 푸시 명령 동적 구성 (빈 문자열 인자 방지)
-        push_cmd = ["git", "push", "origin", new_branch]
-        if is_new_repo: push_cmd.append("--force")
-        
-        _, stderr, p_code = run_command_list(push_cmd, cwd=work_dir)
+        # 푸시 명령을 확실하게 빌드
+        push_args = ["git", "push", "origin", new_branch]
+        if is_new_repo: push_args.append("--force")
+        _, stderr, p_code = run_command_list(push_args, cwd=work_dir)
 
         if p_code == 0:
             res_url = f"https://{domain}/{repo_full_name}"
             if "github.com" in domain and not is_new_repo:
-                pr_title = vars['pr_title'] or f"🚀 {subject}"
-                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {token}"}, json={"title": pr_title, "body": spec, "head": new_branch, "base": vars['base_br']}).json()
+                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {token}"}, json={"title": vars['pr_title'] or f"🚀 {subject}", "body": spec, "head": new_branch, "base": vars['base_br']}).json()
                 res_url = pr.get('html_url', res_url)
-            
-            log(f"✅ 작업 성공! URL: {res_url}")
+            log(f"✅ 성공! URL: {res_url}")
             update_task_status("completed", branch_name=new_branch, pr_url=res_url)
             send_agent_email(sender, subject, spec, res_url, lang_code, "Success")
         else:
@@ -263,8 +237,7 @@ Format: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\
             raise Exception("Git Push Failed")
 
     except Exception:
-        log(f"❌ 치명적 에러:\n{traceback.format_exc()}")
+        log(f"❌ 에러:\n{traceback.format_exc()}")
         update_task_status("failed")
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
