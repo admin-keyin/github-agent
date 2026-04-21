@@ -49,7 +49,7 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
             "Denied": {"badge": "오류", "title": "인증 또는 권한 오류", "desc": "저장소에 접근할 수 없습니다. 아래 양식을 확인해주세요.", "spec_label": "오류 내용", "btn": "저장소 확인"}
         },
         "en": {
-            "Success": {"badge": "Success", "title": "Task Completed", "desc": "GitHub Agent has finished the work successfully.", "spec_label": "Details", "btn": "View Results"},
+            "Success": {"badge": "Success", "title": "Task Completed", "desc": "GitHub Agent has finished the work successfully.", "spec_label": "Details", "btn": "Review Results"},
             "Denied": {"badge": "Error", "title": "Auth/Access Error", "desc": "Cannot access the repository. Check the form below.", "spec_label": "Error Msg", "btn": "Check Repo"}
         }
     }
@@ -78,9 +78,9 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
       <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">{t['desc']}</p>
     </div>
     <div style="padding: 32px 24px; background-color: #ffffff;">
-      <label style="font-size: 12px; color: #64748b; font-weight: bold;">Subject</label>
+      <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Subject</label>
       <h2 style="font-size: 18px; color: #1e293b; margin: 4px 0 24px 0;">{subject}</h2>
-      <label style="font-size: 12px; color: #64748b; font-weight: bold;">{t['spec_label']}</label>
+      <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">{t['spec_label']}</label>
       <div style="margin-top: 12px; padding: 16px; background-color: #f8fafc; border-left: 4px solid #6366f1; border-radius: 4px; color: #475569; white-space: pre-wrap;">{spec}</div>
       {guide_html}
       <div style="text-align: center; margin-top: 40px;">
@@ -99,11 +99,10 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
     except: pass
 
 def run_command_list(args, cwd=None):
-    # 빈 인자 필터링 (중요: fatal: invalid refspec '' 방지)
     clean_args = [str(arg) for arg in args if arg and str(arg).strip()]
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
-    log(f"💻 CMD: {' '.join(clean_args)}") # 실행되는 명령 확인
+    log(f"💻 CMD: {' '.join(clean_args)}")
     result = subprocess.run(clean_args, capture_output=True, text=True, cwd=cwd, env=env)
     return result.stdout.strip(), result.stderr.strip(), result.returncode
 
@@ -196,20 +195,27 @@ def main():
 
         log("📂 Gemini 호출 중...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\nTask: {subject}\nContext:\n{repo_context}\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
+        # 중요: subject와 body를 모두 포함하여 지시 사항 누락 방지
+        prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\n\n[INSTRUCTION]\nSubject: {subject}\nBody: {body}\n\n[CONTEXT]\n{repo_context}\n\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
         stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", prompt])
         
         try:
             res_data = json.loads(extract_json(stdout))
             spec = res_data.get('explanation', '작업 완료')
-            for c in res_data.get('changes', []):
+            changes = res_data.get('changes', [])
+            
+            if not changes:
+                log("⚠️ AI가 변경 사항을 생성하지 않았습니다. 작업을 중단합니다.")
+                raise Exception("Empty Changes from AI")
+
+            for c in changes:
                 p = os.path.join(work_dir, c['path'].lstrip('./'))
                 os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(p, "w", encoding="utf-8") as f: f.write(c['content'])
                 log(f"🛠 파일 작성: {c['path']}")
         except:
-            log(f"❌ 파싱 실패. 원본:\n{stdout}")
-            raise Exception("JSON 파싱 실패")
+            log(f"❌ 파싱 실패 또는 작업 내용 없음. 원본:\n{stdout}")
+            raise Exception("JSON 파싱 실패 또는 변경 사항 없음")
 
         log("📤 푸시 중...")
         new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
@@ -219,7 +225,6 @@ def main():
         run_command_list(["git", "add", "."], cwd=work_dir)
         run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
         
-        # 푸시 명령을 확실하게 빌드
         push_args = ["git", "push", "origin", new_branch]
         if is_new_repo: push_args.append("--force")
         _, stderr, p_code = run_command_list(push_args, cwd=work_dir)
