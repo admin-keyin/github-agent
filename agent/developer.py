@@ -15,9 +15,10 @@ TASK_ID = os.getenv("TASK_ID")
 GITHUB_PAT_ENV = os.getenv("GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
-GEMINI_MODEL = "gemini-2.5-flash-lite"
+GEMINI_MODEL = "gemini-2.0-flash"
 
 def log(msg):
+    # 민감한 정보가 포함된 로그는 생략하거나 마스킹
     print(msg, flush=True)
 
 def update_task_status(status, branch_name=None, pr_url=None):
@@ -206,25 +207,29 @@ def main():
 
         log("📂 Gemini 호출 중 (Large Context)...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"""[STRICT JSON SYSTEM]
-You are a developer agent. Apply the requested changes to the context provided.
-Output ONLY the final JSON results. No chat. No explanation outside the JSON.
+        prompt = f"""### SYSTEM INSTRUCTION ###
+- You are a senior software engineer agent.
+- Your task is to apply changes to the code below.
+- OUTPUT ONLY ONE JSON OBJECT. NO TEXT BEFORE OR AFTER.
+- ALL file contents in 'changes' MUST be the FULL new content.
 
-[INSTRUCTION]
-{subject} - {body}
+### INSTRUCTION ###
+Task: {subject}
+Body: {body}
 
-[CONTEXT]
+### CODE CONTEXT ###
 {repo_context}
 
-[REQUIRED OUTPUT JSON FORMAT]
+### EXPECTED JSON OUTPUT (STRICT) ###
 {{
-  "explanation": "...",
+  "thought": "Reasoning about the change...",
+  "explanation": "Brief description of changes",
   "changes": [
-    {{ "path": "...", "content": "..." }}
+    {{ "path": "src/libs/ui/MsfAddressInput.vue", "content": "..." }}
   ]
 }}
 
-### START JSON RESPONSE ###
+Output JSON only:
 """
         
         log("🤖 Gemini CLI 실행 중...")
