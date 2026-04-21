@@ -240,12 +240,15 @@ Body: {body}
         log("🛠 작업 완료 (파일 수정됨)")
 
         log("📤 푸시 중...")
+        # 이메일 접두사(Fwd:, Re:) 제거 및 제목 정제
+        clean_subject = re.sub(r"^(fwd|re|fw)\s*:\s*", "", subject, flags=re.IGNORECASE).strip()
+        
         new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
-        run_command_list(["git", "config", "user.name", "Agent"], cwd=work_dir)
-        run_command_list(["git", "config", "user.email", "agent@internal.com"], cwd=work_dir)
+        run_command_list(["git", "config", "user.name", "inchAgent"], cwd=work_dir)
+        run_command_list(["git", "config", "user.email", "admin.key.in@gmail.com"], cwd=work_dir)
         if not is_new_repo: run_command_list(["git", "checkout", "-b", new_branch], cwd=work_dir)
         run_command_list(["git", "add", "."], cwd=work_dir)
-        run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
+        run_command_list(["git", "commit", "-m", f"feat: {clean_subject}"], cwd=work_dir)
         
         push_args = ["git", "push", "origin", new_branch]
         if is_new_repo: push_args.append("--force")
