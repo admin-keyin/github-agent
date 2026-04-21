@@ -238,15 +238,16 @@ Body: {body}
         # 프롬프트 파일 저장
         prompt_file = os.path.join(os.getcwd(), f".prompt_{int(time.time())}.txt")
         try:
+            # 시스템 지시어를 프롬프트 본문에 직접 포함
+            full_prompt = f"SYSTEM: {system_instruction}\n\n{prompt}"
             with open(prompt_file, "w", encoding="utf-8") as f:
-                f.write(prompt)
+                f.write(full_prompt)
             
-            # --system-instruction 플래그를 사용하여 역할을 더 강력히 고정
+            # 지원되는 옵션만 사용
             stdout, stderr, code = run_command_list(
                 [
                     "gemini", "-m", GEMINI_MODEL, 
                     "--raw-output", "--accept-raw-output-risk", "--yolo",
-                    "--system-instruction", system_instruction,
                     "-p", f"@{prompt_file}"
                 ],
                 cwd=os.getcwd()
