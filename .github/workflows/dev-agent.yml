@@ -34,7 +34,10 @@ jobs:
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }} # 구글 검색용 API 키
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+          EMAILJS_PRIVATE_KEY: ${{ secrets.EMAILJS_PRIVATE_KEY }}
           OLLAMA_MODEL: "qwen2.5-coder:7b"
         run: |
           python3 agent/developer.py

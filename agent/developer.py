@@ -27,54 +27,37 @@ def update_task_status(status, branch_name=None, pr_url=None):
     except: pass
 
 def send_completion_email(to_email, subject, spec, pr_url):
-    resend_api_key = os.getenv("RESEND_API_KEY")
-    if not resend_api_key or not to_email: 
-        print("⚠️ RESEND_API_KEY or recipient email missing. Skipping email.")
+    service_id = os.getenv("EMAILJS_SERVICE_ID")
+    template_id = os.getenv("EMAILJS_TEMPLATE_ID")
+    public_key = os.getenv("EMAILJS_PUBLIC_KEY")
+    private_key = os.getenv("EMAILJS_PRIVATE_KEY")
+    
+    if not all([service_id, template_id, public_key]):
+        print("⚠️ EmailJS 설정이 누락되었습니다. (SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY 필요)")
         return
     
-    url = "https://api.resend.com/emails"
-    headers = {
-        "Authorization": f"Bearer {resend_api_key}",
-        "Content-Type": "application/json"
-    }
-    
+    url = "https://api.emailjs.com/api/v1.0/email/send"
     data = {
-        "from": "Agent <onboarding@resend.dev>",
-        "to": [to_email],
-        "subject": f"✅ 작업 완료: {subject}",
-        "html": f"""
-        <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #2e7d32; text-align: center;">🚀 작업 성공 리포트</h2>
-            <p>안녕하세요, 요청하신 <b>"{subject}"</b> 작업이 성공적으로 완료되어 Pull Request가 생성되었습니다.</p>
-            
-            <div style="background: #f9f9f9; padding: 15px; border-left: 5px solid #2196f3; margin: 20px 0;">
-                <h3 style="margin-top: 0; color: #333;">🛠 주요 구현 내용</h3>
-                <p style="white-space: pre-wrap; color: #555; font-size: 0.95em;">{spec}</p>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="{pr_url}" style="background: #2196f3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                    📦 생성된 Pull Request 확인하기
-                </a>
-            </div>
-            
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;"/>
-            <p style="font-size: 0.85em; color: #888; text-align: center;">
-                본 메일은 Gemini CLI Agent 시스템에 의해 자동으로 발송되었습니다.<br/>
-                발신 전용 메일이므로 회신이 불가능합니다.
-            </p>
-        </div>
-        """
+        "service_id": service_id,
+        "template_id": template_id,
+        "user_id": public_key,
+        "accessToken": private_key,
+        "template_params": {
+            "to_email": to_email,
+            "subject": subject,
+            "spec": spec,
+            "pr_url": pr_url
+        }
     }
     
     try:
-        res = requests.post(url, headers=headers, json=data, timeout=15)
-        if res.status_code in [200, 201]:
-            print(f"📧 완료 이메일 발송 성공! (To: {to_email})")
+        res = requests.post(url, json=data, timeout=15)
+        if res.status_code == 200:
+            print(f"📧 EmailJS 완료 이메일 발송 성공! (To: {to_email})")
         else:
-            print(f"❌ 이메일 발송 실패: {res.status_code} - {res.text}")
+            print(f"❌ EmailJS 발송 실패: {res.status_code} - {res.text}")
     except Exception as e:
-        print(f"❌ 이메일 발송 중 예외 발생: {e}")
+        print(f"❌ EmailJS 발송 중 예외 발생: {e}")
 
 def run_command_list(args, cwd=None):
     env = os.environ.copy()
