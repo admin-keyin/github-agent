@@ -126,25 +126,19 @@ def extract_from_body(body, key):
 
 def extract_json(text):
     text = text.strip()
-    # 1. ```json ... ``` 블록 찾기
     code_block = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
     if code_block: text = code_block.group(1)
     
-    # 2. 가장 바깥쪽 { } 찾기
     start, end = text.find('{'), text.rfind('}')
     if start != -1 and end != -1:
         text = text[start:end+1]
     
-    # 3. 비표준 삼중 따옴표 보정 시도 (위험하지만 시도)
-    # '''{content}''' -> "{content}" (이스케이프 처리 포함)
     def repair_quotes(match):
         content = match.group(1)
-        # 내용물 안의 진짜 따옴표와 줄바꿈을 이스케이프
         content = content.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
         return f'"{content}"'
     
     text = re.sub(r"'''(.*?)'''", repair_quotes, text, flags=re.DOTALL)
-    
     return text
 
 def main():
@@ -248,8 +242,11 @@ Format: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\
         run_command_list(["git", "add", "."], cwd=work_dir)
         run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
         
-        # 푸시 시 저장소 디렉토리에서 실행하도록 수정
-        _, stderr, p_code = run_command_list(["git", "push", "origin", new_branch, "--force" if is_new_repo else ""], cwd=work_dir)
+        # 푸시 명령 동적 구성 (빈 문자열 인자 방지)
+        push_cmd = ["git", "push", "origin", new_branch]
+        if is_new_repo: push_cmd.append("--force")
+        
+        _, stderr, p_code = run_command_list(push_cmd, cwd=work_dir)
 
         if p_code == 0:
             res_url = f"https://{domain}/{repo_full_name}"
