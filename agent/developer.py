@@ -207,42 +207,48 @@ def main():
 
         log("📂 Gemini 호출 중 (Large Context)...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"""### SYSTEM INSTRUCTION ###
-- You are a senior software engineer agent.
-- DO NOT EXPLAIN. DO NOT SUMMARIZE.
-- OUTPUT ONLY ONE JSON OBJECT. NO TEXT BEFORE OR AFTER.
-- ALL file contents in 'changes' MUST be the FULL new content.
+        
+        system_instruction = "You are a specialized JSON generator for code changes. DO NOT TALK. DO NOT EXPLAIN. ONLY OUTPUT VALID JSON."
+        
+        prompt = f"""### EXAMPLE INPUT ###
+Subject: Update footer text
+Body: Change '© 2024' to '© 2025' in footer.vue
+Context: -- File: footer.vue --\n<div>© 2024 My App</div>
 
-### INSTRUCTION ###
-Task: {subject}
+### EXAMPLE OUTPUT ###
+{{
+  "thought": "Update copyright year to 2025",
+  "explanation": "Updated footer copyright year.",
+  "changes": [
+    {{ "path": "footer.vue", "content": "<div>© 2025 My App</div>" }}
+  ]
+}}
+
+### REAL TASK ###
+Subject: {subject}
 Body: {body}
 
 ### CODE CONTEXT ###
 {repo_context}
 
-### EXPECTED JSON OUTPUT (STRICT) ###
-{{
-  "thought": "Reasoning about the change...",
-  "explanation": "Brief description of changes",
-  "changes": [
-    {{ "path": "src/libs/ui/MsfAddressInput.vue", "content": "..." }}
-  ]
-}}
-
-STRICT: Output ONLY JSON, starting with '{{'.
-JSON:"""
+### FINAL JSON OUTPUT ###
+"""
         
         log("🤖 Gemini CLI 실행 중...")
-        # 프롬프트가 너무 길 경우 Argument list too long 에러가 발생하므로 임시 파일 사용
+        # 프롬프트 파일 저장
         prompt_file = os.path.join(os.getcwd(), f".prompt_{int(time.time())}.txt")
         try:
             with open(prompt_file, "w", encoding="utf-8") as f:
                 f.write(prompt)
             
-            # gemini CLI가 -p @filename 형식을 지원하므로 이를 활용하여 
-            # 명령줄 인수 길이 제한(ARG_MAX)을 완벽하게 피합니다.
+            # --system-instruction 플래그를 사용하여 역할을 더 강력히 고정
             stdout, stderr, code = run_command_list(
-                ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--accept-raw-output-risk", "--yolo", "-p", f"@{prompt_file}"],
+                [
+                    "gemini", "-m", GEMINI_MODEL, 
+                    "--raw-output", "--accept-raw-output-risk", 
+                    "--system-instruction", system_instruction,
+                    "-p", f"@{prompt_file}"
+                ],
                 cwd=os.getcwd()
             )
         finally:
