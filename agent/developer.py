@@ -98,20 +98,21 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
         if res.status_code == 200: log("📧 이메일 발송 완료!")
     except: pass
 
-def run_command_list(args, cwd=None):
+def run_command_list(args, cwd=None, input_data=None):
     clean_args = [str(arg) for arg in args if arg and str(arg).strip()]
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
-    log(f"💻 CMD: {' '.join(clean_args)}")
-    result = subprocess.run(clean_args, capture_output=True, text=True, cwd=cwd, env=env)
+    # 프롬프트가 너무 길 경우 CMD 로그에서는 생략
+    log(f"💻 CMD: {' '.join(clean_args[:10])}{' ...' if len(clean_args) > 10 else ''}")
+    result = subprocess.run(clean_args, capture_output=True, text=True, cwd=cwd, env=env, input=input_data)
     return result.stdout.strip(), result.stderr.strip(), result.returncode
 
 def get_repo_contents(work_dir):
     context = ""
     for root, _, files in os.walk(work_dir):
-        if any(x in root for x in ['node_modules', '.git', '.next']): continue
+        if any(x in root for x in ['node_modules', '.git', '.next', 'dist', 'build', '.cache']): continue
         for file in files:
-            if file.endswith(('.js', '.jsx', '.ts', '.tsx', '.json', '.md', '.html', '.css', '.vue')):
+            if file.endswith(('.js', '.jsx', '.ts', '.tsx', '.json', '.md', '.html', '.css', '.vue', '.java', '.py')):
                 try:
                     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
                         context += f"\n-- File: {os.path.relpath(os.path.join(root, file), work_dir)} --\n{f.read()}\n"
@@ -152,24 +153,18 @@ def main():
         "pr_title": extract_from_body(body, "PR_TITLE")
     }
 
-    # URL 정규표현식 강화 (공백이 나오기 전까지의 모든 유효한 문자열을 경로로 인식)
     url_match = re.search(r"https://([\w\-.]+)/(\S+)", body)
     is_new_repo = False
-    auth_url = None
     domain = "github.com"
+    token = vars['gh_token'] or GITHUB_PAT_ENV
     
     if url_match:
         domain = url_match.group(1)
         repo_path = url_match.group(2).replace(".git", "")
-        
-        if "github.com" in domain:
-            auth_url = f"https://oauth2:{vars['gh_token'] or GITHUB_PAT_ENV}@github.com/{repo_path}.git"
-        elif "gitlab" in domain:
-            auth_url = f"https://oauth2:{vars['gl_token']}@{domain}/{repo_path}.git"
-        elif "bitbucket" in domain:
-            auth_url = f"https://{vars['bb_user']}:{vars['bb_pass']}@{domain}/{repo_path}.git"
-        else:
-            auth_url = f"https://{domain}/{repo_path}.git"
+        if "github.com" in domain: auth_url = f"https://oauth2:{token}@github.com/{repo_path}.git"
+        elif "gitlab" in domain: auth_url = f"https://oauth2:{vars['gl_token']}@{domain}/{repo_path}.git"
+        elif "bitbucket" in domain: auth_url = f"https://{vars['bb_user']}:{vars['bb_pass']}@{domain}/{repo_path}.git"
+        else: auth_url = f"https://{domain}/{repo_path}.git"
         repo_full_name = repo_path
     else:
         repo_name = f"agent-task-{int(time.time())}"
@@ -198,28 +193,30 @@ def main():
             run_command_list(["git", "fetch", "origin", vars['base_br']], cwd=work_dir)
             run_command_list(["git", "checkout", vars['base_br']], cwd=work_dir)
 
-        log("📂 Gemini 호출 중...")
+        log("📂 Gemini 호출 중 (Large Context)...")
         repo_context = get_repo_contents(work_dir)
         prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\n\n[INSTRUCTION]\nSubject: {subject}\nBody: {body}\n\n[CONTEXT]\n{repo_context}\n\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
-        stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", prompt])
         
+        # -p 인자 대신 표준 입력(input_data)으로 프롬프트 전달 (Argument list too long 방지)
+        stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo"], input_data=prompt)
+        
+        if code != 0:
+            log(f"❌ Gemini 실패: {stderr}")
+            raise Exception("Gemini process error")
+
         try:
             res_data = json.loads(extract_json(stdout))
             spec = res_data.get('explanation', '작업 완료')
             changes = res_data.get('changes', [])
-            
-            if not changes:
-                log("⚠️ AI가 변경 사항을 생성하지 않았습니다. 작업을 중단합니다.")
-                raise Exception("Empty Changes from AI")
-
+            if not changes: raise Exception("Empty Changes")
             for c in changes:
                 p = os.path.join(work_dir, c['path'].lstrip('./'))
                 os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(p, "w", encoding="utf-8") as f: f.write(c['content'])
                 log(f"🛠 파일 작성: {c['path']}")
         except:
-            log(f"❌ 파싱 실패 또는 작업 내용 없음. 원본:\n{stdout}")
-            raise Exception("JSON 파싱 실패 또는 변경 사항 없음")
+            log(f"❌ 파싱 실패. 원본:\n{stdout[:1000]}...")
+            raise Exception("JSON 파싱 실패")
 
         log("📤 푸시 중...")
         new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
@@ -235,9 +232,8 @@ def main():
 
         if p_code == 0:
             res_url = f"https://{domain}/{repo_full_name}"
-            # GitHub의 경우만 PR 생성 시도
             if "github.com" in domain and not is_new_repo:
-                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {vars['gh_token'] or GITHUB_PAT_ENV}"}, json={"title": vars['pr_title'] or f"🚀 {subject}", "body": spec, "head": new_branch, "base": vars['base_br']}).json()
+                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {token}"}, json={"title": vars['pr_title'] or f"🚀 {subject}", "body": spec, "head": new_branch, "base": vars['base_br']}).json()
                 res_url = pr.get('html_url', res_url)
             log(f"✅ 성공! URL: {res_url}")
             update_task_status("completed", branch_name=new_branch, pr_url=res_url)
