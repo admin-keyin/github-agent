@@ -127,16 +127,26 @@ def extract_from_body(body, key):
     return None
 
 def extract_json(text):
-    text = text.strip()
-    code_block = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
-    if code_block: text = code_block.group(1)
-    start, end = text.find('{'), text.rfind('}')
-    if start != -1 and end != -1: text = text[start:end+1]
-    
+    # 1. ```json ... ``` 블록 찾기
+    code_block = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    if code_block:
+        target = code_block.group(1)
+    else:
+        # 2. 블록이 없다면 가장 바깥쪽의 { } 찾기
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end != -1:
+            target = text[start:end+1]
+        else:
+            return "" # 찾지 못함
+
+    # 3. 비정상적인 따옴표 처리 ('''...''' 등)
     def repair_quotes(match):
         content = match.group(1).replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
         return f'"{content}"'
-    return re.sub(r"'''(.*?)'''", repair_quotes, text, flags=re.DOTALL)
+    
+    repaired = re.sub(r"'''(.*?)'''", repair_quotes, target, flags=re.DOTALL)
+    return repaired
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
@@ -195,7 +205,27 @@ def main():
 
         log("📂 Gemini 호출 중 (Large Context)...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\n\n[INSTRUCTION]\nSubject: {subject}\nBody: {body}\n\n[CONTEXT]\n{repo_context}\n\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
+        prompt = f"""[STRICT JSON MODE]
+YOU ARE AN AUTOMATED SYSTEM. DO NOT EXPLAIN. DO NOT CONVERSE.
+ONLY OUTPUT VALID JSON. IF YOU OUTPUT ANY TEXT BEFORE OR AFTER THE JSON, THE SYSTEM WILL CRASH.
+
+[INSTRUCTION]
+Subject: {subject}
+Body: {body}
+
+[CONTEXT]
+{repo_context}
+
+[OUTPUT FORMAT]
+{{
+  "explanation": "Brief implementation summary (max 2-3 lines)",
+  "changes": [
+    {{
+      "path": "file/path/here.ext",
+      "content": "Full file content with changes applied"
+    }}
+  ]
+}}"""
         
         log("🤖 Gemini CLI 실행 중...")
         # 프롬프트가 너무 길 경우 Argument list too long 에러가 발생하므로 임시 파일 사용
