@@ -205,74 +205,39 @@ def main():
             run_command_list(["git", "fetch", "origin", vars['base_br']], cwd=work_dir)
             run_command_list(["git", "checkout", vars['base_br']], cwd=work_dir)
 
-        log("📂 Gemini 호출 중 (Large Context)...")
-        repo_context = get_repo_contents(work_dir)
+        log("🤖 Gemini 자율 작업 시작...")
         
-        system_instruction = "You are a specialized JSON generator for code changes. DO NOT TALK. DO NOT EXPLAIN. ONLY OUTPUT VALID JSON."
-        
-        prompt = f"""### EXAMPLE INPUT ###
-Subject: Update footer text
-Body: Change '© 2024' to '© 2025' in footer.vue
-Context: -- File: footer.vue --\n<div>© 2024 My App</div>
-
-### EXAMPLE OUTPUT ###
-{{
-  "thought": "Update copyright year to 2025",
-  "explanation": "Updated footer copyright year.",
-  "changes": [
-    {{ "path": "footer.vue", "content": "<div>© 2025 My App</div>" }}
-  ]
-}}
-
-### REAL TASK ###
+        # 내부 gemini CLI가 직접 파일을 탐색하고 수정하도록 지시
+        # --include-directories를 통해 external_repo를 작업 범위에 포함
+        instruction = f"""
+[TASK]
 Subject: {subject}
 Body: {body}
 
-### CODE CONTEXT ###
-{repo_context}
-
-### FINAL JSON OUTPUT ###
+[INSTRUCTION]
+1. Go to the directory: {work_dir}
+2. Explore the codebase and apply the requested changes.
+3. Ensure the task is completed successfully.
 """
         
-        log("🤖 Gemini CLI 실행 중...")
-        # 프롬프트 파일 저장
-        prompt_file = os.path.join(os.getcwd(), f".prompt_{int(time.time())}.txt")
-        try:
-            # 시스템 지시어를 프롬프트 본문에 직접 포함
-            full_prompt = f"SYSTEM: {system_instruction}\n\n{prompt}"
-            with open(prompt_file, "w", encoding="utf-8") as f:
-                f.write(full_prompt)
-            
-            # 지원되는 옵션만 사용
-            stdout, stderr, code = run_command_list(
-                [
-                    "gemini", "-m", GEMINI_MODEL, 
-                    "--raw-output", "--accept-raw-output-risk", "--yolo",
-                    "-p", f"@{prompt_file}"
-                ],
-                cwd=os.getcwd()
-            )
-        finally:
-            if os.path.exists(prompt_file):
-                os.remove(prompt_file)
+        # gemini CLI 호출 (직접 파일 수정)
+        stdout, stderr, code = run_command_list(
+            [
+                "gemini", "-m", GEMINI_MODEL, 
+                "--raw-output", "--accept-raw-output-risk", "--yolo",
+                "--include-directories", work_dir,
+                "-p", instruction
+            ],
+            cwd=os.getcwd()
+        )
         
         if code != 0:
-            log(f"❌ Gemini 실패: {stderr}")
+            log(f"❌ Gemini 작업 실패: {stderr}")
             raise Exception("Gemini process error")
 
-        try:
-            res_data = json.loads(extract_json(stdout))
-            spec = res_data.get('explanation', '작업 완료')
-            changes = res_data.get('changes', [])
-            if not changes: raise Exception("Empty Changes")
-            for c in changes:
-                p = os.path.join(work_dir, c['path'].lstrip('./'))
-                os.makedirs(os.path.dirname(p), exist_ok=True)
-                with open(p, "w", encoding="utf-8") as f: f.write(c['content'])
-                log(f"🛠 파일 작성: {c['path']}")
-        except:
-            log(f"❌ 파싱 실패. 원본:\n{stdout[:1000]}...")
-            raise Exception("JSON 파싱 실패")
+        # 작업 결과물(설명) 추출 (설명은 stdout에서 가져옴)
+        spec = stdout if stdout else "작업이 완료되었습니다."
+        log("🛠 작업 완료 (파일 수정됨)")
 
         log("📤 푸시 중...")
         new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
