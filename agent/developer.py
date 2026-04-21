@@ -26,63 +26,81 @@ def update_task_status(status, branch_name=None, pr_url=None):
     try: requests.patch(url, headers=headers, json=data, timeout=10)
     except: pass
 
-def send_completion_email(to_email, subject, spec, result_url, lang_code="ko"):
+def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status="Success"):
     service_id = os.getenv("EMAILJS_SERVICE_ID")
     template_id = os.getenv("EMAILJS_TEMPLATE_ID")
     public_key = os.getenv("EMAILJS_PUBLIC_KEY")
     private_key = os.getenv("EMAILJS_PRIVATE_KEY")
     
     if not all([service_id, template_id, public_key, private_key]):
-        print("⚠️ EmailJS 설정이 누락되었습니다.")
+        print("⚠️ EmailJS 설정 누락")
         return
 
     to_email = to_email.strip() if to_email else ""
     if not to_email: return
 
-    # 언어별 문구 설정
-    texts = {
-        "ko": {"title": "🚀 작업 성공 리포트", "msg": "요청하신 작업이 성공적으로 완료되었습니다.", "btn": "결과 확인하기", "footer": "본 메일은 자동 발송되었습니다."},
-        "en": {"title": "🚀 Task Completion Report", "msg": "The requested task has been successfully completed.", "btn": "View Results", "footer": "This is an automated email."},
-        "ja": {"title": "🚀 作業完了レポート", "msg": "ご依頼いただいた作業が正常に完了しました。", "btn": "結果を確認する", "footer": "このメールは自動送信되었습니다."},
-    }
-    t = texts.get(lang_code, texts["en"])
-
-    print(f"📤 EmailJS 발송 시도... (수신자: {to_email}, 언어: {lang_code})")
-    
-    html_content = f"""
-    <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-        <h2 style="color: #2e7d32; text-align: center;">{t['title']}</h2>
-        <p><b>"{subject}"</b> {t['msg']}</p>
-        
-        <div style="background: #f9f9f9; padding: 15px; border-left: 5px solid #2196f3; margin: 20px 0;">
-            <p style="white-space: pre-wrap; color: #555; font-size: 0.95em;">{spec}</p>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{result_url}" style="background: #2196f3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                📦 {t['btn']}
-            </a>
-        </div>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;"/>
-        <p style="font-size: 0.85em; color: #888; text-align: center;">{t['footer']}</p>
-    </div>
-    """
-
-    url = "https://api.emailjs.com/api/v1.0/email/send"
-    data = {
-        "service_id": service_id, "template_id": template_id, "user_id": public_key, "accessToken": private_key,
-        "template_params": {
-            "to_email": to_email,
-            "subject": f"✅ {subject}",
-            "html_body": html_content # 템플릿에서 {{html_body}} 사용 권장
+    # 다국어 및 상태별 텍스트 설정
+    config = {
+        "ko": {
+            "Success": {"badge": "성공", "title": "작업이 성공적으로 완료되었습니다", "desc": "에이전트가 요청하신 작업을 마쳤습니다.", "sub_label": "작업 제목", "spec_label": "구현 상세 내용", "btn": "결과 확인하기"},
+            "Denied": {"badge": "권한 부족", "title": "저장소 접근 권한이 없습니다", "desc": "비공개 저장소에 접근할 수 없습니다. 권한을 확인해주세요.", "sub_label": "작업 제목", "spec_label": "안내 사항", "btn": "저장소로 이동"}
+        },
+        "en": {
+            "Success": {"badge": "Success", "title": "Task Completed Successfully", "desc": "GitHub Agent has finished the requested work.", "sub_label": "Subject", "spec_label": "Implementation Details", "btn": "Review Pull Request"},
+            "Denied": {"badge": "Denied", "title": "Access Denied to Repository", "desc": "The agent cannot access the private repository. Please grant access.", "sub_label": "Subject", "spec_label": "Information", "btn": "Go to Repository"}
+        },
+        "ja": {
+            "Success": {"badge": "成功", "title": "作業が正常に完了しました", "desc": "エージェントが依頼された作業を完了しました。", "sub_label": "作業件名", "spec_label": "実装の詳細", "btn": "結果を確認する"},
+            "Denied": {"badge": "アクセス拒否", "title": "リポジトリへのアクセス権限がありません", "desc": "非公開リポジトリにアクセスできません。権限を確認してください。", "sub_label": "作業件名", "spec_label": "案内事項", "btn": "リポジトリへ移動"}
         }
     }
     
+    lang = config.get(lang_code, config["en"])
+    t = lang.get(status, lang["Success"])
+    badge_color = "#22c55e" if status == "Success" else "#ef4444"
+    btn_color = "#6366f1" if status == "Success" else "#1e293b"
+
+    html_body = f"""
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; color: #334155; line-height: 1.6;">
+  <div style="max-width: 600px; margin: 20px auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <div style="background-color: #1e293b; padding: 32px 24px; text-align: center;">
+      <div style="display: inline-block; background-color: {badge_color}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">
+        {t['badge']}
+      </div>
+      <h1 style="color: #ffffff; font-size: 22px; margin: 0; font-weight: 700;">{t['title']}</h1>
+      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">{t['desc']}</p>
+    </div>
+    <div style="padding: 32px 24px; background-color: #ffffff;">
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">{t['sub_label']}</label>
+        <h2 style="font-size: 18px; color: #1e293b; margin: 4px 0 0 0;">{subject}</h2>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+      <div style="margin-bottom: 32px;">
+        <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">{t['spec_label']}</label>
+        <div style="margin-top: 12px; padding: 16px; background-color: #f8fafc; border-left: 4px solid {btn_color}; border-radius: 4px; color: #475569; white-space: pre-wrap;">{spec}</div>
+      </div>
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="{result_url}" target="_blank" style="background-color: {btn_color}; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+          {t['btn']}
+        </a>
+        <p style="margin-top: 16px; font-size: 13px; color: #94a3b8;">Receiver: <span style="color: #64748b;">{to_email}</span></p>
+      </div>
+    </div>
+    <div style="text-align: center; background-color: #f1f5f9; padding: 24px; border-top: 1px solid #e2e8f0;">
+      <p style="margin: 0; font-size: 13px; color: #64748b;">This is an automated report generated by <strong>GitHub Agent</strong>.</p>
+    </div>
+  </div>
+</div>
+"""
+    data = {
+        "service_id": service_id, "template_id": template_id, "user_id": public_key, "accessToken": private_key,
+        "template_params": {"to_email": to_email, "subject": f"[{t['badge']}] {subject}", "html_body": html_body}
+    }
     try:
-        res = requests.post(url, json=data, timeout=15)
-        if res.status_code == 200: print(f"📧 이메일 발송 성공!")
-        else: print(f"❌ 이메일 발송 실패: {res.status_code} - {res.text}")
-    except Exception as e: print(f"❌ 이메일 예외: {e}")
+        res = requests.post("https://api.emailjs.com/api/v1.0/email/send", json=data, timeout=15)
+        if res.status_code == 200: print(f"📧 이메일({status}) 발송 성공!")
+    except Exception as e: print(f"❌ 이메일 에러: {e}")
 
 def run_command_list(args, cwd=None):
     env = os.environ.copy()
@@ -92,7 +110,7 @@ def run_command_list(args, cwd=None):
 
 def get_repo_contents(work_dir):
     context = ""
-    if not os.path.exists(work_dir): return "New Repository (Empty)"
+    if not os.path.exists(work_dir): return "New Repository"
     for root, _, files in os.walk(work_dir):
         if any(x in root for x in ['node_modules', '.git', '.next']): continue
         for file in files:
@@ -134,8 +152,6 @@ def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
     sender = os.getenv("SENDER", "")
-    
-    # 언어 감지 (단순 키워드 기반 또는 AI에게 위임)
     lang_code = "ko" if any(ord(c) > 0x1100 for c in body) else "en"
 
     git_match = re.search(r"https://github\.com/([\w\-]+/[\w\-.]+)", body)
@@ -147,71 +163,63 @@ def main():
     else:
         repo_name = f"agent-task-{int(time.time())}"
         repo_full_name, clone_url = create_github_repo(repo_name)
-        if not repo_full_name:
-            print("❌ 저장소 생성 실패")
-            return
+        if not repo_full_name: return
         auth_url = clone_url.replace("https://", f"https://oauth2:{GITHUB_PAT}@")
         is_new_repo = True
 
     work_dir = os.path.join(os.getcwd(), "external_repo")
     if os.path.exists(work_dir): shutil.rmtree(work_dir)
 
-    print(f"🚀 에이전트 가동: {repo_full_name} (New: {is_new_repo})")
+    print(f"🚀 에이전트 가동: {repo_full_name}")
     update_task_status("running")
 
     try:
-        # 1. 컨텍스트 수집 (새 저장소면 생략)
-        if not is_new_repo:
-            run_command_list(["git", "clone", auth_url, work_dir])
-            repo_context = get_repo_contents(work_dir)
-        else:
-            os.makedirs(work_dir, exist_ok=True)
-            run_command_list(["git", "clone", auth_url, work_dir]) # auto_init=True 이므로 클론 가능
-            repo_context = "New Repository. Provide full scaffolding (e.g. Next.js, README)."
+        # 1. 저장소 접근 시도
+        _, stderr, code = run_command_list(["git", "clone", auth_url, work_dir])
+        if code != 0:
+            if "terminal" in stderr or "authenticate" in stderr or "repository not found" in stderr:
+                print("❌ 접근 권한 부족")
+                reason = "저장소에 접근할 수 없습니다. 에이전트 계정에 협업자(Collaborator) 권한을 추가해주세요." if lang_code == "ko" else "Access denied. Please add the agent account as a collaborator."
+                send_agent_email(sender, subject, reason, f"https://github.com/{repo_full_name}", lang_code, "Denied")
+                update_task_status("failed")
+                return
+            else:
+                raise Exception(f"Git Clone Error: {stderr}")
 
-        # 2. 전략 수립
-        plan_prompt = f"Lang: {lang_code}\nRepo: {repo_context}\nTask: {subject}\n{body}\n\n결과 형식: {{\"explanation\": \"상세 사양 (요청자 언어로)\", \"lang\": \"{lang_code}\"}}"
-        plan = call_gemini_cli(plan_prompt, "전략 수립")
+        repo_context = get_repo_contents(work_dir) if not is_new_repo else "New Project Scaffolding"
+        
+        # 2. 전략 및 코드
+        plan = call_gemini_cli(f"Lang: {lang_code}\nRepo: {repo_context}\nTask: {subject}\n{body}\n\n결과 형식: {{\"explanation\": \"상세 사양\", \"lang\": \"{lang_code}\"}}", "전략 수립")
         spec = plan.get('explanation', 'Processing...')
         actual_lang = plan.get('lang', lang_code)
 
-        # 3. 코드 작성
-        impl_prompt = f"Lang: {actual_lang}\nSpec: {spec}\n\n모든 파일의 전체 코드를 포함한 JSON을 생성하세요. 형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\" }}]}}"
-        impl = call_gemini_cli(impl_prompt, "코드 작성")
+        impl = call_gemini_cli(f"Lang: {actual_lang}\nSpec: {spec}\n\n전체 코드 포함 JSON: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\" }}]}}", "코드 작성")
         
-        changes = impl.get('changes', [])
-        for c in changes:
+        for c in impl.get('changes', []):
             path = os.path.join(work_dir, c['path'].lstrip('./'))
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "w", encoding="utf-8") as f: f.write(c['content'])
-            print(f"🛠 파일 작성: {c['path']}")
 
-        # 4. Git & Push
+        # 3. Git Push
         branch_name = "main" if is_new_repo else f"agent/task-{int(time.time())}"
         run_command_list(["git", "config", "user.name", "Agent"], cwd=work_dir)
         run_command_list(["git", "config", "user.email", "agent@internal.com"], cwd=work_dir)
-        
-        if not is_new_repo:
-            run_command_list(["git", "checkout", "-b", branch_name], cwd=work_dir)
-        
+        if not is_new_repo: run_command_list(["git", "checkout", "-b", branch_name], cwd=work_dir)
         run_command_list(["git", "add", "."], cwd=work_dir)
         run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
-        _, _, code = run_command_list(["git", "push", "origin", branch_name, "--force" if is_new_repo else ""], cwd=work_dir)
+        _, _, p_code = run_command_list(["git", "push", "origin", branch_name, "--force" if is_new_repo else ""], cwd=work_dir)
 
-        if code == 0:
-            if is_new_repo:
-                result_url = f"https://github.com/{repo_full_name}"
-            else:
-                pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {GITHUB_PAT}"}, json={"title": f"🚀 {subject}", "body": spec, "head": branch_name, "base": "main"}).json()
-                result_url = pr_res.get('html_url', f"https://github.com/{repo_full_name}")
-
-            print(f"✅ 완료: {result_url}")
+        if p_code == 0:
+            result_url = f"https://github.com/{repo_full_name}"
+            if not is_new_repo:
+                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {GITHUB_PAT}"}, json={"title": f"🚀 {subject}", "body": spec, "head": branch_name, "base": "main"}).json()
+                result_url = pr.get('html_url', result_url)
+            
             update_task_status("completed", branch_name=branch_name, pr_url=result_url)
-            if sender:
-                send_completion_email(sender, subject, spec, result_url, actual_lang)
+            send_agent_email(sender, subject, spec, result_url, actual_lang, "Success")
 
     except Exception:
-        print(f"❌ 에러:\n{traceback.format_exc()}")
+        print(f"❌ 에러: {traceback.format_exc()}")
         update_task_status("failed")
 
 if __name__ == "__main__": main()
