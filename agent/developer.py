@@ -111,7 +111,7 @@ def get_repo_contents(work_dir):
     for root, _, files in os.walk(work_dir):
         if any(x in root for x in ['node_modules', '.git', '.next']): continue
         for file in files:
-            if file.endswith(('.js', '.jsx', '.ts', '.tsx', '.json', '.md')):
+            if file.endswith(('.js', '.jsx', '.ts', '.tsx', '.json', '.md', '.html', '.css', '.vue')):
                 try:
                     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
                         context += f"\n-- File: {os.path.relpath(os.path.join(root, file), work_dir)} --\n{f.read()}\n"
@@ -152,26 +152,31 @@ def main():
         "pr_title": extract_from_body(body, "PR_TITLE")
     }
 
-    url_match = re.search(r"https://([\w\-.]+)/([\w\-]+/[\w\-.]+)", body)
+    # URL 정규표현식 강화 (공백이 나오기 전까지의 모든 유효한 문자열을 경로로 인식)
+    url_match = re.search(r"https://([\w\-.]+)/(\S+)", body)
     is_new_repo = False
+    auth_url = None
     domain = "github.com"
-    token = vars['gh_token'] or GITHUB_PAT_ENV
     
     if url_match:
         domain = url_match.group(1)
         repo_path = url_match.group(2).replace(".git", "")
-        if "github.com" in domain: auth_url = f"https://oauth2:{token}@github.com/{repo_path}.git"
-        elif "gitlab.com" in domain: auth_url = f"https://oauth2:{vars['gl_token']}@gitlab.com/{repo_path}.git"
-        elif "bitbucket.org" in domain: auth_url = f"https://{vars['bb_user']}:{vars['bb_pass']}@bitbucket.org/{repo_path}.git"
-        else: auth_url = f"https://{domain}/{repo_path}.git"
+        
+        if "github.com" in domain:
+            auth_url = f"https://oauth2:{vars['gh_token'] or GITHUB_PAT_ENV}@github.com/{repo_path}.git"
+        elif "gitlab" in domain:
+            auth_url = f"https://oauth2:{vars['gl_token']}@{domain}/{repo_path}.git"
+        elif "bitbucket" in domain:
+            auth_url = f"https://{vars['bb_user']}:{vars['bb_pass']}@{domain}/{repo_path}.git"
+        else:
+            auth_url = f"https://{domain}/{repo_path}.git"
         repo_full_name = repo_path
     else:
         repo_name = f"agent-task-{int(time.time())}"
-        log(f"🆕 New Repo: {repo_name}")
-        headers = {"Authorization": f"token {token}", "Accept": "vnd.github.v3+json"}
+        headers = {"Authorization": f"token {GITHUB_PAT_ENV}", "Accept": "vnd.github.v3+json"}
         res = requests.post("https://api.github.com/user/repos", headers=headers, json={"name": repo_name, "auto_init": True}).json()
         repo_full_name = res.get("full_name")
-        auth_url = res.get("clone_url", "").replace("https://", f"https://oauth2:{token}@")
+        auth_url = res.get("clone_url", "").replace("https://", f"https://oauth2:{GITHUB_PAT_ENV}@")
         is_new_repo = True
 
     log(f"🚀 가동: {repo_full_name} (Base: {vars['base_br']})")
@@ -195,7 +200,6 @@ def main():
 
         log("📂 Gemini 호출 중...")
         repo_context = get_repo_contents(work_dir)
-        # 중요: subject와 body를 모두 포함하여 지시 사항 누락 방지
         prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\n\n[INSTRUCTION]\nSubject: {subject}\nBody: {body}\n\n[CONTEXT]\n{repo_context}\n\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
         stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", prompt])
         
@@ -231,8 +235,9 @@ def main():
 
         if p_code == 0:
             res_url = f"https://{domain}/{repo_full_name}"
+            # GitHub의 경우만 PR 생성 시도
             if "github.com" in domain and not is_new_repo:
-                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {token}"}, json={"title": vars['pr_title'] or f"🚀 {subject}", "body": spec, "head": new_branch, "base": vars['base_br']}).json()
+                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {vars['gh_token'] or GITHUB_PAT_ENV}"}, json={"title": vars['pr_title'] or f"🚀 {subject}", "body": spec, "head": new_branch, "base": vars['base_br']}).json()
                 res_url = pr.get('html_url', res_url)
             log(f"✅ 성공! URL: {res_url}")
             update_task_status("completed", branch_name=new_branch, pr_url=res_url)
