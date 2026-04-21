@@ -32,8 +32,8 @@ def send_completion_email(to_email, subject, spec, pr_url):
     public_key = os.getenv("EMAILJS_PUBLIC_KEY")
     private_key = os.getenv("EMAILJS_PRIVATE_KEY")
     
-    if not all([service_id, template_id, public_key]):
-        print("⚠️ EmailJS 설정이 누락되었습니다. (SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY 필요)")
+    if not all([service_id, template_id, public_key, private_key]):
+        print("⚠️ EmailJS 설정이 누락되었습니다. (SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY, PRIVATE_KEY 모두 필요)")
         return
     
     url = "https://api.emailjs.com/api/v1.0/email/send"
@@ -41,7 +41,7 @@ def send_completion_email(to_email, subject, spec, pr_url):
         "service_id": service_id,
         "template_id": template_id,
         "user_id": public_key,
-        "accessToken": private_key,
+        "accessToken": private_key,  # Private Key 사용
         "template_params": {
             "to_email": to_email,
             "subject": subject,
@@ -51,11 +51,14 @@ def send_completion_email(to_email, subject, spec, pr_url):
     }
     
     try:
+        # Content-Type: application/json 명시
         res = requests.post(url, json=data, timeout=15)
         if res.status_code == 200:
             print(f"📧 EmailJS 완료 이메일 발송 성공! (To: {to_email})")
         else:
             print(f"❌ EmailJS 발송 실패: {res.status_code} - {res.text}")
+            if "non-browser environments" in res.text:
+                print("💡 EmailJS 대시보드(Account > Security)에서 'Allow API request from non-browser environments'를 활성화해주세요.")
     except Exception as e:
         print(f"❌ EmailJS 발송 중 예외 발생: {e}")
 
