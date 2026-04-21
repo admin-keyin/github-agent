@@ -2,5 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/actions-runner/_work/github-agent/github-agent" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/actions-runner/_work/github-agent/github-agent/external_repo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test_inspect" vcs="Git" />
   </component>
 </project>

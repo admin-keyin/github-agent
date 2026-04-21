@@ -26,6 +26,56 @@ def update_task_status(status, branch_name=None, pr_url=None):
     try: requests.patch(url, headers=headers, json=data, timeout=10)
     except: pass
 
+def send_completion_email(to_email, subject, spec, pr_url):
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    if not resend_api_key or not to_email: 
+        print("⚠️ RESEND_API_KEY or recipient email missing. Skipping email.")
+        return
+    
+    url = "https://api.resend.com/emails"
+    headers = {
+        "Authorization": f"Bearer {resend_api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "from": "Agent <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": f"✅ 작업 완료: {subject}",
+        "html": f"""
+        <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <h2 style="color: #2e7d32; text-align: center;">🚀 작업 성공 리포트</h2>
+            <p>안녕하세요, 요청하신 <b>"{subject}"</b> 작업이 성공적으로 완료되어 Pull Request가 생성되었습니다.</p>
+            
+            <div style="background: #f9f9f9; padding: 15px; border-left: 5px solid #2196f3; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #333;">🛠 주요 구현 내용</h3>
+                <p style="white-space: pre-wrap; color: #555; font-size: 0.95em;">{spec}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{pr_url}" style="background: #2196f3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                    📦 생성된 Pull Request 확인하기
+                </a>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;"/>
+            <p style="font-size: 0.85em; color: #888; text-align: center;">
+                본 메일은 Gemini CLI Agent 시스템에 의해 자동으로 발송되었습니다.<br/>
+                발신 전용 메일이므로 회신이 불가능합니다.
+            </p>
+        </div>
+        """
+    }
+    
+    try:
+        res = requests.post(url, headers=headers, json=data, timeout=15)
+        if res.status_code in [200, 201]:
+            print(f"📧 완료 이메일 발송 성공! (To: {to_email})")
+        else:
+            print(f"❌ 이메일 발송 실패: {res.status_code} - {res.text}")
+    except Exception as e:
+        print(f"❌ 이메일 발송 중 예외 발생: {e}")
+
 def run_command_list(args, cwd=None):
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -147,8 +197,14 @@ def main():
         
         if push_code == 0:
             pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {GITHUB_PAT}"}, json={"title": f"🚀 [Dashboard] {subject}", "body": f"### 📊 구현 내용\n{spec}\n\n### 🔍 참고 자료\n{search_data}", "head": branch_name, "base": "main"}).json()
-            print(f"✅ 완료: {pr_res.get('html_url')}")
-            update_task_status("completed", branch_name=branch_name, pr_url=pr_res.get("html_url"))
+            pr_url = pr_res.get('html_url')
+            print(f"✅ 완료: {pr_url}")
+            update_task_status("completed", branch_name=branch_name, pr_url=pr_url)
+            
+            # 메일 발송
+            sender_email = os.getenv("SENDER")
+            if sender_email and pr_url:
+                send_completion_email(sender_email, subject, spec, pr_url)
 
     except Exception as e:
         print(f"❌ 에러:\n{traceback.format_exc()}")

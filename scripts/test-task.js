@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 
 async function simulateEmail() {
   const payload = {
-    from: process.env.ALLOWED_SENDER || "celebe@example.com", // 본인의 이메일로 변경하세요
+    from: process.env.ALLOWED_SENDER || "ich019012@gmail.com", // 본인의 이메일로 변경하세요
     subject: "메인 페이지 헤더 업데이트 요청",
     body: "app/page.js 파일의 <h1 className=\"text-3xl font-bold tracking-tight\"> 부분을 <h1 className=\"text-4xl font-extrabold text-indigo-600\"> 로 변경하고, 'AI 에이전트 대시보드' 텍스트를 'Super AI 대시보드'로 바꿔주세요."
   };
