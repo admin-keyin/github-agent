@@ -35,13 +35,21 @@ def send_completion_email(to_email, subject, spec, pr_url):
     if not all([service_id, template_id, public_key, private_key]):
         print("⚠️ EmailJS 설정이 누락되었습니다. (SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY, PRIVATE_KEY 모두 필요)")
         return
+
+    # 이메일 주소 정제 (공백 제거)
+    to_email = to_email.strip() if to_email else ""
+    if not to_email:
+        print("⚠️ 수신자 이메일 주소가 비어 있어 발송을 취소합니다.")
+        return
+
+    print(f"📤 EmailJS 발송 시도... (수신자: {to_email})")
     
     url = "https://api.emailjs.com/api/v1.0/email/send"
     data = {
         "service_id": service_id,
         "template_id": template_id,
         "user_id": public_key,
-        "accessToken": private_key,  # Private Key 사용
+        "accessToken": private_key,
         "template_params": {
             "to_email": to_email,
             "subject": subject,
