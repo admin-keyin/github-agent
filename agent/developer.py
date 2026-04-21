@@ -15,7 +15,7 @@ TASK_ID = os.getenv("TASK_ID")
 GITHUB_PAT_ENV = os.getenv("GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 def log(msg):
     # 민감한 정보가 포함된 로그는 생략하거나 마스킹
@@ -209,7 +209,7 @@ def main():
         repo_context = get_repo_contents(work_dir)
         prompt = f"""### SYSTEM INSTRUCTION ###
 - You are a senior software engineer agent.
-- Your task is to apply changes to the code below.
+- DO NOT EXPLAIN. DO NOT SUMMARIZE.
 - OUTPUT ONLY ONE JSON OBJECT. NO TEXT BEFORE OR AFTER.
 - ALL file contents in 'changes' MUST be the FULL new content.
 
@@ -229,8 +229,8 @@ Body: {body}
   ]
 }}
 
-Output JSON only:
-"""
+STRICT: Output ONLY JSON, starting with '{{'.
+JSON:"""
         
         log("🤖 Gemini CLI 실행 중...")
         # 프롬프트가 너무 길 경우 Argument list too long 에러가 발생하므로 임시 파일 사용
@@ -242,7 +242,7 @@ Output JSON only:
             # gemini CLI가 -p @filename 형식을 지원하므로 이를 활용하여 
             # 명령줄 인수 길이 제한(ARG_MAX)을 완벽하게 피합니다.
             stdout, stderr, code = run_command_list(
-                ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", f"@{prompt_file}"],
+                ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--accept-raw-output-risk", "--yolo", "-p", f"@{prompt_file}"],
                 cwd=os.getcwd()
             )
         finally:
