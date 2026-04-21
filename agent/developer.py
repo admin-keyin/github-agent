@@ -26,60 +26,73 @@ def update_task_status(status, branch_name=None, pr_url=None):
     try: requests.patch(url, headers=headers, json=data, timeout=10)
     except: pass
 
-def send_completion_email(to_email, subject, spec, pr_url):
+def send_completion_email(to_email, subject, spec, result_url, lang_code="ko"):
     service_id = os.getenv("EMAILJS_SERVICE_ID")
     template_id = os.getenv("EMAILJS_TEMPLATE_ID")
     public_key = os.getenv("EMAILJS_PUBLIC_KEY")
     private_key = os.getenv("EMAILJS_PRIVATE_KEY")
     
     if not all([service_id, template_id, public_key, private_key]):
-        print("⚠️ EmailJS 설정이 누락되었습니다. (SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY, PRIVATE_KEY 모두 필요)")
+        print("⚠️ EmailJS 설정이 누락되었습니다.")
         return
 
-    # 이메일 주소 정제 (공백 제거)
     to_email = to_email.strip() if to_email else ""
-    if not to_email:
-        print("⚠️ 수신자 이메일 주소가 비어 있어 발송을 취소합니다.")
-        return
+    if not to_email: return
 
-    print(f"📤 EmailJS 발송 시도... (수신자: {to_email})")
+    # 언어별 문구 설정
+    texts = {
+        "ko": {"title": "🚀 작업 성공 리포트", "msg": "요청하신 작업이 성공적으로 완료되었습니다.", "btn": "결과 확인하기", "footer": "본 메일은 자동 발송되었습니다."},
+        "en": {"title": "🚀 Task Completion Report", "msg": "The requested task has been successfully completed.", "btn": "View Results", "footer": "This is an automated email."},
+        "ja": {"title": "🚀 作業完了レポート", "msg": "ご依頼いただいた作業が正常に完了しました。", "btn": "結果を確認する", "footer": "このメールは自動送信되었습니다."},
+    }
+    t = texts.get(lang_code, texts["en"])
+
+    print(f"📤 EmailJS 발송 시도... (수신자: {to_email}, 언어: {lang_code})")
     
+    html_content = f"""
+    <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+        <h2 style="color: #2e7d32; text-align: center;">{t['title']}</h2>
+        <p><b>"{subject}"</b> {t['msg']}</p>
+        
+        <div style="background: #f9f9f9; padding: 15px; border-left: 5px solid #2196f3; margin: 20px 0;">
+            <p style="white-space: pre-wrap; color: #555; font-size: 0.95em;">{spec}</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{result_url}" style="background: #2196f3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                📦 {t['btn']}
+            </a>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;"/>
+        <p style="font-size: 0.85em; color: #888; text-align: center;">{t['footer']}</p>
+    </div>
+    """
+
     url = "https://api.emailjs.com/api/v1.0/email/send"
     data = {
-        "service_id": service_id,
-        "template_id": template_id,
-        "user_id": public_key,
-        "accessToken": private_key,
+        "service_id": service_id, "template_id": template_id, "user_id": public_key, "accessToken": private_key,
         "template_params": {
             "to_email": to_email,
-            "subject": subject,
-            "spec": spec,
-            "pr_url": pr_url
+            "subject": f"✅ {subject}",
+            "html_body": html_content # 템플릿에서 {{html_body}} 사용 권장
         }
     }
     
     try:
-        # Content-Type: application/json 명시
         res = requests.post(url, json=data, timeout=15)
-        if res.status_code == 200:
-            print(f"📧 EmailJS 완료 이메일 발송 성공! (To: {to_email})")
-        else:
-            print(f"❌ EmailJS 발송 실패: {res.status_code} - {res.text}")
-            if "non-browser environments" in res.text:
-                print("💡 EmailJS 대시보드(Account > Security)에서 'Allow API request from non-browser environments'를 활성화해주세요.")
-    except Exception as e:
-        print(f"❌ EmailJS 발송 중 예외 발생: {e}")
+        if res.status_code == 200: print(f"📧 이메일 발송 성공!")
+        else: print(f"❌ 이메일 발송 실패: {res.status_code} - {res.text}")
+    except Exception as e: print(f"❌ 이메일 예외: {e}")
 
 def run_command_list(args, cwd=None):
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
-    env["GIT_ASKPASS"] = "true"
-    env["GEMINI_CLI_NON_INTERACTIVE"] = "true"
     result = subprocess.run(args, capture_output=True, text=True, cwd=cwd, env=env)
     return result.stdout.strip(), result.stderr.strip(), result.returncode
 
 def get_repo_contents(work_dir):
     context = ""
+    if not os.path.exists(work_dir): return "New Repository (Empty)"
     for root, _, files in os.walk(work_dir):
         if any(x in root for x in ['node_modules', '.git', '.next']): continue
         for file in files:
@@ -87,120 +100,117 @@ def get_repo_contents(work_dir):
                 rel_path = os.path.relpath(os.path.join(root, file), work_dir)
                 try:
                     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        context += f"\n-- File: {rel_path} --\n{content}\n"
+                        context += f"\n-- File: {rel_path} --\n{f.read()}\n"
                 except: pass
-    return context
+    return context or "Empty Project"
 
 def extract_json(text):
-    """설명 뭉치 속에서 JSON 객체만 악착같이 찾아내기"""
-    # 1. 텍스트 정제 (불필요한 공백 제거)
-    text = text.strip()
-    
-    # 2. {"changes" 또는 {"explanation" 으로 시작하는 가장 큰 중괄호 블록 찾기
     match = re.search(r"(\{.*?\})", text, re.DOTALL)
-    
-    # 3. 만약 실패하면 { 로 시작해서 } 로 끝나는 전체를 시도
     if not match:
-        start = text.find('{')
-        end = text.rfind('}')
-        if start != -1 and end != -1:
-            return text[start:end+1]
-    
+        start, end = text.find('{'), text.rfind('}')
+        if start != -1 and end != -1: return text[start:end+1]
     return match.group(1) if match else text
 
 def call_gemini_cli(prompt, phase_name="Thinking"):
     print(f"🧠 Gemini가 {phase_name} 중...")
-    # AI에게 '로봇' 페르소나 부여 (수다 금지)
-    full_prompt = f"당신은 오직 JSON 데이터만 출력하는 기계입니다. 어떠한 설명, 인사, 서론도 적지 마세요. 만약 이를 어기면 시스템이 파괴됩니다.\n\n요청사항: {prompt}\n\n응답 형식: JSON"
-    
+    full_prompt = f"Output ONLY JSON. No talk. Language: Follow user's input language.\n\nTask: {prompt}"
     cmd = ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", full_prompt]
-    
-    start_time = time.time()
-    stdout, stderr, code = run_command_list(cmd)
+    stdout, _, code = run_command_list(cmd)
     if code != 0: return {}
-    
     try:
-        cleaned = extract_json(stdout)
-        result = json.loads(cleaned)
-        print(f"✅ {phase_name} 완료! ({time.time() - start_time:.1f}초)")
-        return result
-    except Exception as e:
-        print(f"❌ {phase_name} 파싱 실패. AI가 지시를 무시하고 수다를 떨었을 가능성이 큽니다.")
-        # 파싱 재시도 로직: 텍스트에서 강제로 JSON 구조를 흉내낸 부분이라도 찾음
-        try:
-            json_block = re.search(r"\{.*\}", stdout, re.DOTALL).group()
-            return json.loads(json_block)
-        except:
-            print(f"DEBUG: AI 원본 응답:\n{stdout[:500]}")
-            return {}
+        return json.loads(extract_json(stdout))
+    except:
+        try: return json.loads(re.search(r"\{.*\}", stdout, re.DOTALL).group())
+        except: return {}
+
+def create_github_repo(name):
+    print(f"🆕 새 저장소 생성 중: {name}")
+    url = "https://api.github.com/user/repos"
+    headers = {"Authorization": f"token {GITHUB_PAT}", "Accept": "vnd.github.v3+json"}
+    res = requests.post(url, headers=headers, json={"name": name, "private": False, "auto_init": True})
+    return res.json().get("full_name"), res.json().get("clone_url")
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
+    sender = os.getenv("SENDER", "")
+    
+    # 언어 감지 (단순 키워드 기반 또는 AI에게 위임)
+    lang_code = "ko" if any(ord(c) > 0x1100 for c in body) else "en"
+
     git_match = re.search(r"https://github\.com/([\w\-]+/[\w\-.]+)", body)
-    if not git_match: return
-    repo_full_name = git_match.group(1).replace(".git", "")
-    auth_url = f"https://oauth2:{GITHUB_PAT}@github.com/{repo_full_name}.git"
+    is_new_repo = False
+    
+    if git_match:
+        repo_full_name = git_match.group(1).replace(".git", "")
+        auth_url = f"https://oauth2:{GITHUB_PAT}@github.com/{repo_full_name}.git"
+    else:
+        repo_name = f"agent-task-{int(time.time())}"
+        repo_full_name, clone_url = create_github_repo(repo_name)
+        if not repo_full_name:
+            print("❌ 저장소 생성 실패")
+            return
+        auth_url = clone_url.replace("https://", f"https://oauth2:{GITHUB_PAT}@")
+        is_new_repo = True
+
     work_dir = os.path.join(os.getcwd(), "external_repo")
     if os.path.exists(work_dir): shutil.rmtree(work_dir)
 
-    print(f"🚀 [ULTRA 모드] 에이전트 가동: {repo_full_name}")
+    print(f"🚀 에이전트 가동: {repo_full_name} (New: {is_new_repo})")
     update_task_status("running")
 
     try:
-        # 1. Google 검색
-        search_query = f"Next.js professional dashboard recharts Tesla vs Hyundai data visualization {subject}"
-        search_results = requests.post("https://google.serper.dev/search", headers={'X-API-KEY': os.getenv("SERPER_API_KEY"), 'Content-Type': 'application/json'}, json={"q": search_query}).json()
-        search_data = "\n".join([f"- {i['title']}: {i['snippet']}" for i in search_results.get('organic', [])[:3]])
+        # 1. 컨텍스트 수집 (새 저장소면 생략)
+        if not is_new_repo:
+            run_command_list(["git", "clone", auth_url, work_dir])
+            repo_context = get_repo_contents(work_dir)
+        else:
+            os.makedirs(work_dir, exist_ok=True)
+            run_command_list(["git", "clone", auth_url, work_dir]) # auto_init=True 이므로 클론 가능
+            repo_context = "New Repository. Provide full scaffolding (e.g. Next.js, README)."
 
-        # 2. 클론 및 컨텍스트 수집
-        run_command_list(["git", "clone", auth_url, work_dir])
-        repo_context = get_repo_contents(work_dir)
-        
-        # 3. 전략 수립 (사양서)
-        plan_prompt = f"현재코드:\n{repo_context}\n검색정보:\n{search_data}\n요구사항: {subject} / {body}\n\n위 내용을 바탕으로 구현할 파일과 로직을 JSON으로 작성하세요. 형식: {{\"explanation\": \"...\"}}"
+        # 2. 전략 수립
+        plan_prompt = f"Lang: {lang_code}\nRepo: {repo_context}\nTask: {subject}\n{body}\n\n결과 형식: {{\"explanation\": \"상세 사양 (요청자 언어로)\", \"lang\": \"{lang_code}\"}}"
         plan = call_gemini_cli(plan_prompt, "전략 수립")
-        spec = plan.get('explanation', '작업을 진행합니다.')
+        spec = plan.get('explanation', 'Processing...')
+        actual_lang = plan.get('lang', lang_code)
 
-        # 4. 구현 (절대 생략 금지)
-        impl_prompt = f"사양서: {spec}\n요구사항: {subject}\n\n**필수:** 'changes' 리스트 안에 모든 파일의 '전체 소스 코드'를 넣으세요. placeholder나 생략 주석을 쓰면 실패 처리됩니다. 테슬라와 현대차의 가짜 판매량 데이터를 포함한 리차트(recharts) 코드를 작성하세요. 형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\" }}]}}"
+        # 3. 코드 작성
+        impl_prompt = f"Lang: {actual_lang}\nSpec: {spec}\n\n모든 파일의 전체 코드를 포함한 JSON을 생성하세요. 형식: {{\"changes\": [{{ \"path\": \"...\", \"content\": \"...\" }}]}}"
         impl = call_gemini_cli(impl_prompt, "코드 작성")
         
         changes = impl.get('changes', [])
-        has_real_changes = False
-        for change in changes:
-            path = os.path.join(work_dir, change['path'].lstrip('./'))
-            content = change.get('content', '')
-            if content and len(content) > 50: # 유의미한 길이 체크
-                has_real_changes = True
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-                with open(path, "w", encoding="utf-8") as f: f.write(content)
-                print(f"🛠 파일 완성: {change['path']} ({len(content)} bytes)")
+        for c in changes:
+            path = os.path.join(work_dir, c['path'].lstrip('./'))
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f: f.write(c['content'])
+            print(f"🛠 파일 작성: {c['path']}")
 
-        if not has_real_changes:
-            raise Exception("AI가 유의미한 코드를 생성하지 않았습니다. (생략 또는 빈 응답)")
-
-        # 5. Git & PR
-        branch_name = f"agent/dashboard-{int(time.time())}"
-        for cmd in [["git", "config", "user.name", "github-actions[bot]"], ["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], ["git", "checkout", "-b", branch_name], ["git", "add", "."], ["git", "commit", "-m", f"feat: pro dashboard with Tesla/Hyundai charts"]]:
-            run_command_list(cmd, cwd=work_dir)
+        # 4. Git & Push
+        branch_name = "main" if is_new_repo else f"agent/task-{int(time.time())}"
+        run_command_list(["git", "config", "user.name", "Agent"], cwd=work_dir)
+        run_command_list(["git", "config", "user.email", "agent@internal.com"], cwd=work_dir)
         
-        run_command_list(["git", "remote", "set-url", "origin", auth_url], cwd=work_dir)
-        _, _, push_code = run_command_list(["git", "push", "origin", branch_name], cwd=work_dir)
+        if not is_new_repo:
+            run_command_list(["git", "checkout", "-b", branch_name], cwd=work_dir)
         
-        if push_code == 0:
-            pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {GITHUB_PAT}"}, json={"title": f"🚀 [Dashboard] {subject}", "body": f"### 📊 구현 내용\n{spec}\n\n### 🔍 참고 자료\n{search_data}", "head": branch_name, "base": "main"}).json()
-            pr_url = pr_res.get('html_url')
-            print(f"✅ 완료: {pr_url}")
-            update_task_status("completed", branch_name=branch_name, pr_url=pr_url)
-            
-            # 메일 발송
-            sender_email = os.getenv("SENDER")
-            if sender_email and pr_url:
-                send_completion_email(sender_email, subject, spec, pr_url)
+        run_command_list(["git", "add", "."], cwd=work_dir)
+        run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
+        _, _, code = run_command_list(["git", "push", "origin", branch_name, "--force" if is_new_repo else ""], cwd=work_dir)
 
-    except Exception as e:
+        if code == 0:
+            if is_new_repo:
+                result_url = f"https://github.com/{repo_full_name}"
+            else:
+                pr_res = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {GITHUB_PAT}"}, json={"title": f"🚀 {subject}", "body": spec, "head": branch_name, "base": "main"}).json()
+                result_url = pr_res.get('html_url', f"https://github.com/{repo_full_name}")
+
+            print(f"✅ 완료: {result_url}")
+            update_task_status("completed", branch_name=branch_name, pr_url=result_url)
+            if sender:
+                send_completion_email(sender, subject, spec, result_url, actual_lang)
+
+    except Exception:
         print(f"❌ 에러:\n{traceback.format_exc()}")
         update_task_status("failed")
 
