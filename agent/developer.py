@@ -245,7 +245,7 @@ Body: {body}
             stdout, stderr, code = run_command_list(
                 [
                     "gemini", "-m", GEMINI_MODEL, 
-                    "--raw-output", "--accept-raw-output-risk", 
+                    "--raw-output", "--accept-raw-output-risk", "--yolo",
                     "--system-instruction", system_instruction,
                     "-p", f"@{prompt_file}"
                 ],
