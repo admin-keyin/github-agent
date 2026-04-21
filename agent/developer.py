@@ -138,9 +138,10 @@ def extract_json(text):
         if start != -1 and end != -1:
             target = text[start:end+1]
         else:
-            return "" # 찾지 못함
+            log(f"⚠️ JSON 시작 기호({{)를 찾을 수 없습니다. 원본 길이: {len(text)}")
+            return ""
 
-    # 3. 비정상적인 따옴표 처리 ('''...''' 등)
+    # 3. 비정상적인 따옴표 처리 및 줄바꿈 처리
     def repair_quotes(match):
         content = match.group(1).replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
         return f'"{content}"'
@@ -205,27 +206,26 @@ def main():
 
         log("📂 Gemini 호출 중 (Large Context)...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"""[STRICT JSON MODE]
-YOU ARE AN AUTOMATED SYSTEM. DO NOT EXPLAIN. DO NOT CONVERSE.
-ONLY OUTPUT VALID JSON. IF YOU OUTPUT ANY TEXT BEFORE OR AFTER THE JSON, THE SYSTEM WILL CRASH.
+        prompt = f"""[STRICT JSON SYSTEM]
+You are a developer agent. Apply the requested changes to the context provided.
+Output ONLY the final JSON results. No chat. No explanation outside the JSON.
 
 [INSTRUCTION]
-Subject: {subject}
-Body: {body}
+{subject} - {body}
 
 [CONTEXT]
 {repo_context}
 
-[OUTPUT FORMAT]
+[REQUIRED OUTPUT JSON FORMAT]
 {{
-  "explanation": "Brief implementation summary (max 2-3 lines)",
+  "explanation": "...",
   "changes": [
-    {{
-      "path": "file/path/here.ext",
-      "content": "Full file content with changes applied"
-    }}
+    {{ "path": "...", "content": "..." }}
   ]
-}}"""
+}}
+
+### START JSON RESPONSE ###
+"""
         
         log("🤖 Gemini CLI 실행 중...")
         # 프롬프트가 너무 길 경우 Argument list too long 에러가 발생하므로 임시 파일 사용
