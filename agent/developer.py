@@ -197,8 +197,22 @@ def main():
         repo_context = get_repo_contents(work_dir)
         prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\n\n[INSTRUCTION]\nSubject: {subject}\nBody: {body}\n\n[CONTEXT]\n{repo_context}\n\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
         
-        # -p 인자 대신 표준 입력(input_data)으로 프롬프트 전달 (Argument list too long 방지)
-        stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo"], input_data=prompt)
+        log("🤖 Gemini CLI 실행 중...")
+        # 프롬프트가 너무 길 경우 Argument list too long 에러가 발생하므로 임시 파일 사용
+        prompt_file = os.path.join(os.getcwd(), f".prompt_{int(time.time())}.txt")
+        try:
+            with open(prompt_file, "w", encoding="utf-8") as f:
+                f.write(prompt)
+            
+            # gemini CLI가 -p @filename 형식을 지원하므로 이를 활용하여 
+            # 명령줄 인수 길이 제한(ARG_MAX)을 완벽하게 피합니다.
+            stdout, stderr, code = run_command_list(
+                ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", f"@{prompt_file}"],
+                cwd=os.getcwd()
+            )
+        finally:
+            if os.path.exists(prompt_file):
+                os.remove(prompt_file)
         
         if code != 0:
             log(f"❌ Gemini 실패: {stderr}")
