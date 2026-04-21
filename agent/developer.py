@@ -32,9 +32,7 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
     public_key = os.getenv("EMAILJS_PUBLIC_KEY")
     private_key = os.getenv("EMAILJS_PRIVATE_KEY")
     
-    if not all([service_id, template_id, public_key, private_key]):
-        print("⚠️ EmailJS 설정 누락")
-        return
+    if not all([service_id, template_id, public_key, private_key]): return
 
     to_email = to_email.strip() if to_email else ""
     if not to_email: return
@@ -53,7 +51,6 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
     lang = config.get(lang_code, config["en"])
     t = lang.get(status, lang["Success"])
     
-    # 실패 시 안내 가이드 추가
     guide_html = ""
     if status == "Denied":
         guide_html = """
@@ -75,9 +72,9 @@ def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status
       <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">{t['desc']}</p>
     </div>
     <div style="padding: 32px 24px; background-color: #ffffff;">
-      <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Subject</label>
+      <label style="font-size: 12px; color: #64748b; font-weight: bold;">Subject</label>
       <h2 style="font-size: 18px; color: #1e293b; margin: 4px 0 24px 0;">{subject}</h2>
-      <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">{t['spec_label']}</label>
+      <label style="font-size: 12px; color: #64748b; font-weight: bold;">{t['spec_label']}</label>
       <div style="margin-top: 12px; padding: 16px; background-color: #f8fafc; border-left: 4px solid #6366f1; border-radius: 4px; color: #475569; white-space: pre-wrap;">{spec}</div>
       {guide_html}
       <div style="text-align: center; margin-top: 40px;">
@@ -112,15 +109,25 @@ def get_repo_contents(work_dir):
     return context or "Empty Project"
 
 def extract_from_body(body, key):
-    # [KEY] Value, KEY: Value, KEY=Value 모두 대응
-    patterns = [
-        fr"\[{key}\]\s*(\S+)",
-        fr"{key}\s*[:=]\s*(\S+)"
-    ]
+    patterns = [fr"\[{key}\]\s*(\S+)", fr"{key}\s*[:=]\s*(\S+)"]
     for p in patterns:
         match = re.search(p, body, re.IGNORECASE)
         if match: return match.group(1)
     return None
+
+def extract_json(text):
+    """설명 뭉치 속에서 JSON 객체만 악착같이 찾아내기"""
+    text = text.strip()
+    # 1. ```json ... ``` 블록 찾기
+    code_block = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
+    if code_block: return code_block.group(1)
+    
+    # 2. 가장 바깥쪽 { } 찾기
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1:
+        return text[start:end+1]
+    return text
 
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
@@ -153,7 +160,6 @@ def main():
         else: auth_url = f"https://{domain}/{repo_path}.git"
         repo_full_name = repo_path
     else:
-        # 새 저장소 생성 (GitHub 기본)
         repo_name = f"agent-task-{int(time.time())}"
         headers = {"Authorization": f"token {vars['gh_token'] or GITHUB_PAT_ENV}", "Accept": "vnd.github.v3+json"}
         res = requests.post("https://api.github.com/user/repos", headers=headers, json={"name": repo_name, "auto_init": True}).json()
@@ -179,18 +185,22 @@ def main():
             run_command_list(["git", "fetch", "origin", vars['base_br']], cwd=work_dir)
             run_command_list(["git", "checkout", vars['base_br']], cwd=work_dir)
 
-        repo_context = get_repo_contents(work_dir) if not is_new_repo else "New Project Scaffolding"
-        cmd = ["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", f"Output JSON ONLY. Lang: {lang_code}\nRepo: {repo_context}\nTask: {subject}\n\n형식: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"]
-        stdout, _, _ = run_command_list(cmd)
+        repo_context = get_repo_contents(work_dir)
+        prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY. NO TALK.\nLang: {lang_code}\nRepo:\n{repo_context}\nTask: {subject} / {body}\n\nFORMAT: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
+        
+        stdout, _, _ = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", prompt])
         
         try:
-            res_data = json.loads(re.search(r"\{.*\}", stdout, re.DOTALL).group())
+            cleaned = extract_json(stdout)
+            res_data = json.loads(cleaned)
             spec = res_data.get('explanation', 'Done.')
             for c in res_data.get('changes', []):
                 p = os.path.join(work_dir, c['path'].lstrip('./'))
                 os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(p, "w", encoding="utf-8") as f: f.write(c['content'])
-        except: raise Exception("AI 응답 파싱 실패")
+        except:
+            print(f"DEBUG: AI Output:\n{stdout}")
+            raise Exception("AI 응답 파싱 실패 (JSON 형식 오류)")
 
         new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
         run_command_list(["git", "config", "user.name", "Agent"], cwd=work_dir)
