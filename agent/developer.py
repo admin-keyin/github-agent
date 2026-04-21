@@ -126,10 +126,25 @@ def extract_from_body(body, key):
 
 def extract_json(text):
     text = text.strip()
+    # 1. ```json ... ``` 블록 찾기
     code_block = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
-    if code_block: return code_block.group(1)
+    if code_block: text = code_block.group(1)
+    
+    # 2. 가장 바깥쪽 { } 찾기
     start, end = text.find('{'), text.rfind('}')
-    if start != -1 and end != -1: return text[start:end+1]
+    if start != -1 and end != -1:
+        text = text[start:end+1]
+    
+    # 3. 비표준 삼중 따옴표 보정 시도 (위험하지만 시도)
+    # '''{content}''' -> "{content}" (이스케이프 처리 포함)
+    def repair_quotes(match):
+        content = match.group(1)
+        # 내용물 안의 진짜 따옴표와 줄바꿈을 이스케이프
+        content = content.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        return f'"{content}"'
+    
+    text = re.sub(r"'''(.*?)'''", repair_quotes, text, flags=re.DOTALL)
+    
     return text
 
 def main():
@@ -196,7 +211,16 @@ def main():
 
         log("📂 코드 분석 및 Gemini 호출 중...")
         repo_context = get_repo_contents(work_dir)
-        prompt = f"YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.\nTask: {subject}\nBody: {body}\nContext:\n{repo_context}\n\nFormat: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"
+        prompt = f"""YOU ARE A JSON GENERATOR. OUTPUT JSON ONLY.
+CRITICAL: Use ONLY standard JSON strings for 'content' with proper escaping (\\n, \\").
+DO NOT USE Python triple quotes (''') for multiline strings.
+
+Task: {subject}
+Body: {body}
+Context:
+{repo_context}
+
+Format: {{\"explanation\":\"...\", \"changes\":[{{\"path\":\"...\",\"content\":\"...\"}}]}}"""
         
         stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--yolo", "-p", prompt])
         if code != 0:
@@ -204,7 +228,8 @@ def main():
             raise Exception("Gemini execution failed")
 
         try:
-            res_data = json.loads(extract_json(stdout))
+            cleaned = extract_json(stdout)
+            res_data = json.loads(cleaned)
             spec = res_data.get('explanation', '작업 완료')
             for c in res_data.get('changes', []):
                 p = os.path.join(work_dir, c['path'].lstrip('./'))
@@ -222,7 +247,9 @@ def main():
         if not is_new_repo: run_command_list(["git", "checkout", "-b", new_branch], cwd=work_dir)
         run_command_list(["git", "add", "."], cwd=work_dir)
         run_command_list(["git", "commit", "-m", f"feat: {subject}"], cwd=work_dir)
-        _, stderr, p_code = run_command_list(["git", "push", "origin", new_branch, "--force" if is_new_repo else ""])
+        
+        # 푸시 시 저장소 디렉토리에서 실행하도록 수정
+        _, stderr, p_code = run_command_list(["git", "push", "origin", new_branch, "--force" if is_new_repo else ""], cwd=work_dir)
 
         if p_code == 0:
             res_url = f"https://{domain}/{repo_full_name}"
