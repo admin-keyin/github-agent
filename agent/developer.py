@@ -248,13 +248,23 @@ def main():
         run_command_list(["git", "checkout", base_br], cwd=work_dir)
 
         log("🤖 Gemini 작업 시작...")
-        instr = f"[TASK]\nSubject: {subject}\nBody: {body}\n\n[INSTRUCTION]\n1. {work_dir} 기준 작업.\n2. '/src/views/guide/pages/pub'와 실제 구현 화면 비교.\n3. 분석 결과를 리포트에 상세히 기록."
-        stdout, _, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--accept-raw-output-risk", "--yolo", "--include-directories", work_dir, "-p", instr])
+        instr = f"""[TASK]
+주제: {subject}
+내용: {body}
+
+[INSTRUCTION]
+1. {work_dir} 경로 내부의 소스 코드를 면밀히 분석하세요.
+2. '/src/views/guide/pages/pub' 폴더의 퍼블리싱 파일들과 실제 기능이 구현된 화면 파일들을 비교하세요.
+3. 각 화면별로 구현 완료율(%)을 파악하고 요약 리포트를 작성하세요.
+4. 분석 결과는 반드시 '{work_dir}/ANALYSIS.md' 파일에 한국어로 상세히 기록하세요. (파일이 생성되어야 작업이 완료됩니다.)
+5. 다른 기존 소스 코드는 수정하지 마세요."""
+        
+        stdout, stderr, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--accept-raw-output-risk", "--yolo", "--include-directories", work_dir, "-p", instr])
         
         # 변경 사항 확인
         st, _, _ = run_command_list(["git", "status", "--porcelain"], cwd=work_dir)
         if not st.strip():
-            log("ℹ️ 변경 사항 없음."); send_agent_email(sender, subject, "변경 사항 없음", full_git_url, lang_code, "Success"); update_task_status("completed"); return
+            log("ℹ️ 변경 사항 없음."); send_agent_email(sender, subject, "분석 완료되었으나 파일 생성에 실패했습니다. (Gemini 출력 확인 필요)", full_git_url, lang_code, "Success"); update_task_status("completed"); return
 
         new_branch = f"agent/task-{int(time.time())}"
         run_command_list(["git", "config", "user.name", "inchAgent"], cwd=work_dir)
