@@ -21,10 +21,10 @@ load_dotenv(dotenv_path=".env.local")
 load_dotenv()
 
 # --- 설정 ---
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 TASK_ID = os.getenv("TASK_ID")
-GITHUB_PAT_ENV = os.getenv("GITHUB_PAT")
+GITHUB_PAT_ENV = os.getenv("GITHUB_PAT") or os.getenv("MY_GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 MASTER_ENCRYPTION_KEY = os.getenv("MASTER_ENCRYPTION_KEY", "default-secret-key-for-local-test")
 
