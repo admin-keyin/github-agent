@@ -3,8 +3,14 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/actions-runner/_work/github-agent/github-agent" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/actions-runner/_work/github-agent/github-agent/external_repo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/basw-repo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/default-token-list" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/eth-tokens" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/test_inspect" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/test_repo" vcs="Git" />
+<<<<<<< HEAD
+=======
+    <mapping directory="$PROJECT_DIR$/trust-assets" vcs="Git" />
+>>>>>>> 502244f (feat: 보안 강화 및 이메일 기반 권한 제어 시스템 구축)
   </component>
 </project>
