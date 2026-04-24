@@ -120,29 +120,42 @@ def update_task_status(status, branch_name=None, pr_url=None):
     except: pass
 
 def upsert_credential(email, provider, value, git_url):
-    if not all([SUPABASE_URL, SUPABASE_KEY, email, provider, value, git_url]): return
+    if not all([SUPABASE_URL, SUPABASE_KEY, email, value, git_url]): return
     
     encrypted_value = encrypt_value(value)
     log(f"🔒 Credential 암호화 완료 (대상: {email})")
     
-    url = f"{SUPABASE_URL}/rest/v1/user_credentials"
+    url = f"{SUPABASE_URL}/rest/v1/git_credentials"
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"}
-    data = {"user_email": email, "key_name": provider.upper(), "key_value": encrypted_value, "scope": git_url}
-    try: requests.post(f"{url}?on_conflict=user_email,key_name,scope", headers=headers, json=data, timeout=10)
+    data = {"email": email, "encrypted_config": encrypted_value, "scope": git_url}
+    try: requests.post(f"{url}?on_conflict=email,scope", headers=headers, json=data, timeout=10)
     except: pass
 
 def get_credential_from_vault(email, provider, git_url):
-    if not all([SUPABASE_URL, SUPABASE_KEY, email, provider, git_url]): return None
-    url = f"{SUPABASE_URL}/rest/v1/user_credentials?user_email=eq.{email}&key_name=eq.{provider.upper()}&scope=eq.{git_url}"
+    if not all([SUPABASE_URL, SUPABASE_KEY, email, git_url]): return None
+    url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{email}&scope=eq.{git_url}"
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     try:
         res = requests.get(url, headers=headers, timeout=10).json()
         if res: 
-            encrypted_value = res[0].get("key_value")
+            encrypted_value = res[0].get("encrypted_config")
             decrypted = decrypt_value(encrypted_value)
             if decrypted:
                 log(f"🔓 Credential 복호화 성공 (대상: {email})")
                 return decrypted
+    except: pass
+    return None
+
+def get_latest_scope_from_vault(email, provider):
+    """사용자가 등록한 최신 저장소 주소(scope)를 가져옵니다."""
+    if not all([SUPABASE_URL, SUPABASE_KEY, email]): return None
+    url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{email}&select=scope&order=created_at.desc&limit=1"
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+    try:
+        res = requests.get(url, headers=headers, timeout=10).json()
+        if res and res[0].get("scope"):
+            log(f"🔍 Supabase에서 기존 저장소 탐색 성공: {res[0].get('scope')}")
+            return res[0].get("scope")
     except: pass
     return None
 
