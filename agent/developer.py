@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 dotenv_paths = [
     ".env.local", 
     ".env", 
-    "/Users/celebe/WebstormProjects/untitled2/.env.local", # 사용자 지정 절대 경로
+    "/Users/celebe/WebstormProjects/untitled2/.env.local", 
     os.path.expanduser("~/.env.local")
 ]
 
@@ -28,6 +28,9 @@ for path in dotenv_paths:
     if os.path.exists(path):
         load_dotenv(dotenv_path=path)
         print(f"✅ 환경 변수 로드 완료: {path}")
+
+def log(msg):
+    print(msg, flush=True)
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -38,7 +41,7 @@ SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 MASTER_ENCRYPTION_KEY = os.getenv("MASTER_ENCRYPTION_KEY")
 
 if not MASTER_ENCRYPTION_KEY:
-    log("⚠️ 경고: MASTER_ENCRYPTION_KEY를 찾지 못해 기본값을 사용합니다. (복호화 실패 원인이 될 수 있음)")
+    log("⚠️ 경고: MASTER_ENCRYPTION_KEY를 찾지 못해 기본값을 사용합니다.")
     MASTER_ENCRYPTION_KEY = "default-secret-key-for-local-test"
 else:
     log(f"🔑 마스터 키 로드 성공 (앞 3글자: {MASTER_ENCRYPTION_KEY[:3]}...)")
@@ -75,9 +78,6 @@ SOLAPI_API_SECRET = os.getenv("SOLAPI_API_SECRET")
 SOLAPI_FROM_NUMBER = os.getenv("SOLAPI_FROM_NUMBER")
 
 GEMINI_MODEL = "gemini-2.5-flash-lite"
-
-def log(msg):
-    print(msg, flush=True)
 
 def get_solapi_header():
     """솔라피 v4 인증 헤더를 생성합니다."""
