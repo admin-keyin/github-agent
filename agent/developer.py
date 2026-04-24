@@ -133,17 +133,27 @@ def upsert_credential(email, provider, value, git_url):
 
 def get_credential_from_vault(email, provider, git_url):
     if not all([SUPABASE_URL, SUPABASE_KEY, email, git_url]): return None
-    url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{email}&scope=eq.{git_url}"
-    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
-    try:
-        res = requests.get(url, headers=headers, timeout=10).json()
-        if res: 
-            encrypted_value = res[0].get("encrypted_config")
-            decrypted = decrypt_value(encrypted_value)
-            if decrypted:
-                log(f"🔓 Credential 복호화 성공 (대상: {email})")
-                return decrypted
-    except: pass
+    
+    # 도메인 추출 (예: https://smartform-gitlab.ktmmobile.com)
+    domain_match = re.search(r"(https?://[\w\-.]+)", git_url)
+    domain_url = domain_match.group(1).lower() if domain_match else git_url
+    
+    # 1. 전체 URL로 먼저 검색 후, 없으면 도메인 URL로 검색
+    scopes_to_check = [git_url, domain_url]
+    
+    for scope in scopes_to_check:
+        url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{email}&scope=eq.{scope}"
+        headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+        try:
+            res = requests.get(url, headers=headers, timeout=10).json()
+            if res: 
+                encrypted_value = res[0].get("encrypted_config")
+                decrypted = decrypt_value(encrypted_value)
+                if decrypted:
+                    log(f"🔓 Credential 복호화 성공 (대상: {email}, Scope: {scope})")
+                    return decrypted
+        except: pass
+    
     return None
 
 def get_latest_scope_from_vault(email, provider):
