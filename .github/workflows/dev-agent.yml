@@ -17,7 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install requests duckduckgo-search cryptography
+          python3 -m pip install requests duckduckgo-search cryptography python-dotenv
 
       - name: Check Ollama Status
         run: |

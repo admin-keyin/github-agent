@@ -14,10 +14,15 @@ import base64
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from dotenv import load_dotenv
+
+# 환경 변수 로드 (.env.local 우선, 없으면 .env)
+load_dotenv(dotenv_path=".env.local")
+load_dotenv()
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+...
 TASK_ID = os.getenv("TASK_ID")
 GITHUB_PAT_ENV = os.getenv("GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
