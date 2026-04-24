@@ -217,12 +217,12 @@ def main():
     if "gitlab" in domain: provider = "GITLAB"
     elif "bitbucket" in domain: provider = "BITBUCKET"
 
-    # 1. 이메일에 포함된 토큰이 있으면 우선 저장
+    # 1. 이메일에 포함된 토큰이 있으면 우선 저장 (scope에 전체 URL 저장)
     if provider == "GITHUB" and gh_token: upsert_credential(sender, provider, gh_token, full_git_url)
     elif provider == "GITLAB" and gl_token: upsert_credential(sender, provider, gl_token, full_git_url)
     elif provider == "BITBUCKET" and bb_user and bb_pass: upsert_credential(sender, provider, f"{bb_user}:{bb_pass}", full_git_url)
 
-    # 2. Supabase에서 조회 (이메일별 n개 가능)
+    # 2. Supabase에서 조회 (해당 이메일 + 해당 저장소 주소)
     vault_token = get_credential_from_vault(sender, provider, full_git_url)
     
     # 3. Supabase에 없으면 환경 변수 기본 키(Default) 사용
@@ -234,6 +234,7 @@ def main():
         update_task_status("failed")
         sys.exit(1)
 
+    # 도메인을 하드코딩하지 않고 추출된 domain 변수를 그대로 사용
     auth_url = f"https://oauth2:{final_token}@{domain}/{repo_path}.git"
     if provider == "BITBUCKET": auth_url = f"https://{final_token}@{domain}/{repo_path}.git"
     
@@ -243,6 +244,7 @@ def main():
 
     try:
         log(f"📡 저장소 접근 시도: {full_git_url}")
+        # 클론 시 인증 정보를 포함한 URL 사용
         _, stderr, code = run_command_list(["git", "clone", "--depth", "1", auth_url, work_dir])
         
         # 4. 권한 부족 감지 및 메일 발송
@@ -272,6 +274,7 @@ def main():
         run_command_list(["git", "add", "."], cwd=work_dir)
         run_command_list(["git", "commit", "-m", f"feat: {re.sub(r'^(fwd|re|fw)\s* : \s*', '', subject, flags=re.IGNORECASE).strip()}"], cwd=work_dir)
         
+        # 푸시 시에도 인증 정보가 포함된 URL을 명시적으로 사용하거나 origin이 auth_url로 설정되어 있어야 함
         log("📤 푸시 중...")
         _, stderr, p_code = run_command_list(["git", "push", "origin", new_branch], cwd=work_dir)
 
