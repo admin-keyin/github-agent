@@ -16,9 +16,18 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import load_dotenv
 
-# 환경 변수 로드 (.env.local 우선, 없으면 .env)
-load_dotenv(dotenv_path=".env.local")
-load_dotenv()
+# 환경 변수 로드 (절대 경로 및 상대 경로 모두 탐색)
+dotenv_paths = [
+    ".env.local", 
+    ".env", 
+    "/Users/celebe/WebstormProjects/untitled2/.env.local", # 사용자 지정 절대 경로
+    os.path.expanduser("~/.env.local")
+]
+
+for path in dotenv_paths:
+    if os.path.exists(path):
+        load_dotenv(dotenv_path=path)
+        print(f"✅ 환경 변수 로드 완료: {path}")
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -26,7 +35,13 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY
 TASK_ID = os.getenv("TASK_ID")
 GITHUB_PAT_ENV = os.getenv("GITHUB_PAT") or os.getenv("MY_GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
-MASTER_ENCRYPTION_KEY = os.getenv("MASTER_ENCRYPTION_KEY", "default-secret-key-for-local-test")
+MASTER_ENCRYPTION_KEY = os.getenv("MASTER_ENCRYPTION_KEY")
+
+if not MASTER_ENCRYPTION_KEY:
+    log("⚠️ 경고: MASTER_ENCRYPTION_KEY를 찾지 못해 기본값을 사용합니다. (복호화 실패 원인이 될 수 있음)")
+    MASTER_ENCRYPTION_KEY = "default-secret-key-for-local-test"
+else:
+    log(f"🔑 마스터 키 로드 성공 (앞 3글자: {MASTER_ENCRYPTION_KEY[:3]}...)")
 
 # 암호화 엔진 초기화
 def get_cipher():
