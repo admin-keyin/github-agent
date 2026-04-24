@@ -3,7 +3,11 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/actions-runner/_work/github-agent/github-agent" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/actions-runner/_work/github-agent/github-agent/external_repo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/basw-repo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/default-token-list" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/eth-tokens" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/test_inspect" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test_repo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/trust-assets" vcs="Git" />
   </component>
 </project>

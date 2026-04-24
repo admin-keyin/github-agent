@@ -7,6 +7,13 @@ import time
 import re
 import shutil
 import sys
+import uuid
+import hmac
+import hashlib
+import base64
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -14,12 +21,93 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 TASK_ID = os.getenv("TASK_ID")
 GITHUB_PAT_ENV = os.getenv("GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
+MASTER_ENCRYPTION_KEY = os.getenv("MASTER_ENCRYPTION_KEY", "default-secret-key-for-local-test")
+
+# 암호화 엔진 초기화
+def get_cipher():
+    """마스터 키를 기반으로 암호화 키를 생성합니다."""
+    salt = b'static_salt_for_now' # 운영 시에는 별도 보관 권장
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(MASTER_ENCRYPTION_KEY.encode()))
+    return Fernet(key)
+
+CIPHER = get_cipher()
+
+def encrypt_value(value):
+    if not value: return None
+    return CIPHER.encrypt(value.encode()).decode()
+
+def decrypt_value(encrypted_value):
+    if not encrypted_value: return None
+    try:
+        return CIPHER.decrypt(encrypted_value.encode()).decode()
+    except Exception:
+        return None
+
+# 솔라피 설정 (환경변수에서만 참조)
+SOLAPI_API_KEY = os.getenv("SOLAPI_API_KEY")
+SOLAPI_API_SECRET = os.getenv("SOLAPI_API_SECRET")
+SOLAPI_FROM_NUMBER = os.getenv("SOLAPI_FROM_NUMBER")
 
 GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 def log(msg):
-    # 민감한 정보가 포함된 로그는 생략하거나 마스킹
     print(msg, flush=True)
+
+def get_solapi_header():
+    """솔라피 v4 인증 헤더를 생성합니다."""
+    if not SOLAPI_API_KEY or not SOLAPI_API_SECRET:
+        return {}
+    date = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    salt = str(uuid.uuid4().hex)
+    combined = date + salt
+    signature = hmac.new(
+        SOLAPI_API_SECRET.encode('utf-8'),
+        combined.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+    
+    return {
+        'Authorization': f'HMAC-SHA256 apiKey={SOLAPI_API_KEY}, date={date}, salt={salt}, signature={signature}',
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
+def send_kakao_report(to_number, subject, spec_summary, result_url):
+    """솔라피 API를 사용하여 카카오톡 결과를 발송합니다."""
+    if not SOLAPI_API_KEY or not SOLAPI_API_SECRET or not SOLAPI_FROM_NUMBER:
+        log("⚠️ 솔라피 설정(Key, Secret, From Number)이 누락되었습니다. .env를 확인하세요.")
+        return
+
+    target_number = re.sub(r'[^0-9]', '', str(to_number))
+    if not target_number: return
+
+    log(f"📱 카카오톡(솔라피) 결과 발송 시도 (대상: {target_number})")
+    
+    short_spec = spec_summary[:100] + "..." if len(spec_summary) > 100 else spec_summary
+    message_text = f"✅ [에이전트 작업 완료]\n\n제목: {subject}\n요약: {short_spec}\n\n결과 확인: {result_url}"
+    
+    url = "https://api.solapi.com/messages/v4/send-many"
+    data = {
+        "messages": [
+            {
+                "to": target_number,
+                "from": SOLAPI_FROM_NUMBER,
+                "text": message_text
+            }
+        ]
+    }
+    
+    try:
+        res = requests.post(url, headers=get_solapi_header(), json=data, timeout=15)
+        if res.status_code == 200: log("📧 카카오톡 메시지 발송 완료!")
+        else: log(f"❌ 카카오톡 발송 실패: {res.json()}")
+    except Exception as e:
+        log(f"❌ 카카오톡 발송 중 에러: {e}")
 
 def update_task_status(status, branch_name=None, pr_url=None):
     if not SUPABASE_URL or not SUPABASE_KEY or not TASK_ID: return
@@ -31,94 +119,67 @@ def update_task_status(status, branch_name=None, pr_url=None):
     try: requests.patch(url, headers=headers, json=data, timeout=10)
     except: pass
 
+def upsert_credential(email, provider, value, git_url):
+    if not all([SUPABASE_URL, SUPABASE_KEY, email, provider, value, git_url]): return
+    
+    encrypted_value = encrypt_value(value)
+    log(f"🔒 Credential 암호화 완료 (대상: {email})")
+    
+    url = f"{SUPABASE_URL}/rest/v1/user_credentials"
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"}
+    data = {"user_email": email, "key_name": provider.upper(), "key_value": encrypted_value, "scope": git_url}
+    try: requests.post(f"{url}?on_conflict=user_email,key_name,scope", headers=headers, json=data, timeout=10)
+    except: pass
+
+def get_credential_from_vault(email, provider, git_url):
+    if not all([SUPABASE_URL, SUPABASE_KEY, email, provider, git_url]): return None
+    url = f"{SUPABASE_URL}/rest/v1/user_credentials?user_email=eq.{email}&key_name=eq.{provider.upper()}&scope=eq.{git_url}"
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+    try:
+        res = requests.get(url, headers=headers, timeout=10).json()
+        if res: 
+            encrypted_value = res[0].get("key_value")
+            decrypted = decrypt_value(encrypted_value)
+            if decrypted:
+                log(f"🔓 Credential 복호화 성공 (대상: {email})")
+                return decrypted
+    except: pass
+    return None
+
 def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status="Success"):
     service_id = os.getenv("EMAILJS_SERVICE_ID")
     template_id = os.getenv("EMAILJS_TEMPLATE_ID")
     public_key = os.getenv("EMAILJS_PUBLIC_KEY")
     private_key = os.getenv("EMAILJS_PRIVATE_KEY")
-    
-    if not all([service_id, template_id, public_key, private_key]):
-        log("⚠️ EmailJS 설정 누락")
-        return
-
+    if not all([service_id, template_id, public_key, private_key]): return
     to_email = to_email.strip() if to_email else ""
     if not to_email: return
-
+    
     config = {
         "ko": {
-            "Success": {"badge": "성공", "title": "작업 완료 리포트", "desc": "요청하신 작업이 성공적으로 완료되었습니다.", "spec_label": "구현 상세", "btn": "결과 확인하기"},
-            "Denied": {"badge": "오류", "title": "인증 또는 권한 오류", "desc": "저장소에 접근할 수 없습니다. 아래 양식을 확인해주세요.", "spec_label": "오류 내용", "btn": "저장소 확인"}
+            "Success": {"badge": "성공", "title": "작업 완료 리포트", "desc": "작업이 성공적으로 완료되었습니다.", "spec_label": "구현 상세", "btn": "결과 확인하기"},
+            "Denied": {"badge": "거부", "title": "접근 권한 부족", "desc": "해당 저장소에 접근할 권한이 없거나 인증 토큰이 유효하지 않아 작업을 수행할 수 없습니다.", "spec_label": "에러 상세", "btn": "권한 설정 가이드"}
         },
         "en": {
-            "Success": {"badge": "Success", "title": "Task Completed", "desc": "GitHub Agent has finished the work successfully.", "spec_label": "Details", "btn": "Review Results"},
-            "Denied": {"badge": "Error", "title": "Auth/Access Error", "desc": "Cannot access the repository. Check the form below.", "spec_label": "Error Msg", "btn": "Check Repo"}
+            "Success": {"badge": "Success", "title": "Task Completed", "desc": "Finished the work successfully.", "spec_label": "Details", "btn": "Review Results"},
+            "Denied": {"badge": "Denied", "title": "Access Denied", "desc": "You do not have permission or the token is invalid.", "spec_label": "Error Details", "btn": "Security Guide"}
         }
     }
-    
     lang = config.get(lang_code, config["en"])
     t = lang.get(status, lang["Success"])
     
-    guide_html = ""
-    if status == "Denied":
-        guide_html = """
-        <div style="margin-top: 20px; padding: 15px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; font-size: 13px;">
-            <b style="color: #92400e;">💡 사용 가능한 변수 양식 (메일 본문에 포함)</b><br/>
-            <code>GITHUB_TOKEN: ghp_xxx</code><br/>
-            <code>GITLAB_TOKEN: glpat-xxx</code><br/>
-            <code>BITBUCKET_USER: my_id</code><br/>
-            <code>BITBUCKET_PASS: app_pass</code><br/>
-            <code>BASE_BRANCH: develop</code>
-        </div>
-        """
-
-    html_body = f"""
-<div style="font-family: -apple-system, sans-serif; font-size: 15px; color: #334155; line-height: 1.6; max-width: 600px; margin: 20px auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
-    <div style="background-color: #1e293b; padding: 32px 24px; text-align: center;">
-      <div style="display: inline-block; background-color: {'#22c55e' if status == 'Success' else '#ef4444'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 12px;">{t['badge']}</div>
-      <h1 style="color: #ffffff; font-size: 22px; margin: 0;">{t['title']}</h1>
-      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">{t['desc']}</p>
-    </div>
-    <div style="padding: 32px 24px; background-color: #ffffff;">
-      <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Subject</label>
-      <h2 style="font-size: 18px; color: #1e293b; margin: 4px 0 24px 0;">{subject}</h2>
-      <label style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">{t['spec_label']}</label>
-      <div style="margin-top: 12px; padding: 16px; background-color: #f8fafc; border-left: 4px solid #6366f1; border-radius: 4px; color: #475569; white-space: pre-wrap;">{spec}</div>
-      {guide_html}
-      <div style="text-align: center; margin-top: 40px;">
-        <a href="{result_url}" target="_blank" style="background-color: #6366f1; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">{t['btn']}</a>
-      </div>
-    </div>
-</div>
-"""
-    data = {
-        "service_id": service_id, "template_id": template_id, "user_id": public_key, "accessToken": private_key,
-        "template_params": {"to_email": to_email, "subject": f"[{t['badge']}] {subject}", "html_body": html_body}
-    }
-    try:
-        res = requests.post("https://api.emailjs.com/api/v1.0/email/send", json=data, timeout=15)
-        if res.status_code == 200: log("📧 이메일 발송 완료!")
+    color = "#6366f1" if status == "Success" else "#ef4444"
+    html_body = f"<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2>{t['title']}</h2><p>{t['desc']}</p><div style='padding: 15px; background: #f9f9f9; border-left: 4px solid {color};'>{spec}</div><br/><a href='{result_url}' style='padding: 10px 20px; background: #6366f1; color: #fff; text-decoration: none; border-radius: 5px;'>{t['btn']}</a></div>"
+    data = {"service_id": service_id, "template_id": template_id, "user_id": public_key, "accessToken": private_key, "template_params": {"to_email": to_email, "subject": f"[{t['badge']}] {subject}", "html_body": html_body}}
+    try: requests.post("https://api.emailjs.com/api/v1.0/email/send", json=data, timeout=15)
     except: pass
 
 def run_command_list(args, cwd=None, input_data=None):
     clean_args = [str(arg) for arg in args if arg and str(arg).strip()]
-    env = os.environ.copy()
-    env["GIT_TERMINAL_PROMPT"] = "0"
-    # 프롬프트가 너무 길 경우 CMD 로그에서는 생략
-    log(f"💻 CMD: {' '.join(clean_args[:10])}{' ...' if len(clean_args) > 10 else ''}")
+    env = os.environ.copy(); env["GIT_TERMINAL_PROMPT"] = "0"
+    log(f"💻 CMD: {' '.join(clean_args[:10])}")
     result = subprocess.run(clean_args, capture_output=True, text=True, cwd=cwd, env=env, input=input_data)
     return result.stdout.strip(), result.stderr.strip(), result.returncode
-
-def get_repo_contents(work_dir):
-    context = ""
-    for root, _, files in os.walk(work_dir):
-        if any(x in root for x in ['node_modules', '.git', '.next', 'dist', 'build', '.cache']): continue
-        for file in files:
-            if file.endswith(('.js', '.jsx', '.ts', '.tsx', '.json', '.md', '.html', '.css', '.vue', '.java', '.py')):
-                try:
-                    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
-                        context += f"\n-- File: {os.path.relpath(os.path.join(root, file), work_dir)} --\n{f.read()}\n"
-                except: pass
-    return context or "Empty Project"
 
 def extract_from_body(body, key):
     patterns = [fr"\[{key}\]\s*(\S+)", fr"{key}\s*[:=]\s*(\S+)"]
@@ -127,147 +188,107 @@ def extract_from_body(body, key):
         if match: return match.group(1)
     return None
 
-def extract_json(text):
-    # 1. ```json ... ``` 블록 찾기
-    code_block = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
-    if code_block:
-        target = code_block.group(1)
-    else:
-        # 2. 블록이 없다면 가장 바깥쪽의 { } 찾기
-        start = text.find('{')
-        end = text.rfind('}')
-        if start != -1 and end != -1:
-            target = text[start:end+1]
-        else:
-            log(f"⚠️ JSON 시작 기호({{)를 찾을 수 없습니다. 원본 길이: {len(text)}")
-            return ""
-
-    # 3. 비정상적인 따옴표 처리 및 줄바꿈 처리
-    def repair_quotes(match):
-        content = match.group(1).replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-        return f'"{content}"'
-    
-    repaired = re.sub(r"'''(.*?)'''", repair_quotes, target, flags=re.DOTALL)
-    return repaired
-
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
     sender = os.getenv("SENDER", "")
+    source = os.getenv("SOURCE", "email")
+    owner = os.getenv("GITHUB_OWNER")
+    repo = os.getenv("GITHUB_REPO")
     lang_code = "ko" if any(ord(c) > 0x1100 for c in body) else "en"
 
-    vars = {
-        "gh_token": extract_from_body(body, "GITHUB_TOKEN"),
-        "gl_token": extract_from_body(body, "GITLAB_TOKEN"),
-        "bb_user": extract_from_body(body, "BITBUCKET_USER"),
-        "bb_pass": extract_from_body(body, "BITBUCKET_PASS"),
-        "base_br": extract_from_body(body, "BASE_BRANCH") or "main",
-        "pr_title": extract_from_body(body, "PR_TITLE")
-    }
+    gh_token = extract_from_body(body, "GITHUB_TOKEN")
+    gl_token = extract_from_body(body, "GITLAB_TOKEN")
+    bb_user = extract_from_body(body, "BITBUCKET_USER")
+    bb_pass = extract_from_body(body, "BITBUCKET_PASS")
+    base_br = extract_from_body(body, "BASE_BRANCH") or "main"
+    pr_title = extract_from_body(body, "PR_TITLE")
 
-    url_match = re.search(r"https://([\w\-.]+)/(\S+)", body)
-    is_new_repo = False
-    domain = "github.com"
-    token = vars['gh_token'] or GITHUB_PAT_ENV
-    
+    # URL 추출
+    url_match = re.search(r"https://([\w\-.]+)/([a-zA-Z0-9.\-_/]+)", body)
     if url_match:
-        domain = url_match.group(1)
-        repo_path = url_match.group(2).replace(".git", "")
-        if "github.com" in domain: auth_url = f"https://oauth2:{token}@github.com/{repo_path}.git"
-        elif "gitlab" in domain: auth_url = f"https://oauth2:{vars['gl_token']}@{domain}/{repo_path}.git"
-        elif "bitbucket" in domain: auth_url = f"https://{vars['bb_user']}:{vars['bb_pass']}@{domain}/{repo_path}.git"
-        else: auth_url = f"https://{domain}/{repo_path}.git"
-        repo_full_name = repo_path
+        domain = url_match.group(1).lower()
+        repo_path = url_match.group(2).replace(".git", "").strip()
+        full_git_url = f"https://{domain}/{repo_path}"
     else:
-        repo_name = f"agent-task-{int(time.time())}"
-        headers = {"Authorization": f"token {GITHUB_PAT_ENV}", "Accept": "vnd.github.v3+json"}
-        res = requests.post("https://api.github.com/user/repos", headers=headers, json={"name": repo_name, "auto_init": True}).json()
-        repo_full_name = res.get("full_name")
-        auth_url = res.get("clone_url", "").replace("https://", f"https://oauth2:{GITHUB_PAT_ENV}@")
-        is_new_repo = True
+        domain = "github.com"; repo_path = f"{owner}/{repo}"; full_git_url = f"https://github.com/{repo_path}"
 
-    log(f"🚀 가동: {repo_full_name} (Base: {vars['base_br']})")
+    provider = "GITHUB"
+    if "gitlab" in domain: provider = "GITLAB"
+    elif "bitbucket" in domain: provider = "BITBUCKET"
+
+    # 1. 이메일에 포함된 토큰이 있으면 우선 저장
+    if provider == "GITHUB" and gh_token: upsert_credential(sender, provider, gh_token, full_git_url)
+    elif provider == "GITLAB" and gl_token: upsert_credential(sender, provider, gl_token, full_git_url)
+    elif provider == "BITBUCKET" and bb_user and bb_pass: upsert_credential(sender, provider, f"{bb_user}:{bb_pass}", full_git_url)
+
+    # 2. Supabase에서 조회 (이메일별 n개 가능)
+    vault_token = get_credential_from_vault(sender, provider, full_git_url)
+    
+    # 3. Supabase에 없으면 환경 변수 기본 키(Default) 사용
+    final_token = vault_token or (GITHUB_PAT_ENV if provider == "GITHUB" else None)
+
+    if not final_token:
+        log("❌ 인증 정보가 없습니다.")
+        send_agent_email(sender, subject, "사용자 계정 또는 시스템 기본 인증 정보를 찾을 수 없습니다.", full_git_url, lang_code, "Denied")
+        update_task_status("failed")
+        sys.exit(1)
+
+    auth_url = f"https://oauth2:{final_token}@{domain}/{repo_path}.git"
+    if provider == "BITBUCKET": auth_url = f"https://{final_token}@{domain}/{repo_path}.git"
+    
     update_task_status("running")
-
     work_dir = os.path.join(os.getcwd(), "external_repo")
     if os.path.exists(work_dir): shutil.rmtree(work_dir)
 
     try:
-        log("📡 클론 중...")
-        _, stderr, code = run_command_list(["git", "clone", auth_url, work_dir])
+        log(f"📡 저장소 접근 시도: {full_git_url}")
+        _, stderr, code = run_command_list(["git", "clone", "--depth", "1", auth_url, work_dir])
+        
+        # 4. 권한 부족 감지 및 메일 발송
         if code != 0:
-            send_agent_email(sender, subject, f"접근 실패: {stderr}", "", lang_code, "Denied")
-            update_task_status("failed")
-            return
+            if any(err in stderr.lower() for err in ["401", "403", "authentication failed", "fatal: could not read"]):
+                log(f"❌ 권한 거부: {stderr}")
+                send_agent_email(sender, subject, f"Git 인증 실패(권한 부족): {stderr}", full_git_url, lang_code, "Denied")
+                update_task_status("failed")
+                sys.exit(1)
+            raise Exception(f"Clone failed: {stderr}")
 
-        if not is_new_repo:
-            log(f"🌿 브랜치 이동: {vars['base_br']}")
-            run_command_list(["git", "fetch", "origin", vars['base_br']], cwd=work_dir)
-            run_command_list(["git", "checkout", vars['base_br']], cwd=work_dir)
+        run_command_list(["git", "fetch", "origin", base_br], cwd=work_dir)
+        run_command_list(["git", "checkout", base_br], cwd=work_dir)
 
         log("🤖 Gemini 자율 작업 시작...")
-        
-        # 내부 gemini CLI가 직접 파일을 탐색하고 수정하도록 지시
-        # --include-directories를 통해 external_repo를 작업 범위에 포함
-        instruction = f"""
-[TASK]
-Subject: {subject}
-Body: {body}
+        instruction = f"[TASK]\nSubject: {subject}\nBody: {body}\n\n[INSTRUCTION]\n1. Go to: {work_dir}\n2. Explore and apply requested changes.\n3. Verify results."
+        stdout, _, code = run_command_list(["gemini", "-m", GEMINI_MODEL, "--raw-output", "--accept-raw-output-risk", "--yolo", "--include-directories", work_dir, "-p", instruction])
+        if code != 0: raise Exception("Gemini process failed")
 
-[INSTRUCTION]
-1. Go to the directory: {work_dir}
-2. Explore the codebase and apply the requested changes.
-3. Ensure the task is completed successfully.
-"""
-        
-        # gemini CLI 호출 (직접 파일 수정)
-        stdout, stderr, code = run_command_list(
-            [
-                "gemini", "-m", GEMINI_MODEL, 
-                "--raw-output", "--accept-raw-output-risk", "--yolo",
-                "--include-directories", work_dir,
-                "-p", instruction
-            ],
-            cwd=os.getcwd()
-        )
-        
-        if code != 0:
-            log(f"❌ Gemini 작업 실패: {stderr}")
-            raise Exception("Gemini process error")
-
-        # 작업 결과물(설명) 추출 (설명은 stdout에서 가져옴)
-        spec = stdout if stdout else "작업이 완료되었습니다."
+        spec = stdout or "작업 완료"
         log("🛠 작업 완료 (파일 수정됨)")
 
-        log("📤 푸시 중...")
-        # 이메일 접두사(Fwd:, Re:) 제거 및 제목 정제
-        clean_subject = re.sub(r"^(fwd|re|fw)\s*:\s*", "", subject, flags=re.IGNORECASE).strip()
-        
-        new_branch = "main" if is_new_repo else f"agent/task-{int(time.time())}"
+        new_branch = f"agent/task-{int(time.time())}"
         run_command_list(["git", "config", "user.name", "inchAgent"], cwd=work_dir)
         run_command_list(["git", "config", "user.email", "admin.key.in@gmail.com"], cwd=work_dir)
-        if not is_new_repo: run_command_list(["git", "checkout", "-b", new_branch], cwd=work_dir)
+        run_command_list(["git", "checkout", "-b", new_branch], cwd=work_dir)
         run_command_list(["git", "add", "."], cwd=work_dir)
-        run_command_list(["git", "commit", "-m", f"feat: {clean_subject}"], cwd=work_dir)
+        run_command_list(["git", "commit", "-m", f"feat: {re.sub(r'^(fwd|re|fw)\s* : \s*', '', subject, flags=re.IGNORECASE).strip()}"], cwd=work_dir)
         
-        push_args = ["git", "push", "origin", new_branch]
-        if is_new_repo: push_args.append("--force")
-        _, stderr, p_code = run_command_list(push_args, cwd=work_dir)
+        log("📤 푸시 중...")
+        _, stderr, p_code = run_command_list(["git", "push", "origin", new_branch], cwd=work_dir)
 
         if p_code == 0:
-            res_url = f"https://{domain}/{repo_full_name}"
-            if "github.com" in domain and not is_new_repo:
-                pr = requests.post(f"https://api.github.com/repos/{repo_full_name}/pulls", headers={"Authorization": f"token {token}"}, json={"title": vars['pr_title'] or f"🚀 {subject}", "body": spec, "head": new_branch, "base": vars['base_br']}).json()
+            res_url = full_git_url
+            if provider == "GITHUB":
+                pr = requests.post(f"https://api.github.com/repos/{repo_path}/pulls", headers={"Authorization": f"token {final_token}"}, json={"title": pr_title or f"🚀 {subject}", "body": spec, "head": new_branch, "base": base_br}).json()
                 res_url = pr.get('html_url', res_url)
             log(f"✅ 성공! URL: {res_url}")
             update_task_status("completed", branch_name=new_branch, pr_url=res_url)
+            if source == "kakao": send_kakao_report(sender, subject, spec, res_url)
             send_agent_email(sender, subject, spec, res_url, lang_code, "Success")
         else:
-            log(f"❌ 푸시 실패: {stderr}")
-            raise Exception("Git Push Failed")
-
+            raise Exception(f"Git Push Failed: {stderr}")
     except Exception:
-        log(f"❌ 에러:\n{traceback.format_exc()}")
+        log(f"❌ 에러 발생:\n{traceback.format_exc()}")
         update_task_status("failed")
+        sys.exit(1)
 
 if __name__ == "__main__": main()

@@ -17,7 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install requests duckduckgo-search
+          python3 -m pip install requests duckduckgo-search cryptography
 
       - name: Check Ollama Status
         run: |
@@ -30,14 +30,20 @@ jobs:
           TASK_SUBJECT: ${{ github.event.client_payload.subject }}
           TASK_BODY: ${{ github.event.client_payload.body }}
           SENDER: ${{ github.event.client_payload.from }}
+          SOURCE: ${{ github.event.client_payload.source }}
           GITHUB_PAT: ${{ secrets.MY_GITHUB_PAT }} # 기본 토큰 대신 수동 등록한 PAT 사용
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }} # 구글 검색용 API 키
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
           EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
           EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
           EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
           EMAILJS_PRIVATE_KEY: ${{ secrets.EMAILJS_PRIVATE_KEY }}
+          SOLAPI_API_KEY: ${{ secrets.SOLAPI_API_KEY }}
+          SOLAPI_API_SECRET: ${{ secrets.SOLAPI_API_SECRET }}
+          SOLAPI_FROM_NUMBER: ${{ secrets.SOLAPI_FROM_NUMBER }}
           OLLAMA_MODEL: "qwen2.5-coder:7b"
         run: |
           python3 agent/developer.py
