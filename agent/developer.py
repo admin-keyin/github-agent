@@ -22,7 +22,7 @@ load_dotenv()
 
 # --- 설정 ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-...
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 TASK_ID = os.getenv("TASK_ID")
 GITHUB_PAT_ENV = os.getenv("GITHUB_PAT")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
