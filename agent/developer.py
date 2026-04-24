@@ -188,6 +188,19 @@ def extract_from_body(body, key):
         if match: return match.group(1)
     return None
 
+def get_latest_scope_from_vault(email, provider):
+    """사용자가 등록한 최신 저장소 주소(scope)를 가져옵니다."""
+    if not all([SUPABASE_URL, SUPABASE_KEY, email]): return None
+    url = f"{SUPABASE_URL}/rest/v1/user_credentials?user_email=eq.{email}&key_name=eq.{provider.upper()}&select=scope&order=created_at.desc&limit=1"
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+    try:
+        res = requests.get(url, headers=headers, timeout=10).json()
+        if res and res[0].get("scope"):
+            log(f"🔍 Supabase에서 기존 저장소 탐색 성공: {res[0].get('scope')}")
+            return res[0].get("scope")
+    except: pass
+    return None
+
 def main():
     subject = os.getenv("TASK_SUBJECT", "No Subject")
     body = os.getenv("TASK_BODY", "")
@@ -204,28 +217,39 @@ def main():
     base_br = extract_from_body(body, "BASE_BRANCH") or "main"
     pr_title = extract_from_body(body, "PR_TITLE")
 
-    # URL 추출
+    # 1. URL 추출 시도
     url_match = re.search(r"https://([\w\-.]+)/([a-zA-Z0-9.\-_/]+)", body)
+    
+    provider = "GITHUB" # 기본값
     if url_match:
         domain = url_match.group(1).lower()
         repo_path = url_match.group(2).replace(".git", "").strip()
         full_git_url = f"https://{domain}/{repo_path}"
+        if "gitlab" in domain: provider = "GITLAB"
+        elif "bitbucket" in domain: provider = "BITBUCKET"
     else:
-        domain = "github.com"; repo_path = f"{owner}/{repo}"; full_git_url = f"https://github.com/{repo_path}"
+        # 본문에 URL이 없으면 Supabase에서 해당 사용자의 최신 scope 조회
+        log("🔎 본문에 URL이 없어 Supabase에서 기존 설정을 검색합니다...")
+        found_scope = get_latest_scope_from_vault(sender, "GITHUB") or get_latest_scope_from_vault(sender, "GITLAB")
+        
+        if found_scope:
+            full_git_url = found_scope
+            url_match = re.search(r"https://([\w\-.]+)/([a-zA-Z0-9.\-_/]+)", full_git_url)
+            domain = url_match.group(1).lower()
+            repo_path = url_match.group(2).replace(".git", "").strip()
+            if "gitlab" in domain: provider = "GITLAB"
+            elif "bitbucket" in domain: provider = "BITBUCKET"
+        else:
+            # 정말 아무것도 없으면 에이전트 기본 저장소
+            domain = "github.com"; repo_path = f"{owner}/{repo}"; full_git_url = f"https://github.com/{repo_path}"
 
-    provider = "GITHUB"
-    if "gitlab" in domain: provider = "GITLAB"
-    elif "bitbucket" in domain: provider = "BITBUCKET"
-
-    # 1. 이메일에 포함된 토큰이 있으면 우선 저장 (scope에 전체 URL 저장)
+    # 2. 이메일에 포함된 토큰 저장 로직 (생략 방지)
     if provider == "GITHUB" and gh_token: upsert_credential(sender, provider, gh_token, full_git_url)
     elif provider == "GITLAB" and gl_token: upsert_credential(sender, provider, gl_token, full_git_url)
     elif provider == "BITBUCKET" and bb_user and bb_pass: upsert_credential(sender, provider, f"{bb_user}:{bb_pass}", full_git_url)
 
-    # 2. Supabase에서 조회 (해당 이메일 + 해당 저장소 주소)
+    # 3. 토큰 조회
     vault_token = get_credential_from_vault(sender, provider, full_git_url)
-    
-    # 3. Supabase에 없으면 환경 변수 기본 키(Default) 사용
     final_token = vault_token or (GITHUB_PAT_ENV if provider == "GITHUB" else None)
 
     if not final_token:
