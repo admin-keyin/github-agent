@@ -132,50 +132,56 @@ def upsert_credential(email, provider, value, git_url):
     except: pass
 
 def get_credential_from_vault(email, provider, git_url):
-    if not all([SUPABASE_URL, SUPABASE_KEY, email, git_url]): return None
+    if not all([SUPABASE_URL, SUPABASE_KEY, email, git_url]): 
+        log(f"⚠️ 설정 누락: URL={bool(SUPABASE_URL)}, KEY={bool(SUPABASE_KEY)}, Email={bool(email)}")
+        return None
     
     search_email = email.strip().lower()
-    # .git 제거 및 끝 슬래시 제거한 순수 주소 추출
     clean_url = git_url.replace(".git", "").rstrip("/")
-    
-    # 도메인 추출 (예: https://smartform-gitlab.ktmmobile.com)
     domain_match = re.search(r"(https?://[\w\-.]+)", clean_url)
     domain_url = domain_match.group(1).lower() if domain_match else clean_url
     
-    # 체크할 우선순위: 1.순수주소, 2.원래주소, 3.도메인주소, 4. .git붙인주소
     scopes_to_check = [clean_url, git_url, domain_url, f"{clean_url}.git"]
+    log(f"🔎 Supabase 조회 시작 (Email: {search_email})")
     
-    log(f"🔎 Supabase 조회 시작: 이메일={search_email}")
-    
+    headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     for scope in scopes_to_check:
-        url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{search_email}&scope=eq.{scope}"
-        headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+        url = f"{SUPABASE_URL}/rest/v1/git_credentials"
+        params = {"email": f"eq.{search_email}", "scope": f"eq.{scope}"}
         try:
-            res = requests.get(url, headers=headers, timeout=10).json()
-            if res: 
-                encrypted_value = res[0].get("encrypted_config")
+            res = requests.get(url, headers=headers, params=params, timeout=10)
+            if res.status_code != 200:
+                log(f"❌ Supabase 에러 ({res.status_code}): {res.text}")
+                continue
+            
+            data = res.json()
+            if data: 
+                encrypted_value = data[0].get("encrypted_config")
                 decrypted = decrypt_value(encrypted_value)
                 if decrypted:
-                    log(f"🔓 Credential 복호화 성공 (Scope: {scope})")
+                    log(f"🔓 복호화 성공! (Scope: {scope})")
                     return decrypted
         except Exception as e:
-            log(f"⚠️ 조회 중 오류: {e}")
+            log(f"⚠️ 요청 중 예외 발생: {e}")
     
-    log("❓ Supabase에서 일치하는 인증 정보를 찾지 못했습니다.")
     return None
 
 def get_latest_scope_from_vault(email, provider):
-    """사용자가 등록한 최신 저장소 주소(scope)를 가져옵니다."""
     if not all([SUPABASE_URL, SUPABASE_KEY, email]): return None
     search_email = email.strip().lower()
-    url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{search_email}&select=scope&order=created_at.desc&limit=1"
+    url = f"{SUPABASE_URL}/rest/v1/git_credentials"
+    params = {"email": f"eq.{search_email}", "select": "scope", "order": "created_at.desc", "limit": "1"}
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     try:
-        res = requests.get(url, headers=headers, timeout=10).json()
-        if res and res[0].get("scope"):
-            log(f"🔍 최근 작업 저장소 자동 탐색: {res[0].get('scope')}")
-            return res[0].get("scope")
-    except: pass
+        res = requests.get(url, headers=headers, params=params, timeout=10)
+        log(f"🔍 최근 저장소 조회 결과 ({res.status_code})")
+        data = res.json()
+        if data and data[0].get("scope"):
+            scope = data[0].get("scope")
+            log(f"✅ 자동 탐색 성공: {scope}")
+            return scope
+    except Exception as e:
+        log(f"⚠️ 최근 저장소 조회 중 예외: {e}")
     return None
 
 def send_agent_email(to_email, subject, spec, result_url, lang_code="ko", status="Success"):
