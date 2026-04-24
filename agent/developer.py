@@ -134,15 +134,21 @@ def upsert_credential(email, provider, value, git_url):
 def get_credential_from_vault(email, provider, git_url):
     if not all([SUPABASE_URL, SUPABASE_KEY, email, git_url]): return None
     
-    # 도메인 추출 (예: https://smartform-gitlab.ktmmobile.com)
-    domain_match = re.search(r"(https?://[\w\-.]+)", git_url)
-    domain_url = domain_match.group(1).lower() if domain_match else git_url
+    search_email = email.strip().lower()
+    # .git 제거 및 끝 슬래시 제거한 순수 주소 추출
+    clean_url = git_url.replace(".git", "").rstrip("/")
     
-    # 1. 전체 URL로 먼저 검색 후, 없으면 도메인 URL로 검색
-    scopes_to_check = [git_url, domain_url]
+    # 도메인 추출 (예: https://smartform-gitlab.ktmmobile.com)
+    domain_match = re.search(r"(https?://[\w\-.]+)", clean_url)
+    domain_url = domain_match.group(1).lower() if domain_match else clean_url
+    
+    # 체크할 우선순위: 1.순수주소, 2.원래주소, 3.도메인주소, 4. .git붙인주소
+    scopes_to_check = [clean_url, git_url, domain_url, f"{clean_url}.git"]
+    
+    log(f"🔎 Supabase 조회 시작: 이메일={search_email}")
     
     for scope in scopes_to_check:
-        url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{email}&scope=eq.{scope}"
+        url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{search_email}&scope=eq.{scope}"
         headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
         try:
             res = requests.get(url, headers=headers, timeout=10).json()
@@ -150,21 +156,24 @@ def get_credential_from_vault(email, provider, git_url):
                 encrypted_value = res[0].get("encrypted_config")
                 decrypted = decrypt_value(encrypted_value)
                 if decrypted:
-                    log(f"🔓 Credential 복호화 성공 (대상: {email}, Scope: {scope})")
+                    log(f"🔓 Credential 복호화 성공 (Scope: {scope})")
                     return decrypted
-        except: pass
+        except Exception as e:
+            log(f"⚠️ 조회 중 오류: {e}")
     
+    log("❓ Supabase에서 일치하는 인증 정보를 찾지 못했습니다.")
     return None
 
 def get_latest_scope_from_vault(email, provider):
     """사용자가 등록한 최신 저장소 주소(scope)를 가져옵니다."""
     if not all([SUPABASE_URL, SUPABASE_KEY, email]): return None
-    url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{email}&select=scope&order=created_at.desc&limit=1"
+    search_email = email.strip().lower()
+    url = f"{SUPABASE_URL}/rest/v1/git_credentials?email=eq.{search_email}&select=scope&order=created_at.desc&limit=1"
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     try:
         res = requests.get(url, headers=headers, timeout=10).json()
         if res and res[0].get("scope"):
-            log(f"🔍 Supabase에서 기존 저장소 탐색 성공: {res[0].get('scope')}")
+            log(f"🔍 최근 작업 저장소 자동 탐색: {res[0].get('scope')}")
             return res[0].get("scope")
     except: pass
     return None
