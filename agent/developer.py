@@ -148,8 +148,10 @@ def get_credential_from_vault(email, provider, git_url):
     
     scopes_to_check = [clean_url, git_url, domain_url, f"{clean_url}.git"]
     log(f"🔎 Supabase 조회 시작 (Email: {search_email})")
+    log(f"🔍 검색 대상 Scopes: {scopes_to_check}")
     
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+    
     for scope in scopes_to_check:
         url = f"{SUPABASE_URL}/rest/v1/git_credentials"
         params = {"email": f"eq.{search_email}", "scope": f"eq.{scope}"}
@@ -161,13 +163,28 @@ def get_credential_from_vault(email, provider, git_url):
             
             data = res.json()
             if data: 
+                log(f"✅ 데이터 발견! (Scope: {scope}) - 복호화 시도 중...")
                 encrypted_value = data[0].get("encrypted_config")
                 decrypted = decrypt_value(encrypted_value)
                 if decrypted:
-                    log(f"🔓 복호화 성공! (Scope: {scope})")
+                    log(f"🔓 복호화 최종 성공!")
                     return decrypted
+                else:
+                    log(f"💀 복호화 실패: MASTER_ENCRYPTION_KEY가 일치하지 않거나 데이터가 손상되었습니다.")
+            else:
+                log(f"➖ 데이터 없음 (Scope: {scope})")
         except Exception as e:
             log(f"⚠️ 요청 중 예외 발생: {e}")
+    
+    # 디버깅: 해당 이메일로 등록된 모든 데이터 리스팅
+    try:
+        debug_res = requests.get(f"{SUPABASE_URL}/rest/v1/git_credentials", headers=headers, params={"email": f"eq.{search_email}"}, timeout=10).json()
+        if debug_res:
+            available_scopes = [d.get("scope") for d in debug_res]
+            log(f"💡 힌트: 해당 이메일로 등록된 Scopes들: {available_scopes}")
+        else:
+            log(f"💡 힌트: 해당 이메일({search_email})로 등록된 데이터가 아예 없습니다. 테이블명이나 이메일 주소를 다시 확인하세요.")
+    except: pass
     
     return None
 
