@@ -48,7 +48,7 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          VIDEO_TITLE: "AI Music Video: ${{ github.event.inputs.prompt || 'Chill Vibes' }}"
+          VIDEO_TITLE: "잘때 듣기 좋은 노래모음"
           VIDEO_DESCRIPTION: "made by keyin."
         run: |
           python scripts/upload_to_youtube.py output_music_video.mp4

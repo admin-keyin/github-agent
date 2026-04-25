@@ -4,26 +4,27 @@ from moviepy.editor import ImageClip, AudioFileClip
 import sys
 import random
 
-# --- 랜덤 소스 리스트 ---
+# --- 잔잔한 음악 소스 리스트 ---
 MUSIC_SOURCES = [
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-    "https://cdn.pixabay.com/audio/2022/05/27/audio_180873748b.mp3", # Pixabay (User-Agent 필요)
-    "https://cdn.pixabay.com/audio/2023/11/24/audio_349d447f53.mp3"
+    "https://cdn.pixabay.com/audio/2022/03/10/audio_c330c67990.mp3", # Chill ambient
+    "https://cdn.pixabay.com/audio/2022/01/21/audio_31743c589f.mp3", # Lofi study
+    "https://cdn.pixabay.com/audio/2023/10/16/audio_f52363013d.mp3", # Emotional piano
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", # Relatively calm
+    "https://cdn.pixabay.com/audio/2022/05/27/audio_180873748b.mp3"  # Relaxing lofi
 ]
 
+# --- 평온한 이미지 프롬프트 리스트 ---
 IMAGE_PROMPTS = [
-    "cinematic lo-fi {time} {style}, aesthetic digital art, 4k, {weather}",
-    "cyberpunk city in {weather}, {time}, anime style, neon lights",
-    "peaceful forest with {weather}, {time}, studio ghibli style, watercolor",
-    "cozy room with a view of {weather} {time}, pixel art style, lo-fi vibes",
-    "surreal space landscape, nebulae and planets, {style}, detailed"
+    "peaceful {time} with {weather}, starry night, soft moonlight, {style}, highly detailed, 4k, calm atmosphere",
+    "aesthetic {time} view from window, {weather}, lo-fi aesthetic, {style}, cozy and warm, relax vibes",
+    "surreal forest in {time}, {weather}, magical atmosphere, {style}, deep blue and purple colors",
+    "cozy library at {time}, {weather} outside, warm candle light, {style}, pixel art, sleeping mood",
+    "calm ocean waves under {time} {weather}, cinematic lighting, {style}, peaceful scenery"
 ]
 
-TIMES = ["sunset", "midnight", "early morning", "golden hour", "night"]
-STYLES = ["oil painting", "digital art", "sketch", "retro synthwave", "minimalist"]
-WEATHERS = ["rainy", "snowy", "clear sky", "foggy", "thunderstorm"]
+TIMES = ["midnight", "late night", "dawn", "twilight"]
+STYLES = ["watercolor painting", "soft digital art", "ghibli anime style", "dreamy oil painting"]
+WEATHERS = ["clear sky", "gentle rain", "soft snow", "misty fog"]
 
 def download_file(url, filename):
     print(f"Downloading {url}...")
@@ -31,7 +32,7 @@ def download_file(url, filename):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     try:
-        response = requests.get(url, stream=True, headers=headers, timeout=30)
+        response = requests.get(url, stream=True, headers=headers, timeout=45)
         if response.status_code == 200:
             with open(filename, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
@@ -48,39 +49,31 @@ def download_file(url, filename):
 def generate_ai_image(prompt, filename):
     print(f"Generating AI image for prompt: {prompt}")
     encoded_prompt = requests.utils.quote(prompt)
-    # seed를 랜덤하게 주어 매번 다른 그림 생성
-    seed = random.randint(1, 100000)
+    seed = random.randint(1, 1000000)
     url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1920&height=1080&nologo=true&seed={seed}"
     download_file(url, filename)
 
 def create_video(image_path, audio_path, output_path):
     print("Combining image and audio into video...")
     audio = AudioFileClip(audio_path)
-    # 영상 길이를 최대 1분(60초)으로 제한 (업로드 속도 및 리소스 고려)
-    duration = min(audio.duration, 60)
+    # 잘 때 듣기 좋게 길이를 조금 더 늘림 (최대 3분)
+    duration = min(audio.duration, 180)
     image_clip = ImageClip(image_path).set_duration(duration)
     video = image_clip.set_audio(audio.subclip(0, duration))
     video.write_videofile(output_path, fps=24, codec="libx264", audio_codec="aac")
     print(f"Video created: {output_path}")
 
 if __name__ == "__main__":
-    # 랜덤하게 음악 선택
-    default_music = random.choice(MUSIC_SOURCES)
-    music_url = os.getenv("MUSIC_URL")
-    if not music_url or music_url == "":
-        music_url = default_music
+    # 랜덤 음악 및 프롬프트 선택 (잔잔한 분위기 고정)
+    music_url = os.getenv("MUSIC_URL") or random.choice(MUSIC_SOURCES)
     
-    # 랜덤하게 프롬프트 조합
     base_prompt = random.choice(IMAGE_PROMPTS)
     full_prompt = base_prompt.format(
         time=random.choice(TIMES),
         style=random.choice(STYLES),
         weather=random.choice(WEATHERS)
     )
-    
-    image_prompt = os.getenv("IMAGE_PROMPT")
-    if not image_prompt or image_prompt == "":
-        image_prompt = full_prompt
+    image_prompt = os.getenv("IMAGE_PROMPT") or full_prompt
     
     os.makedirs("temp", exist_ok=True)
     audio_file = "temp/music.mp3"
