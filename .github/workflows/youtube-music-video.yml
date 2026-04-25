@@ -3,8 +3,7 @@ name: AI YouTube Music Video Generator
 on:
   schedule:
     - cron: '*/5 * * * *' # 5분마다 실행
-  workflow_dispatch:
- # 수동 실행 가능
+  workflow_dispatch: # 수동 실행 가능
     inputs:
       prompt:
         description: 'AI 이미지 생성 프롬프트 (비워두면 랜덤)'
@@ -17,7 +16,7 @@ on:
 
 jobs:
   create-and-upload:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest # 다시 GitHub 서버 환경으로 복구
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
