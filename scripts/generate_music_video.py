@@ -4,15 +4,15 @@ from moviepy.editor import ImageClip, AudioFileClip
 import sys
 import random
 
-# --- 수면 유도용 정적인 앰비언트/피아노 음악 소스 (비트가 거의 없는 곡들) ---
+# --- 검증된 안정적인 수면/앰비언트 음악 소스 (SoundHelix 중 잔잔한 곡 & 오픈 소스) ---
 MUSIC_SOURCES = [
-    "https://www.chosic.com/wp-content/uploads/2021/07/Midnight-Forest.mp3", # 매우 잔잔한 숲 소리/피아노
-    "https://www.chosic.com/wp-content/uploads/2020/06/Warm-Memories-Emotional-Inspiring-Piano.mp3", # 감성적인 피아노
-    "https://www.chosic.com/wp-content/uploads/2021/04/Rain-on-the-Window.mp3", # 빗소리와 잔잔한 선율
-    "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Ketsa/Raising_Frequencies/Ketsa_-_09_-_Slowing_Down.mp3", # 느린 템포
-    "https://www.chosic.com/wp-content/uploads/2022/01/Long-Night.mp3", # 긴 밤 테마
-    "https://www.chosic.com/wp-content/uploads/2021/05/Starlight.mp3", # 별빛 테마 앰비언트
-    "https://www.chosic.com/wp-content/uploads/2021/03/Ethereal-Visions.mp3" # 몽환적이고 정적인 음악
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3",
+    "https://upload.wikimedia.org/wikipedia/commons/b/b9/Relaxing_Ambient_Music.mp3",
+    "https://upload.wikimedia.org/wikipedia/commons/5/52/Ambient_Piano_Music.mp3"
 ]
 
 # --- 숙면을 위한 어둡고 평온한 이미지 프롬프트 ---
@@ -30,7 +30,7 @@ STYLES = ["dark oil painting", "low-light digital art", "soft charcoal sketch", 
 WEATHERS = ["complete silence", "gentle drizzle", "light mist", "calm wind"]
 
 def download_file(url, filename):
-    print(f"Downloading sleep music: {url}")
+    print(f"Downloading: {url}")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -40,9 +40,10 @@ def download_file(url, filename):
             with open(filename, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
+            print(f"Successfully downloaded: {filename}")
             return True
         else:
-            print(f"Failed to download: {url} (Status: {response.status_code})")
+            print(f"Failed (Status {response.status_code}): {url}")
             return False
     except Exception as e:
         print(f"Error: {e}")
@@ -51,7 +52,6 @@ def download_file(url, filename):
 def generate_ai_image(prompt, filename):
     print(f"Generating sleep-themed image: {prompt}")
     encoded_prompt = requests.utils.quote(prompt)
-    # 수면용이므로 nologo와 함께 시각적 자극을 최소화하는 seed 사용
     seed = random.randint(1, 10000000)
     url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1920&height=1080&nologo=true&seed={seed}"
     return download_file(url, filename)
@@ -59,7 +59,7 @@ def generate_ai_image(prompt, filename):
 def create_video(image_path, audio_path, output_path):
     print("Creating calming video...")
     audio = AudioFileClip(audio_path)
-    # 수면 영상은 호흡이 길어야 하므로 기본 3분으로 설정
+    # 수면 영상은 호흡이 길어야 하므로 최대 3분으로 설정
     max_duration = 180 
     duration = min(audio.duration, max_duration)
     
@@ -85,7 +85,10 @@ if __name__ == "__main__":
             break
     
     if not success:
-        sys.exit(1)
+        print("All music sources failed. Trying fallback URL...")
+        # 최후의 보루: 가장 안정적인 SoundHelix 1번 곡 사용
+        if not download_file("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", audio_file):
+            sys.exit(1)
 
     base_prompt = random.choice(IMAGE_PROMPTS)
     full_prompt = base_prompt.format(
