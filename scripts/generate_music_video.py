@@ -13,29 +13,43 @@ def generate_sleep_sound(duration_sec, output_path):
     t = np.linspace(0, duration_sec, int(fs * duration_sec), False)
 
     # 1. 딥 드론 (Deep Drone) - 솔페지오 주파수 기반
-    # 174Hz (고통 완화), 432Hz (우주 주파수), 528Hz (치유) 중 랜덤 선택
     base_freq = random.choice([174, 432, 528])
     drone = np.sin(base_freq * 2 * np.pi * t) * 0.3
     drone += np.sin((base_freq / 2) * 2 * np.pi * t) * 0.2 # 서브 베이스
     
-    # 2. 화이트/핑크 노이즈 (빗소리/바람 효과)
-    noise = np.random.normal(0, 1, len(t))
-    # 저주파 필터 효과 (잔잔한 느낌)
+    # 2. 다중 노이즈 레이어 생성 (2~5개 랜덤 레이어)
     from scipy.signal import butter, lfilter
     def lowpass(data, cutoff, fs, order=5):
         nyq = 0.5 * fs
         normal_cutoff = cutoff / nyq
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         return lfilter(b, a, data)
+
+    num_layers = random.randint(2, 5)
+    noise_combined = np.zeros_like(t)
+    print(f"Adding {num_layers} layers of noise for rich texture...")
     
-    noise_filtered = lowpass(noise, random.randint(500, 1500), fs) * 0.1
+    for i in range(num_layers):
+        layer_noise = np.random.normal(0, 1, len(t))
+        # 각 레이어마다 다른 컷오프 주파수와 볼륨 적용
+        cutoff = random.randint(200, 2000)
+        volume = random.uniform(0.02, 0.08)
+        noise_combined += lowpass(layer_noise, cutoff, fs) * volume
     
-    # 3. 맥동 효과 (Pulsing) - 호흡 유도
-    pulse = (np.sin(0.2 * 2 * np.pi * t) + 1) / 2 # 5초 주기 호흡
-    final_wave = (drone + noise_filtered) * pulse
+    # 3. 맥동 효과 (Pulsing) - 1~30초 랜덤 주기
+    pulse_period = random.uniform(1, 30)
+    pulse_freq = 1.0 / pulse_period
+    print(f"Applying pulse effect with period of {pulse_period:.2f} seconds.")
+    
+    pulse = (np.sin(pulse_freq * 2 * np.pi * t) + 1) / 2
+    final_wave = (drone + noise_combined) * pulse
 
     # Normalize to 16-bit PCM
-    final_wave = (final_wave / np.max(np.abs(final_wave)) * 32767).astype(np.int16)
+    max_val = np.max(np.abs(final_wave))
+    if max_val > 0:
+        final_wave = (final_wave / max_val * 32767).astype(np.int16)
+    else:
+        final_wave = final_wave.astype(np.int16)
     
     temp_wav = "temp/generated.wav"
     os.makedirs("temp", exist_ok=True)
@@ -49,7 +63,7 @@ def generate_sleep_sound(duration_sec, output_path):
 def generate_ai_image(prompt, filename):
     print(f"Generating image: {prompt}")
     encoded_prompt = requests.utils.quote(prompt)
-    seed = random.randint(1, 9999999)
+    seed = random.randint(1, 99999999)
     url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1920&height=1080&nologo=true&seed={seed}"
     headers = {'User-Agent': 'Mozilla/5.0'}
     response = requests.get(url, headers=headers)
