@@ -48,7 +48,7 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          VIDEO_TITLE: "잘때 듣기좋은 소리"
+          VIDEO_TITLE: "음량에 따라 잘떄도, 공부할때도 좋은 백색소음"
           VIDEO_DESCRIPTION: "made by keyin."
         run: |
           python scripts/upload_to_youtube.py output_music_video.mp4
