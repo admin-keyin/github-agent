@@ -1,124 +1,89 @@
 import os
 import requests
 from moviepy.editor import ImageClip, AudioFileClip
+from pydub import AudioSegment
 import sys
 import random
 
-# --- 고품질 & 안정적 수면/앰비언트 음악 리스트 (직접 링크 검증됨) ---
-# 비트가 없고 정적인 곡들 위주로 구성
-MUSIC_SOURCES = [
-    # 1. 자연의 소리 & 앰비언트 (Wikimedia Commons)
-    "https://upload.wikimedia.org/wikipedia/commons/b/b9/Relaxing_Ambient_Music.mp3",
+# --- 레이어별 소리 소스 ---
+# 1. 배경음 (자연의 소리)
+BACKGROUND_SOURCES = [
+    "https://upload.wikimedia.org/wikipedia/commons/3/30/Rain_Atmosphere.mp3", # 빗소리
+    "https://upload.wikimedia.org/wikipedia/commons/0/08/Forest_Ambience.mp3", # 숲 소리
+    "https://upload.wikimedia.org/wikipedia/commons/4/4e/Soft_Wind_Breeze.mp3", # 바람 소리
+    "https://upload.wikimedia.org/wikipedia/commons/f/f0/Small_Ocean_Waves.mp3"   # 파도 소리
+]
+
+# 2. 멜로디 (정적인 악기/앰비언트)
+MELODY_SOURCES = [
     "https://upload.wikimedia.org/wikipedia/commons/5/52/Ambient_Piano_Music.mp3",
-    "https://upload.wikimedia.org/wikipedia/commons/3/30/Rain_Atmosphere.mp3",
-    "https://upload.wikimedia.org/wikipedia/commons/0/08/Forest_Ambience.mp3",
-    "https://upload.wikimedia.org/wikipedia/commons/4/4e/Soft_Wind_Breeze.mp3",
-    
-    # 2. 고품질 앰비언트 (Archive.org 및 안정적 CDN)
-    "https://ia800204.us.archive.org/21/items/Silent_Night_Ambient/SilentNight.mp3",
-    "https://ia802905.us.archive.org/24/items/AmbientMeditation/DeepMeditation.mp3",
-    "https://ia800703.us.archive.org/15/items/AmbientSleepingMusic/AmbientSleep01.mp3",
-    "https://ia600703.us.archive.org/15/items/AmbientSleepingMusic/AmbientSleep02.mp3",
+    "https://upload.wikimedia.org/wikipedia/commons/b/b9/Relaxing_Ambient_Music.mp3",
     "https://ia800703.us.archive.org/15/items/AmbientSleepingMusic/AmbientSleep03.mp3",
-    "https://ia600703.us.archive.org/15/items/AmbientSleepingMusic/AmbientSleep04.mp3",
-    "https://ia800703.us.archive.org/15/items/AmbientSleepingMusic/AmbientSleep05.mp3",
-    
-    # 3. SoundHelix 중 가장 정적이고 긴 곡들 (백업용)
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3"
+    "https://ia600703.us.archive.org/15/items/AmbientSleepingMusic/AmbientSleep05.mp3"
 ]
-
-# --- 숙면을 위한 어둡고 정적인 이미지 프롬프트 ---
-IMAGE_PROMPTS = [
-    "cinematic dark {time}, {weather}, extremely low light, minimalist aesthetic, {style}, starry night, peaceful, 4k",
-    "view of a silent forest in {time}, {weather}, deep blue and charcoal tones, {style}, mysterious and calm, sleep mood",
-    "peaceful moon reflection on still water, {time}, {weather}, dark aesthetic, {style}, no light pollution, calming",
-    "a cozy window in the {time}, {weather} outside, soft warm ember glow inside, {style}, dark atmosphere, relaxing",
-    "nebula in the deep space, {time}, very dark purple and black colors, {style}, ethereal and quiet, 4k",
-    "slow falling snow in the {time} forest, {weather}, dim moonlight, {style}, serene and cold, peaceful silence"
-]
-
-TIMES = ["midnight", "deep night", "pre-dawn", "pitch black night"]
-STYLES = ["soft oil painting", "dreamy digital art", "minimalist charcoal sketch", "low-exposure photography"]
-WEATHERS = ["complete silence", "gentle mist", "calm breeze", "starry sky"]
 
 def download_file(url, filename):
-    print(f"Checking music source: {url}")
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36'
-    }
+    print(f"Downloading: {url}")
+    headers = {'User-Agent': 'Mozilla/5.0'}
     try:
         response = requests.get(url, stream=True, headers=headers, timeout=60)
         if response.status_code == 200:
             with open(filename, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=1024*1024): # 1MB chunks for speed
-                    if chunk:
-                        f.write(chunk)
-            print(f"Successfully downloaded: {url}")
+                for chunk in response.iter_content(chunk_size=1024*1024):
+                    f.write(chunk)
             return True
-        else:
-            print(f"Failed to access: {url} (Code: {response.status_code})")
-            return False
-    except Exception as e:
-        print(f"Error connecting to {url}: {e}")
-        return False
+    except:
+        pass
+    return False
+
+def mix_audio(bg_path, melody_path, output_path):
+    print(f"Mixing {bg_path} and {melody_path}...")
+    bg = AudioSegment.from_file(bg_path)
+    melody = AudioSegment.from_file(melody_path)
+
+    # 3분(180초)으로 길이 맞추기
+    duration_ms = 180 * 1000
+    bg = (bg * (duration_ms // len(bg) + 1))[:duration_ms]
+    melody = (melody * (duration_ms // len(melody) + 1))[:duration_ms]
+
+    # 배경음은 조금 작게 (-15dB), 멜로디는 적당히 (-5dB)
+    mixed = bg.overlay(melody - 5) - 10
+    mixed.export(output_path, format="mp3")
+    print(f"New generated music saved to: {output_path}")
 
 def generate_ai_image(prompt, filename):
-    print(f"Generating sleep-themed image for: {prompt}")
     encoded_prompt = requests.utils.quote(prompt)
     seed = random.randint(1, 99999999)
     url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1920&height=1080&nologo=true&seed={seed}"
-    return download_file(url, filename)
-
-def create_video(image_path, audio_path, output_path):
-    print("Combining image and audio into a sleep video...")
-    audio = AudioFileClip(audio_path)
-    # 수면용은 충분히 길게 (3분 고정)
-    duration = min(audio.duration, 180) 
-    
-    image_clip = ImageClip(image_path).set_duration(duration)
-    video = image_clip.set_audio(audio.subclip(0, duration))
-    
-    # 페이드를 아주 길게(7초) 주어 잠들기 더 편하게 함
-    video = video.fadein(7).fadeout(7)
-    
-    video.write_videofile(output_path, fps=24, codec="libx264", audio_codec="aac")
-    print(f"Video saved as: {output_path}")
+    download_file(url, filename)
 
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
-    audio_file = "temp/music.mp3"
-    image_file = "temp/background.jpg"
+    bg_file = "temp/bg.mp3"
+    melody_file = "temp/melody.mp3"
+    final_audio = "temp/final_generated.mp3"
+    image_file = "temp/bg.jpg"
     video_file = "output_music_video.mp4"
 
-    # 1. 음악 무작위 선택 및 다운로드 (성공할 때까지 시도)
-    shuffled_sources = MUSIC_SOURCES.copy()
-    random.shuffle(shuffled_sources)
-    
-    success = False
-    for music_url in shuffled_sources:
-        if download_file(music_url, audio_file):
-            success = True
-            break
-        print("Moving to next source...")
-    
-    if not success:
-        print("CRITICAL: All music sources failed.")
-        sys.exit(1)
+    # 1. 배경음과 멜로디 랜덤 선택 및 다운로드
+    if not download_file(random.choice(BACKGROUND_SOURCES), bg_file):
+        download_file(BACKGROUND_SOURCES[0], bg_file)
+    if not download_file(random.choice(MELODY_SOURCES), melody_file):
+        download_file(MELODY_SOURCES[0], melody_file)
 
-    # 2. 이미지 프롬프트 생성
-    full_prompt = random.choice(IMAGE_PROMPTS).format(
-        time=random.choice(TIMES),
-        style=random.choice(STYLES),
-        weather=random.choice(WEATHERS)
-    )
-    
-    # 3. 이미지 생성 및 영상 합성
-    if generate_ai_image(full_prompt, image_file):
-        create_video(image_file, audio_file, video_file)
-    else:
-        print("CRITICAL: Failed to create background.")
-        sys.exit(1)
+    # 2. 두 소리를 합성하여 '새로운 곡' 생성
+    mix_audio(bg_file, melody_file, final_audio)
+
+    # 3. 이미지 생성 (수면용 어두운 테마)
+    prompts = [
+        "extremely dark and peaceful night, dim moonlight, soft minimalist oil painting, sleep atmosphere",
+        "starry sky over a still dark lake, deep charcoal and blue tones, serene silence",
+        "a cozy room in pitch black night, soft warm candle glow, lo-fi aesthetic, very low brightness"
+    ]
+    generate_ai_image(random.choice(prompts), image_file)
+
+    # 4. 최종 영상 제작
+    audio = AudioFileClip(final_audio)
+    clip = ImageClip(image_file).set_duration(audio.duration)
+    video = clip.set_audio(audio).fadein(5).fadeout(5)
+    video.write_videofile(video_file, fps=24, codec="libx264", audio_codec="aac")
