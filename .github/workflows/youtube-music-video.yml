@@ -2,8 +2,9 @@ name: AI YouTube Music Video Generator
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # 주 1회 (일요일 자정) 실행
-  workflow_dispatch: # 수동 실행 가능
+    - cron: '*/5 * * * *' # 5분마다 실행
+  workflow_dispatch:
+ # 수동 실행 가능
     inputs:
       prompt:
         description: 'AI 이미지 생성 프롬프트 (비워두면 랜덤)'
@@ -16,7 +17,7 @@ on:
 
 jobs:
   create-and-upload:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
