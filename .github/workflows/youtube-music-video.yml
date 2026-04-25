@@ -12,7 +12,7 @@ on:
       music_url:
         description: '무료 음악 MP3 URL'
         required: false
-        default: 'https://cdn.pixabay.com/audio/2022/05/27/audio_180873748b.mp3'
+        default: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
 
 jobs:
   create-and-upload:

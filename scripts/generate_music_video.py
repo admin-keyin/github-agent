@@ -5,7 +5,10 @@ import sys
 
 def download_file(url, filename):
     print(f"Downloading {url}...")
-    response = requests.get(url, stream=True)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    response = requests.get(url, stream=True, headers=headers)
     if response.status_code == 200:
         with open(filename, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
