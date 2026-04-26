@@ -3,21 +3,19 @@ import requests
 import numpy as np
 from scipy.io import wavfile
 from pydub import AudioSegment
-from moviepy.editor import ImageClip, AudioFileClip
 import random
 import sys
+import subprocess
 
 def generate_sleep_sound(duration_sec, output_path):
-    print(f"Generating procedural sleep music ({duration_sec}s)...")
-    fs = 44100  # Sample rate
+    print(f"Generating base sound ({duration_sec}s)...")
+    fs = 44100
     t = np.linspace(0, duration_sec, int(fs * duration_sec), False)
 
-    # 1. 딥 드론 (Deep Drone) - 솔페지오 주파수 기반
     base_freq = random.choice([174, 432, 528])
     drone = np.sin(base_freq * 2 * np.pi * t) * 0.3
-    drone += np.sin((base_freq / 2) * 2 * np.pi * t) * 0.2 # 서브 베이스
+    drone += np.sin((base_freq / 2) * 2 * np.pi * t) * 0.2
     
-    # 2. 다중 노이즈 레이어 생성 (2~5개 랜덤 레이어)
     from scipy.signal import butter, lfilter
     def lowpass(data, cutoff, fs, order=5):
         nyq = 0.5 * fs
@@ -25,46 +23,56 @@ def generate_sleep_sound(duration_sec, output_path):
         b, a = butter(order, normal_cutoff, btype='low', analog=False)
         return lfilter(b, a, data)
 
-    num_layers = random.randint(2, 5)
+    num_layers = random.randint(3, 6)
     noise_combined = np.zeros_like(t)
-    print(f"Adding {num_layers} layers of noise for rich texture...")
-    
-    for i in range(num_layers):
+    for _ in range(num_layers):
         layer_noise = np.random.normal(0, 1, len(t))
-        # 각 레이어마다 다른 컷오프 주파수와 볼륨 적용
-        cutoff = random.randint(200, 2000)
-        volume = random.uniform(0.02, 0.08)
-        noise_combined += lowpass(layer_noise, cutoff, fs) * volume
+        cutoff = random.randint(200, 1200)
+        noise_combined += lowpass(layer_noise, cutoff, fs) * random.uniform(0.02, 0.06)
     
-    # 3. 맥동 효과 (Pulsing) - 1~30초 랜덤 주기
-    pulse_period = random.uniform(1, 30)
-    pulse_freq = 1.0 / pulse_period
-    print(f"Applying pulse effect with period of {pulse_period:.2f} seconds.")
-    
-    pulse = (np.sin(pulse_freq * 2 * np.pi * t) + 1) / 2
+    pulse_period = random.uniform(5, 20)
+    pulse = (np.sin((1.0/pulse_period) * 2 * np.pi * t) + 1) / 2
     final_wave = (drone + noise_combined) * pulse
 
-    # Normalize to 16-bit PCM
-    max_val = np.max(np.abs(final_wave))
-    if max_val > 0:
-        final_wave = (final_wave / max_val * 32767).astype(np.int16)
-    else:
-        final_wave = final_wave.astype(np.int16)
-    
-    temp_wav = "temp/generated.wav"
+    final_wave = (final_wave / np.max(np.abs(final_wave)) * 32767).astype(np.int16)
+    temp_wav = "temp/base.wav"
     os.makedirs("temp", exist_ok=True)
     wavfile.write(temp_wav, fs, final_wave)
     
-    # WAV to MP3 conversion using pydub
     audio = AudioSegment.from_wav(temp_wav)
     audio.export(output_path, format="mp3")
-    print(f"Procedural music generated: {output_path}")
+
+def create_8h_video(image_path, audio_path, output_path):
+    print("Creating 8-hour video (High-speed concatenation mode)...")
+    
+    # 1. 5분짜리 단기 영상 생성 (용량 최적화를 위해 720p 사용)
+    short_video = "temp/short.mp4"
+    cmd_short = [
+        "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
+        "-c:v", "libx264", "-t", "300", "-pix_fmt", "yuv420p", "-vf", "scale=1280:720",
+        "-preset", "ultrafast", "-crf", "30", "-c:a", "aac", "-b:a", "128k", short_video
+    ]
+    subprocess.run(cmd_short, check=True)
+
+    # 2. 5분 영상을 96번 반복 (96 * 5분 = 8시간)
+    with open("temp/concat.txt", "w") as f:
+        for _ in range(96):
+            # ffmpeg concat 필터는 상대 경로를 사용해야 안전함
+            f.write(f"file 'short.mp4'\n")
+    
+    # temp 폴더 안에서 실행하여 경로 문제 방지
+    cmd_concat = [
+        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "temp/concat.txt",
+        "-c", "copy", output_path
+    ]
+    subprocess.run(cmd_concat, check=True)
+    print(f"Final 8-hour video created: {output_path}")
 
 def generate_ai_image(prompt, filename):
-    print(f"Generating image: {prompt}")
+    print(f"Generating background: {prompt}")
     encoded_prompt = requests.utils.quote(prompt)
     seed = random.randint(1, 99999999)
-    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1920&height=1080&nologo=true&seed={seed}"
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&nologo=true&seed={seed}"
     headers = {'User-Agent': 'Mozilla/5.0'}
     response = requests.get(url, headers=headers)
     with open(filename, 'wb') as f:
@@ -72,23 +80,20 @@ def generate_ai_image(prompt, filename):
 
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
-    final_audio = "temp/final.mp3"
+    base_audio = "temp/base.mp3"
     image_file = "temp/bg.jpg"
-    video_file = "output_music_video.mp4"
+    final_video = "output_music_video.mp4"
 
-    # 1. 수학적으로 새로운 수면 음악 생성 (3분)
-    generate_sleep_sound(180, final_audio)
-
-    # 2. 이미지 생성
+    # 1. 5분 사운드 생성
+    generate_sleep_sound(300, base_audio)
+    
+    # 2. 이미지 생성 (수면용 어두운 테마)
     prompts = [
-        "extremely dark night, minimalistic charcoal painting, very low brightness, starry sky, sleep mood",
-        "deep blue midnight sky with soft nebula, dark landscape, peaceful silence, dark aesthetic",
-        "dark bedroom with a soft ember glow, window with rain drops, night atmosphere, lo-fi dark"
+        "dark peaceful midnight landscape, dim moonlight, soft minimalist painting, very low brightness",
+        "starry sky over a still dark lake, deep charcoal and blue tones, serene silence",
+        "minimalist deep space nebula, extremely dark purple and black, ethereal and quiet"
     ]
     generate_ai_image(random.choice(prompts), image_file)
-
-    # 3. 영상 합성
-    audio = AudioFileClip(final_audio)
-    clip = ImageClip(image_file).set_duration(audio.duration)
-    video = clip.set_audio(audio).fadein(7).fadeout(7)
-    video.write_videofile(video_file, fps=24, codec="libx264", audio_codec="aac")
+    
+    # 3. 8시간 영상으로 확장
+    create_8h_video(image_file, base_audio, final_video)
