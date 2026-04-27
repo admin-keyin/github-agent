@@ -43,7 +43,7 @@ def run_task():
         # 제목과 설명도 환경변수로 전달 (이미 .env.local에 있을 수 있음)
         env = os.environ.copy()
         if "VIDEO_TITLE" not in env:
-            env["VIDEO_TITLE"] = "음량에 따라 잘떄도, 공부할때도 좋은 백색소음"
+            env["VIDEO_TITLE"] = "음량에 따라 잘때도, 공부할때도 좋은 백색소음"
         if "VIDEO_DESCRIPTION" not in env:
             env["VIDEO_DESCRIPTION"] = "made by keyin."
 
