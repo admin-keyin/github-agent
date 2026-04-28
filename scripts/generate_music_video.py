@@ -8,12 +8,14 @@ import sys
 import subprocess
 
 def generate_sleep_sound(duration_sec, output_path):
-    # 솔페지오 주파수 및 설명
-    frequencies = {
+    # 솔페지오 주파수 정의 (특정 주파수일 경우 설명 제공)
+    solfeggio_desc = {
         174: "Pain Relief", 432: "Deep Relaxation", 528: "DNA Repair", 639: "Connection"
     }
-    base_freq = random.choice(list(frequencies.keys()))
-    description = frequencies[base_freq]
+    
+    # 1~1000Hz 사이의 가변 랜덤 주파수 생성
+    base_freq = random.randint(1, 1000)
+    description = solfeggio_desc.get(base_freq, "Deep Meditation & Healing")
     
     fs = 44100
     t = np.linspace(0, duration_sec, int(fs * duration_sec), False)
