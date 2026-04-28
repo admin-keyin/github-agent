@@ -8,39 +8,69 @@ import sys
 import subprocess
 
 def generate_sleep_sound(duration_sec, output_path):
-    print(f"Generating base sound ({duration_sec}s)...")
+    # 솔페지오 주파수 및 설명
+    frequencies = {
+        174: "Pain Relief", 432: "Deep Relaxation", 528: "DNA Repair", 639: "Connection"
+    }
+    base_freq = random.choice(list(frequencies.keys()))
+    description = frequencies[base_freq]
+    
     fs = 44100
     t = np.linspace(0, duration_sec, int(fs * duration_sec), False)
-
-    base_freq = random.choice([174, 432, 528])
-    drone = np.sin(base_freq * 2 * np.pi * t) * 0.3
-    drone += np.sin((base_freq / 2) * 2 * np.pi * t) * 0.2
     
+    # 1. 바이노럴 비트 & 솔페지오 톤
+    beat_freq = random.uniform(1.0, 3.0)
+    left_tone = np.sin(base_freq * 2 * np.pi * t) * 0.15
+    right_tone = np.sin((base_freq + beat_freq) * 2 * np.pi * t) * 0.15
+    
+    # 2. ASMR 레이어: 빗소리 (Pinkish/Brownish Noise)
+    # 핑크 노이즈 생성 후 로우패스 필터로 부드러운 빗소리 구현
     from scipy.signal import butter, lfilter
-    def lowpass(data, cutoff, fs, order=5):
+    def lowpass(data, cutoff, fs, order=2):
         nyq = 0.5 * fs
-        normal_cutoff = cutoff / nyq
-        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        b, a = butter(order, cutoff / nyq, btype='low')
         return lfilter(b, a, data)
 
-    num_layers = random.randint(3, 6)
-    noise_combined = np.zeros_like(t)
-    for _ in range(num_layers):
-        layer_noise = np.random.normal(0, 1, len(t))
-        cutoff = random.randint(200, 1200)
-        noise_combined += lowpass(layer_noise, cutoff, fs) * random.uniform(0.02, 0.06)
+    rain_raw = np.random.normal(0, 1, len(t))
+    rain_sound = lowpass(rain_raw, 800, fs) * 0.08
     
-    pulse_period = random.uniform(5, 20)
-    pulse = (np.sin((1.0/pulse_period) * 2 * np.pi * t) + 1) / 2
-    final_wave = (drone + noise_combined) * pulse
+    # 3. ASMR 레이어: 모닥불 장작 소리 (Crackling)
+    # 짧은 고주파 펄스를 불규칙하게 배치
+    crackling = np.zeros_like(t)
+    num_cracks = int(duration_sec * 2) # 초당 약 2번의 탁탁 소리
+    for _ in range(num_cracks):
+        pos = random.randint(0, len(t) - 1)
+        duration = random.randint(5, 20) # 아주 짧은 순간
+        if pos + duration < len(t):
+            crackling[pos:pos+duration] = np.random.normal(0, 1, duration) * 0.1
+    
+    # 4. 공간감 (Panning)
+    # 소리가 좌우로 아주 천천히 이동하도록 설정
+    pan_speed = 0.05
+    pan = (np.sin(pan_speed * 2 * np.pi * t) + 1) / 2 # 0 ~ 1 사이 진동
+    
+    final_l = (left_tone + rain_sound + crackling) * (1 - pan * 0.3)
+    final_r = (right_tone + rain_sound + crackling) * (pan * 0.3 + 0.7)
 
-    final_wave = (final_wave / np.max(np.abs(final_wave)) * 32767).astype(np.int16)
+    # 5. 수면 유도를 위한 부드러운 맥동 (Breath-like pulsation)
+    pulse = (np.sin((1.0/12.0) * 2 * np.pi * t) + 1.2) / 2.2
+    final_l *= pulse
+    final_r *= pulse
+
+    # 정규화 및 저장
+    final_l = (final_l / np.max(np.abs(final_l)) * 28000).astype(np.int16)
+    final_r = (final_r / np.max(np.abs(final_r)) * 28000).astype(np.int16)
+    stereo_wave = np.vstack((final_l, final_r)).T.flatten()
+
     temp_wav = "temp/base.wav"
     os.makedirs("temp", exist_ok=True)
-    wavfile.write(temp_wav, fs, final_wave)
+    wavfile.write(temp_wav, fs, stereo_wave.reshape(-1, 2))
     
     audio = AudioSegment.from_wav(temp_wav)
     audio.export(output_path, format="mp3")
+    
+    return base_freq, f"{description} with Soft Rain & Fire Crackling"
+
 
 def create_8h_video(image_path, audio_path, output_path):
     print("Creating 8-hour video (High-speed concatenation mode)...")
@@ -57,10 +87,8 @@ def create_8h_video(image_path, audio_path, output_path):
     # 2. 5분 영상을 96번 반복 (96 * 5분 = 8시간)
     with open("temp/concat.txt", "w") as f:
         for _ in range(96):
-            # ffmpeg concat 필터는 상대 경로를 사용해야 안전함
             f.write(f"file 'short.mp4'\n")
     
-    # temp 폴더 안에서 실행하여 경로 문제 방지
     cmd_concat = [
         "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "temp/concat.txt",
         "-c", "copy", output_path
@@ -84,10 +112,10 @@ if __name__ == "__main__":
     image_file = "temp/bg.jpg"
     final_video = "output_music_video.mp4"
 
-    # 1. 5분 사운드 생성
-    generate_sleep_sound(300, base_audio)
+    # 1. 5분 사운드 생성 (선택된 주파수 정보 획득)
+    freq, desc = generate_sleep_sound(300, base_audio)
     
-    # 2. 이미지 생성 (수면용 어두운 테마)
+    # 2. 이미지 생성
     prompts = [
         "dark peaceful midnight landscape, dim moonlight, soft minimalist painting, very low brightness",
         "starry sky over a still dark lake, deep charcoal and blue tones, serene silence",
@@ -97,3 +125,7 @@ if __name__ == "__main__":
     
     # 3. 8시간 영상으로 확장
     create_8h_video(image_file, base_audio, final_video)
+    
+    # 4. 정보 저장 (업로드 스크립트에서 읽을 수 있도록)
+    with open("temp/video_info.txt", "w") as f:
+        f.write(f"{freq}Hz | {desc}")
