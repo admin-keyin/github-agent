@@ -4,6 +4,7 @@ import json
 import time
 import re
 import argparse
+import sys
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -43,19 +44,28 @@ class DucktemCrawler:
         self.results = []
 
     def save(self):
-        if not self.results: return
+        if not self.results:
+            print(f"⚠️ '{self.keyword}' 수집된 결과가 없습니다.")
+            return
+        
         data = []
         for i in self.results:
-            data.append({
+            item = {
                 "title": i['title'][:200],
                 "price": int(i['price'] or 0),
                 "image_url": i['image'],
                 "source_url": i['url'],
                 "source_platform": i['platform'],
-                "country_code": i['country'],
                 "animation_id": self.animation_id
-            })
-        requests.post(f"{SUPABASE_URL}/rest/v1/goods", headers=HEADERS_SUPA, data=json.dumps(data))
+            }
+            # country_code 컬럼이 DB에 확실히 추가되기 전까지는 제외
+            data.append(item)
+        
+        res = requests.post(f"{SUPABASE_URL}/rest/v1/goods", headers=HEADERS_SUPA, data=json.dumps(data))
+        if res.status_code in [200, 201]:
+            print(f"✅ '{self.keyword}' ({len(data)}개) DB 동기화 완료")
+        else:
+            print(f"❌ '{self.keyword}' 저장 실패: {res.status_code} {res.text[:100]}")
 
     def crawl_bunjang(self):
         try:
