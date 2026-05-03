@@ -1,30 +1,34 @@
 import os
+import sys
 import requests
 import json
 import time
 import re
 import argparse
-import sys
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 # .env.local 로드 (로컬 실행 시)
-load_dotenv(dotenv_path='.env.local')
+if os.path.exists('.env.local'):
+    load_dotenv(dotenv_path='.env.local')
 
 # 환경 변수 우선순위: 1. 시스템 환경변수(GitHub Actions) 2. .env.local
 SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL') or os.getenv('SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_KEY')
+SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_KEY') or os.getenv('SUPABASE_ANON_KEY')
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ 에러: SUPABASE_URL 또는 SUPABASE_KEY가 설정되지 않았습니다.")
-    print("GitHub Secrets 또는 .env.local 파일을 확인해주세요.")
-    sys.exit(1)
+def validate_config():
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        print("❌ 에러: SUPABASE_URL 또는 SUPABASE_KEY가 설정되지 않았습니다.")
+        print("GitHub Secrets 또는 .env.local 파일을 확인해주세요.")
+        sys.exit(1)
 
-# URL 형식 검증
-if not SUPABASE_URL.startswith('http'):
-    print(f"❌ 에러: 잘못된 SUPABASE_URL 형식입니다: {SUPABASE_URL}")
-    sys.exit(1)
+    if not SUPABASE_URL.startswith('http'):
+        print(f"❌ 에러: 잘못된 SUPABASE_URL 형식입니다: {SUPABASE_URL}")
+        sys.exit(1)
+
+# 설정 검증 실행
+validate_config()
 
 HEADERS_SUPA = {
     "apikey": SUPABASE_KEY,
@@ -58,83 +62,31 @@ class DucktemCrawler:
                 "source_platform": i['platform'],
                 "animation_id": self.animation_id
             }
-            # country_code 컬럼이 DB에 확실히 추가되기 전까지는 제외
+            # country_code는 DB에 컬럼이 있을 때만 추가되도록 (현재는 제외하여 에러 방지)
             data.append(item)
         
-        res = requests.post(f"{SUPABASE_URL}/rest/v1/goods", headers=HEADERS_SUPA, data=json.dumps(data))
-        if res.status_code in [200, 201]:
-            print(f"✅ '{self.keyword}' ({len(data)}개) DB 동기화 완료")
-        else:
-            print(f"❌ '{self.keyword}' 저장 실패: {res.status_code} {res.text[:100]}")
+        try:
+            res = requests.post(f"{SUPABASE_URL}/rest/v1/goods", headers=HEADERS_SUPA, data=json.dumps(data))
+            if res.status_code in [200, 201]:
+                print(f"✅ '{self.keyword}' ({len(data)}개) DB 동기화 완료")
+            elif res.status_code == 409:
+                print(f"ℹ️ '{self.keyword}' 중복된 데이터는 건너뛰었습니다.")
+            else:
+                print(f"❌ '{self.keyword}' 저장 실패: {res.status_code} {res.text[:100]}")
+        except Exception as e:
+            print(f"❌ DB 통신 에러: {e}")
 
     def crawl_bunjang(self):
         try:
             url = f"https://api.bunjang.co.kr/api/1/find_v2.json?q={self.keyword}&order=date&n=20"
             res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
-            for i in res.json().get('list', []):
-                self.results.append({
-                    "title": i.get('name'), "price": i.get('price'), "image": i.get('product_image'),
-                    "url": f"https://m.bunjang.co.kr/products/{i.get('pid')}", "platform": "Bunjang", "country": "KR"
-                })
+            if res.status_code == 200:
+                for i in res.json().get('list', []):
+                    self.results.append({
+                        "title": i.get('name'), "price": i.get('price'), "image": i.get('product_image'),
+                        "url": f"https://m.bunjang.co.kr/products/{i.get('pid')}", "platform": "Bunjang", "country": "KR"
+                    })
         except: pass
-
-    def crawl_dokidokigoods(self):
-        """국내 굿즈샵: 두근두근굿즈 수집"""
-        print(f"💓 [DokiDoki] '{self.keyword}' 수집 중...")
-        try:
-            url = f"https://dokidokigoods.co.kr/product/search.html?keyword={self.keyword}"
-            res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
-            soup = BeautifulSoup(res.text, 'lxml')
-            
-            # 두근두근굿즈 상품 리스트 파싱
-            for el in soup.select('.prdList > li'):
-                name_el = el.select_one('.description .name a')
-                price_el = el.select_one('.description .price') 
-                img_el = el.select_one('.thumbnail img')
-                
-                if name_el and img_el:
-                    title = name_el.text.strip()
-                    price_text = price_el.text.strip() if price_el else "0"
-                    price = int(re.sub(r'[^\d]', '', price_text)) if price_text else 0
-                    link = "https://dokidokigoods.co.kr" + name_el.get('href')
-                    
-                    self.results.append({
-                        "title": f"[두근두근] {title}", "price": price, 
-                        "image": "https:" + img_el.get('src') if img_el.get('src').startswith('//') else img_el.get('src'), 
-                        "url": link, "platform": "DokiDoki", "country": "KR"
-                    })
-        except Exception as e:
-            print(f"DokiDoki Error: {e}")
-
-    def crawl_ittanstore(self):
-        """국내 정품 굿즈샵: 이딴가게 수집"""
-        print(f"📦 [IttanStore] '{self.keyword}' 수집 중...")
-        # 이딴가게 검색 또는 카테고리 기반 수집
-        try:
-            # 검색어 기반 수집
-            url = f"https://ittanstore.com/product/search.html?keyword={self.keyword}"
-            res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
-            soup = BeautifulSoup(res.text, 'lxml')
-            
-            # 이딴가게 상품 리스트 파싱 (Cafe24 기반 구조)
-            for el in soup.select('.prdList > li'):
-                name_el = el.select_one('.name a')
-                price_el = el.select_one('.xans-record- span') # 가격 요소
-                img_el = el.select_one('.thumbnail img')
-                
-                if name_el and img_el:
-                    title = name_el.text.strip()
-                    price_text = price_el.text.strip() if price_el else "0"
-                    price = int(re.sub(r'[^\d]', '', price_text)) if price_text else 0
-                    link = "https://ittanstore.com" + name_el.get('href')
-                    
-                    self.results.append({
-                        "title": f"[이딴가게] {title}", "price": price, 
-                        "image": "https:" + img_el.get('src') if img_el.get('src').startswith('//') else img_el.get('src'), 
-                        "url": link, "platform": "IttanStore", "country": "KR"
-                    })
-        except Exception as e:
-            print(f"IttanStore Error: {e}")
 
     def crawl_daangn(self):
         try:
@@ -156,6 +108,48 @@ class DucktemCrawler:
                     })
         except: pass
 
+    def crawl_ittanstore(self):
+        try:
+            url = f"https://ittanstore.com/product/search.html?keyword={self.keyword}"
+            res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
+            soup = BeautifulSoup(res.text, 'lxml')
+            for el in soup.select('.prdList > li'):
+                name_el = el.select_one('.name a')
+                price_el = el.select_one('.xans-record- span')
+                img_el = el.select_one('.thumbnail img')
+                if name_el and img_el:
+                    price_text = price_el.text.strip() if price_el else "0"
+                    price = int(re.sub(r'[^\d]', '', price_text)) if price_text else 0
+                    img_src = img_el.get('src')
+                    if img_src.startswith('//'): img_src = "https:" + img_src
+                    self.results.append({
+                        "title": f"[이딴가게] {name_el.text.strip()}", "price": price, 
+                        "image": img_src, "url": "https://ittanstore.com" + name_el.get('href'), 
+                        "platform": "IttanStore", "country": "KR"
+                    })
+        except: pass
+
+    def crawl_dokidokigoods(self):
+        try:
+            url = f"https://dokidokigoods.co.kr/product/search.html?keyword={self.keyword}"
+            res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
+            soup = BeautifulSoup(res.text, 'lxml')
+            for el in soup.select('.prdList > li'):
+                name_el = el.select_one('.description .name a')
+                price_el = el.select_one('.description .price') 
+                img_el = el.select_one('.thumbnail img')
+                if name_el and img_el:
+                    price_text = price_el.text.strip() if price_el else "0"
+                    price = int(re.sub(r'[^\d]', '', price_text)) if price_text else 0
+                    img_src = img_el.get('src')
+                    if img_src.startswith('//'): img_src = "https:" + img_src
+                    self.results.append({
+                        "title": f"[두근두근] {name_el.text.strip()}", "price": price, 
+                        "image": img_src, "url": "https://dokidokigoods.co.kr" + name_el.get('href'), 
+                        "platform": "DokiDoki", "country": "KR"
+                    })
+        except: pass
+
     def crawl_heyprice(self):
         try:
             url = f"https://heyprice.co.kr/search/yahoo_auction?keyword={self.keyword}"
@@ -165,8 +159,7 @@ class DucktemCrawler:
                 title = el.select_one('.item-name').text.strip()
                 price = int(re.sub(r'[^\d]', '', el.select_one('.item-price').text))
                 img = el.select_one('img').get('src')
-                link = "https://heyprice.co.kr" + el.select_one('a').get('href')
-                self.results.append({"title": f"[해외직구] {title}", "price": price, "image": img, "url": link, "platform": "HeyPrice", "country": "JP"})
+                self.results.append({"title": f"[해외직구] {title}", "price": price, "image": img, "url": "https://heyprice.co.kr" + el.select_one('a').get('href'), "platform": "HeyPrice", "country": "JP"})
         except: pass
 
     def crawl_bidbuy(self):
@@ -175,11 +168,12 @@ class DucktemCrawler:
             res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
             soup = BeautifulSoup(res.text, 'lxml')
             for el in soup.select('.item_list_box')[:10]:
-                title = el.select_one('.item_name').text.strip()
-                price = int(re.sub(r'[^\d]', '', el.select_one('.price_won').text))
-                img = el.select_one('.item_img img').get('src')
-                link = "https://www.bidbuy.co.kr" + el.select_one('a').get('href')
-                self.results.append({"title": f"[비드바이] {title}", "price": price, "image": img, "url": link, "platform": "Bidbuy", "country": "JP"})
+                title_el = el.select_one('.item_name')
+                price_el = el.select_one('.price_won')
+                img_el = el.select_one('.item_img img')
+                if title_el and price_el:
+                    price = int(re.sub(r'[^\d]', '', price_el.text))
+                    self.results.append({"title": f"[비드바이] {title_el.text.strip()}", "price": price, "image": img_el.get('src') if img_el else "", "url": "https://www.bidbuy.co.kr" + el.select_one('a').get('href'), "platform": "Bidbuy", "country": "JP"})
         except: pass
 
     def crawl_yahoo_jp(self):
@@ -187,7 +181,7 @@ class DucktemCrawler:
             url = f"https://auctions.yahoo.co.jp/search/search?p={self.keyword}"
             res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
             soup = BeautifulSoup(res.text, 'lxml')
-            for el in soup.select('.Product')[:15]:
+            for el in soup.select('.Product')[:10]:
                 title_el = el.select_one('.Product__titleLink')
                 price_el = el.select_one('.Product__priceValue')
                 if title_el and price_el:
@@ -200,7 +194,7 @@ class DucktemCrawler:
             url = f"https://www.ebay.com/sch/i.html?_nkw={self.keyword.replace(' ', '+')}"
             res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
             soup = BeautifulSoup(res.text, 'lxml')
-            for el in soup.select('.s-item__wrapper')[:15]:
+            for el in soup.select('.s-item__wrapper')[:10]:
                 title = el.select_one('.s-item__title')
                 price_el = el.select_one('.s-item__price')
                 if title and price_el:
@@ -210,50 +204,40 @@ class DucktemCrawler:
         except: pass
 
 class DucktemEventCrawler:
-    """공식 팝업스토어 및 이벤트 크롤러"""
     def __init__(self):
         self.events = []
 
-    def crawl_hyundai_popups(self):
-        """더현대/현대백화점 공식 팝업 정보 파싱"""
-        print("🏢 [Hyundai] 공식 팝업 정보 수집 중...")
-        # 실제 운영 시 현대백화점 이벤트 페이지(https://www.ehyundai.com/newGP/EV/EV000001_L.do) 파싱
-        # 현재는 구조적 수집 틀 마련
-        pass
-
     def crawl_animate_korea(self):
-        """애니메이트 코리아 공식 이벤트 수집"""
         print("🎨 [Animate KR] 공식 이벤트 수집 중...")
         try:
             url = "https://www.animate-onlineshop.co.kr/goods/event.php"
             res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
             soup = BeautifulSoup(res.text, 'lxml')
-            # 애니메이트 이벤트 페이지 구조에 맞춰 파싱 (예시 셀렉터)
             for el in soup.select('.event_list li')[:5]:
-                title = el.select_one('.event_title').text.strip()
-                link = "https://www.animate-onlineshop.co.kr" + el.select_one('a').get('href')
-                # 실제 날짜 파싱 로직 추가 가능
-                self.events.append({
-                    "title": f"[Animate KR] {title}",
-                    "start_date": datetime.now().strftime('%Y-%m-%d'),
-                    "end_date": (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d'),
-                    "location": "애니메이트 매장 (홍대/부산 등)",
-                    "detail_link": link
-                })
+                title_el = el.select_one('.event_title')
+                if title_el:
+                    self.events.append({
+                        "title": f"[Animate KR] {title_el.text.strip()}",
+                        "start_date": datetime.now().strftime('%Y-%m-%d'),
+                        "end_date": (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d'),
+                        "location": "애니메이트 매장",
+                        "detail_link": "https://www.animate-onlineshop.co.kr" + el.select_one('a').get('href')
+                    })
         except: pass
 
     def save(self):
         if not self.events: return
-        # 중복 방지를 위해 title을 기준으로 체크하거나 Upsert 활용
         requests.post(f"{SUPABASE_URL}/rest/v1/events", headers=HEADERS_SUPA, data=json.dumps(self.events))
 
 def get_or_create_animation(title):
-    res = requests.get(f"{SUPABASE_URL}/rest/v1/animations?title=eq.{title}", headers=HEADERS_SUPA)
-    data = res.json()
-    if data: return data[0]['id']
-    res = requests.post(f"{SUPABASE_URL}/rest/v1/animations", headers=HEADERS_SUPA, data=json.dumps({"title": title}))
-    res = requests.get(f"{SUPABASE_URL}/rest/v1/animations?title=eq.{title}", headers=HEADERS_SUPA)
-    return res.json()[0]['id'] if res.json() else None
+    try:
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/animations?title=eq.{title}", headers=HEADERS_SUPA)
+        data = res.json()
+        if data: return data[0]['id']
+        res = requests.post(f"{SUPABASE_URL}/rest/v1/animations", headers=HEADERS_SUPA, data=json.dumps({"title": title}))
+        res = requests.get(f"{SUPABASE_URL}/rest/v1/animations?title=eq.{title}", headers=HEADERS_SUPA)
+        return res.json()[0]['id'] if res.json() else None
+    except: return None
 
 def main():
     parser = argparse.ArgumentParser()
@@ -261,56 +245,35 @@ def main():
     args = parser.parse_args()
 
     genres = [
-        {"title": "나루토", "kws": [
-            "나루토 원단", "Naruto fabric", "ナルト 生地",
-            "나루토 피규어", "Naruto figure", "ナルト フィギュア",
-            "나루토 인형", "Naruto plush", "ナルト ぬいぐるみ",
-            "나루토 굿즈", "Naruto goods", "ナルト グッズ",
-            "나루토 한정판", "Naruto limited", "ナルト 限定"
-        ]},
-        {"title": "짱구는못말려", "kws": ["짱구", "Crayon Shin-chan", "クレヨンしんちゃん"]},
-        {"title": "도라에몽", "kws": ["도라에몽", "Doraemon", "ドラえもん"]},
-        {"title": "산리오", "kws": ["산리오", "Sanrio", "サンリオ"]},
-        {"title": "치이카와", "kws": ["치이카와", "Chiikawa", "ちいかわ"]},
-        {"title": "카드캡터체리", "kws": ["카드캡터체리", "Cardcaptor Sakura", "カードキャプターさくら"]},
-        {"title": "세일러문", "kws": ["세일러문", "Sailor Moon", "セーラームーン"]},
-        {"title": "슈가슈가룬", "kws": ["슈가슈가룬", "Sugar Sugar Rune", "シュガシュガルーン"]},
-        {"title": "케로로", "kws": ["케로로", "Keroro", "ケロロ軍曹"]},
-        {"title": "원피스", "kws": ["원피스 굿즈", "One Piece", "ワンピース"]},
-        {"title": "블리치", "kws": ["블리치", "Bleach", "ブリーチ"]},
-        {"title": "나의히어로아카데미아", "kws": ["히로아카", "My Hero Academia", "僕のヒーローアカデミア"]},
-        {"title": "톰과제리", "kws": ["톰과제리", "Tom and Jerry", "トムとジェリー"]},
-        {"title": "괴수8호", "kws": ["괴수8호", "Kaiju No. 8", "怪獣8号"]},
-        {"title": "문호스트레이독스", "kws": ["문스독", "Bungo Stray Dogs", "文豪ストレイドッグ스"]},
-        {"title": "데스노트", "kws": ["데스노트", "Death Note", "デスノート"]},
-        {"title": "주술회전", "kws": ["주술회전", "Jujutsu Kaisen", "呪術廻戦"]},
-        {"title": "귀멸의 칼날", "kws": ["귀멸", "Demon Slayer", "鬼滅の刃"]},
-        {"title": "슬램덩크", "kws": ["슬램덩크", "Slam Dunk", "スラムダン크"]},
-        {"title": "헌터x헌터", "kws": ["헌터x헌터", "Hunter x Hunter", "ハンターハンター"]},
-        {"title": "사카모토데이즈", "kws": ["사카모토 데이즈", "Sakamoto Days", "サカモトデイズ"]},
-        {"title": "윈드브레이커", "kws": ["윈드브레이커", "Wind Breaker", "ウィンドブレイカー"]},
-        {"title": "명탐정코난", "kws": ["명탐정 코난", "Detective Conan", "名探偵コナン"]}
+        {"title": "나루토", "kws": ["나루토", "Naruto", "ナルト"]},
+        {"title": "짱구는못말려", "kws": ["짱구", "Crayon Shin-chan"]},
+        {"title": "치이카와", "kws": ["치이카와", "Chiikawa"]},
+        {"title": "하이큐", "kws": ["하이큐", "Haikyuu"]},
+        {"title": "주술회전", "kws": ["주술회전", "Jujutsu Kaisen"]},
+        {"title": "귀멸의 칼날", "kws": ["귀멸", "Demon Slayer"]},
+        {"title": "슬램덩크", "kws": ["슬램덩크", "Slam Dunk"]},
+        {"title": "명탐정코난", "kws": ["명탐정 코난", "Detective Conan"]}
     ]
+
     if args.keyword:
+        print(f"🚀 집중 수집 시작: {args.keyword}")
         anim_id = get_or_create_animation("기타/요청")
-        crawler = DucktemCrawler(args.keyword, anim_id)
-        crawler.crawl_bunjang(); crawler.crawl_daangn(); crawler.crawl_dokidokigoods(); crawler.crawl_ittanstore(); crawler.crawl_heyprice(); crawler.crawl_bidbuy(); crawler.crawl_yahoo_jp(); crawler.crawl_ebay_us()
-        crawler.save()
+        c = DucktemCrawler(args.keyword, anim_id)
+        c.crawl_bunjang(); c.crawl_daangn(); c.crawl_ittanstore(); c.crawl_dokidokigoods()
+        c.crawl_heyprice(); c.crawl_bidbuy(); c.crawl_yahoo_jp(); c.crawl_ebay_us(); c.save()
         return
 
-    # 1. 굿즈 수집
     for g in genres:
         anim_id = get_or_create_animation(g['title'])
         for kw in g['kws']:
             c = DucktemCrawler(kw, anim_id)
-            c.crawl_bunjang(); c.crawl_daangn(); c.crawl_dokidokigoods(); c.crawl_ittanstore(); c.crawl_heyprice(); c.crawl_bidbuy(); c.crawl_yahoo_jp(); c.crawl_ebay_us(); c.save()
-            time.sleep(2)
+            c.crawl_bunjang(); c.crawl_daangn(); c.crawl_ittanstore(); c.crawl_dokidokigoods()
+            c.crawl_heyprice(); c.crawl_bidbuy(); c.crawl_yahoo_jp(); c.crawl_ebay_us(); c.save()
+            time.sleep(1)
         print(f"✅ {g['title']} 동기화 완료")
 
-    # 2. 공식 이벤트 수집
     e = DucktemEventCrawler()
     e.crawl_animate_korea()
-    e.crawl_hyundai_popups()
     e.save()
     print("📅 공식 이벤트 동기화 완료")
 
