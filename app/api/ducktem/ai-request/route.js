@@ -5,10 +5,10 @@ export async function POST(req) {
     const { keyword } = await req.json();
     
     // GitHub API를 통해 Workflow 트리거
-    const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/dispatches`, {
+    const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER || process.env.REPO_OWNER}/${process.env.GITHUB_REPO || process.env.REPO_NAME}/dispatches`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.GITHUB_PAT}`,
+        'Authorization': `Bearer ${process.env.GITHUB_PAT || process.env.MY_GITHUB_PAT}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },

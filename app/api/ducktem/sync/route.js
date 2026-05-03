@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 export async function POST(req) {
   try {
     // GitHub API를 통해 'Ducktem Goods Crawler' 워크플로우 즉시 실행
-    const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/actions/workflows/ducktem-crawler.yml/dispatches`, {
+    const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_OWNER || process.env.REPO_OWNER}/${process.env.GITHUB_REPO || process.env.REPO_NAME}/actions/workflows/ducktem-crawler.yml/dispatches`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.GITHUB_PAT}`,
+        'Authorization': `Bearer ${process.env.GITHUB_PAT || process.env.MY_GITHUB_PAT}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },
