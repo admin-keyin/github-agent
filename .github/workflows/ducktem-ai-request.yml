@@ -3,6 +3,12 @@ name: Ducktem AI On-Demand Crawler
 on:
   repository_dispatch:
     types: [ducktem-ai-request] # 외부(프론트엔드)에서 트리거
+  workflow_dispatch: # GitHub UI에서 수동 실행 가능
+    inputs:
+      keyword:
+        description: '수집할 굿즈 키워드 (예: 나루토 원단)'
+        required: true
+        default: '나루토'
 
 jobs:
   ai-crawl:
@@ -19,7 +25,7 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TARGET_KEYWORD: ${{ github.event.client_payload.keyword }}
+          TARGET_KEYWORD: ${{ github.event.client_payload.keyword || github.event.inputs.keyword }}
         run: |
           # 특정 키워드에 대해 전 세계를 뒤지는 모드로 실행
           python scripts/ducktem_crawler.py --keyword "$TARGET_KEYWORD"
