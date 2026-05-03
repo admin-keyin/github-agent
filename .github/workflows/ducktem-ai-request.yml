@@ -1,0 +1,30 @@
+name: Ducktem AI On-Demand Crawler
+
+on:
+  repository_dispatch:
+    types: [ducktem-ai-request] # 외부(프론트엔드)에서 트리거
+
+jobs:
+  ai-crawl:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install beautifulsoup4 lxml requests python-dotenv
+
+      - name: Run Targeted Crawler
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TARGET_KEYWORD: ${{ github.event.client_payload.keyword }}
+        run: |
+          # 특정 키워드에 대해 전 세계를 뒤지는 모드로 실행
+          python scripts/ducktem_crawler.py --keyword "$TARGET_KEYWORD"

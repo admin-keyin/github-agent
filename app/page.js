@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
+import Link from 'next/link';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -116,7 +117,11 @@ export default function Home() {
             <h1 className="text-4xl font-black tracking-tight">AGENT VAULT</h1>
             <p className="text-gray-500 mt-2 font-medium">관리자 전용 AI 에이전트 및 자격 증명 관리 시스템</p>
           </div>
-          {user ? (
+          <div className="flex items-center gap-4">
+            <Link href="/ducktem" className="px-6 py-3 bg-yellow-400 text-yellow-900 rounded-xl font-black hover:bg-yellow-500 transition-all shadow-md flex items-center gap-2">
+              🦆 DUCKTEM 이동
+            </Link>
+            {user ? (
             <div className="flex items-center gap-4 bg-white p-2 px-4 rounded-full shadow-sm border border-gray-100">
               <span className="text-sm font-bold text-indigo-600">{user.email}</span>
               <button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors uppercase">Logout</button>
@@ -126,6 +131,7 @@ export default function Home() {
               Google 계정으로 접속
             </button>
           )}
+          </div>
         </header>
 
         {!user ? (
