@@ -56,6 +56,64 @@ class DucktemCrawler:
                 })
         except: pass
 
+    def crawl_dokidokigoods(self):
+        """국내 굿즈샵: 두근두근굿즈 수집"""
+        print(f"💓 [DokiDoki] '{self.keyword}' 수집 중...")
+        try:
+            url = f"https://dokidokigoods.co.kr/product/search.html?keyword={self.keyword}"
+            res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
+            soup = BeautifulSoup(res.text, 'lxml')
+            
+            # 두근두근굿즈 상품 리스트 파싱
+            for el in soup.select('.prdList > li'):
+                name_el = el.select_one('.description .name a')
+                price_el = el.select_one('.description .price') 
+                img_el = el.select_one('.thumbnail img')
+                
+                if name_el and img_el:
+                    title = name_el.text.strip()
+                    price_text = price_el.text.strip() if price_el else "0"
+                    price = int(re.sub(r'[^\d]', '', price_text)) if price_text else 0
+                    link = "https://dokidokigoods.co.kr" + name_el.get('href')
+                    
+                    self.results.append({
+                        "title": f"[두근두근] {title}", "price": price, 
+                        "image": "https:" + img_el.get('src') if img_el.get('src').startswith('//') else img_el.get('src'), 
+                        "url": link, "platform": "DokiDoki", "country": "KR"
+                    })
+        except Exception as e:
+            print(f"DokiDoki Error: {e}")
+
+    def crawl_ittanstore(self):
+        """국내 정품 굿즈샵: 이딴가게 수집"""
+        print(f"📦 [IttanStore] '{self.keyword}' 수집 중...")
+        # 이딴가게 검색 또는 카테고리 기반 수집
+        try:
+            # 검색어 기반 수집
+            url = f"https://ittanstore.com/product/search.html?keyword={self.keyword}"
+            res = requests.get(url, headers=BROWSER_HEADERS, timeout=10)
+            soup = BeautifulSoup(res.text, 'lxml')
+            
+            # 이딴가게 상품 리스트 파싱 (Cafe24 기반 구조)
+            for el in soup.select('.prdList > li'):
+                name_el = el.select_one('.name a')
+                price_el = el.select_one('.xans-record- span') # 가격 요소
+                img_el = el.select_one('.thumbnail img')
+                
+                if name_el and img_el:
+                    title = name_el.text.strip()
+                    price_text = price_el.text.strip() if price_el else "0"
+                    price = int(re.sub(r'[^\d]', '', price_text)) if price_text else 0
+                    link = "https://ittanstore.com" + name_el.get('href')
+                    
+                    self.results.append({
+                        "title": f"[이딴가게] {title}", "price": price, 
+                        "image": "https:" + img_el.get('src') if img_el.get('src').startswith('//') else img_el.get('src'), 
+                        "url": link, "platform": "IttanStore", "country": "KR"
+                    })
+        except Exception as e:
+            print(f"IttanStore Error: {e}")
+
     def crawl_daangn(self):
         try:
             url = f"https://www.daangn.com/search/{self.keyword}"
@@ -211,11 +269,11 @@ def main():
         {"title": "윈드브레이커", "kws": ["윈드브레이커", "Wind Breaker", "ウィンドブレイカー"]},
         {"title": "명탐정코난", "kws": ["명탐정 코난", "Detective Conan", "名探偵コナン"]}
     ]
-
     if args.keyword:
         anim_id = get_or_create_animation("기타/요청")
-        c = DucktemCrawler(args.keyword, anim_id)
-        c.crawl_bunjang(); c.crawl_daangn(); c.crawl_heyprice(); c.crawl_bidbuy(); c.crawl_yahoo_jp(); c.crawl_ebay_us(); c.save()
+        crawler = DucktemCrawler(args.keyword, anim_id)
+        crawler.crawl_bunjang(); crawler.crawl_daangn(); crawler.crawl_dokidokigoods(); crawler.crawl_ittanstore(); crawler.crawl_heyprice(); crawler.crawl_bidbuy(); crawler.crawl_yahoo_jp(); crawler.crawl_ebay_us()
+        crawler.save()
         return
 
     # 1. 굿즈 수집
@@ -223,7 +281,7 @@ def main():
         anim_id = get_or_create_animation(g['title'])
         for kw in g['kws']:
             c = DucktemCrawler(kw, anim_id)
-            c.crawl_bunjang(); c.crawl_daangn(); c.crawl_heyprice(); c.crawl_bidbuy(); c.crawl_yahoo_jp(); c.crawl_ebay_us(); c.save()
+            c.crawl_bunjang(); c.crawl_daangn(); c.crawl_dokidokigoods(); c.crawl_ittanstore(); c.crawl_heyprice(); c.crawl_bidbuy(); c.crawl_yahoo_jp(); c.crawl_ebay_us(); c.save()
             time.sleep(2)
         print(f"✅ {g['title']} 동기화 완료")
 

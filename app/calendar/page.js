@@ -34,7 +34,7 @@ export default function EventCalendar() {
     <div className="min-h-screen bg-[#F8F9FA] text-gray-900">
       <header className="p-8 bg-black text-white rounded-b-[3rem]">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <Link href="/ducktem" className="text-2xl font-black italic tracking-tighter">DUCKTEM 🦆</Link>
+          <Link href="/" className="text-2xl font-black italic tracking-tighter">DUCKTEM 🦆</Link>
           <h1 className="text-3xl font-black tracking-tight">이벤트 달력</h1>
         </div>
       </header>

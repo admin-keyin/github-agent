@@ -78,7 +78,7 @@ export default function GoodsExplorer() {
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-gray-100 p-4 shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link href="/ducktem" className="text-3xl font-black italic tracking-tighter text-yellow-500">DUCKTEM 🦆</Link>
+            <Link href="/" className="text-3xl font-black italic tracking-tighter text-yellow-500">DUCKTEM 🦆</Link>
           </div>
           
           <div className="relative w-full md:max-w-xl flex gap-2">

@@ -4,275 +4,121 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
 import Link from 'next/link';
 
-export default function Home() {
-  const [user, setUser] = useState(null);
+export default function DucktemHome() {
+  const [recentGoods, setRecentGoods] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState([]);
-  const [credentials, setCredentials] = useState([]);
-  
-  // Credential Form State
-  const [newKey, setNewKey] = useState({ provider: 'GITHUB', value: '', git_url: '' });
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (session?.user) {
-        fetchData();
-      }
-    };
-
-    checkUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchData();
-      } else {
-        setTasks([]);
-        setCredentials([]);
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    fetchData();
   }, []);
 
   const fetchData = async () => {
-    await Promise.all([fetchTasks(), fetchCredentials()]);
+    setLoading(true);
+    const [goodsRes, eventsRes] = await Promise.all([
+      supabase.from('goods').select('*').order('created_at', { ascending: false }).limit(4),
+      supabase.from('events').select('*').gte('end_date', new Date().toISOString().split('T')[0]).order('start_date', { ascending: true }).limit(3)
+    ]);
+
+    if (goodsRes.data) setRecentGoods(goodsRes.data);
+    if (eventsRes.data) setUpcomingEvents(eventsRes.data);
+    setLoading(false);
   };
-
-  const fetchTasks = async () => {
-    const { data } = await supabase
-      .from('agent_tasks')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (data) setTasks(data);
-  };
-
-  const fetchCredentials = async () => {
-    const { data } = await supabase
-      .from('user_credentials')
-      .select('id, key_name, scope, created_at')
-      .order('created_at', { ascending: false });
-    if (data) setCredentials(data);
-  };
-
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
-    });
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  const saveCredential = async (e) => {
-    e.preventDefault();
-    if (!newKey.provider || !newKey.value || !newKey.git_url) {
-      alert('모든 필드를 입력해주세요.');
-      return;
-    }
-
-    setIsSaving(true);
-    const { error } = await supabase
-      .from('user_credentials')
-      .upsert([
-        { 
-          user_email: user.email, 
-          key_name: newKey.provider, 
-          key_value: newKey.value, 
-          scope: newKey.git_url 
-        }
-      ], { onConflict: 'user_email,key_name,scope' });
-
-    if (error) {
-      alert('저장 실패: ' + error.message);
-    } else {
-      setNewKey({ provider: 'GITHUB', value: '', git_url: '' });
-      fetchCredentials();
-      alert('성공적으로 저장되었습니다.');
-    }
-    setIsSaving(false);
-  };
-
-  const deleteCredential = async (id) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('user_credentials').delete().eq('id', id);
-    if (!error) fetchCredentials();
-  };
-
-  if (loading) return <div className="p-8 text-center">준비 중...</div>;
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50 text-gray-900">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-10 flex justify-between items-end">
+    <div className="min-h-screen bg-[#FFF9E6] text-[#333]">
+      {/* Hero Section */}
+      <header className="bg-yellow-400 p-8 rounded-b-[3rem] shadow-lg">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-black tracking-tight">AGENT VAULT</h1>
-            <p className="text-gray-500 mt-2 font-medium">관리자 전용 AI 에이전트 및 자격 증명 관리 시스템</p>
+            <h1 className="text-5xl font-black text-white italic tracking-tighter drop-shadow-md">
+              DUCKTEM <span className="text-2xl not-italic ml-2">🦆 덕템</span>
+            </h1>
+            <p className="text-yellow-900 font-bold mt-2 opacity-80">애니 굿즈 & 팝업스토어 정보 통합 플랫폼</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/ducktem" className="px-6 py-3 bg-yellow-400 text-yellow-900 rounded-xl font-black hover:bg-yellow-500 transition-all shadow-md flex items-center gap-2">
-              🦆 DUCKTEM 이동
+          <nav className="flex gap-4">
+            <Link href="/goods" className="px-6 py-3 bg-white rounded-2xl font-black hover:scale-105 transition-transform shadow-sm">
+              굿즈 탐색
             </Link>
-            {user ? (
-            <div className="flex items-center gap-4 bg-white p-2 px-4 rounded-full shadow-sm border border-gray-100">
-              <span className="text-sm font-bold text-indigo-600">{user.email}</span>
-              <button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors uppercase">Logout</button>
+            <Link href="/calendar" className="px-6 py-3 bg-white rounded-2xl font-black hover:scale-105 transition-transform shadow-sm">
+              이벤트 달력
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto p-8 space-y-12">
+        {/* Recent Goods */}
+        <section>
+          <div className="flex justify-between items-end mb-6">
+            <h2 className="text-3xl font-black flex items-center gap-2">
+              <span className="text-4xl">✨</span> 실시간 신규 굿즈
+            </h2>
+            <Link href="/ducktem/goods" className="text-sm font-bold text-gray-500 hover:text-black">전체보기 →</Link>
+          </div>
+          
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map(i => <div key={i} className="aspect-square bg-white animate-pulse rounded-3xl" />)}
             </div>
           ) : (
-            <button onClick={handleLogin} className="px-6 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition-all shadow-lg flex items-center gap-3">
-              Google 계정으로 접속
-            </button>
-          )}
-          </div>
-        </header>
-
-        {!user ? (
-          <div className="bg-white p-20 rounded-3xl border-2 border-dashed border-gray-200 text-center">
-            <h2 className="text-2xl font-bold mb-4">로그인이 필요합니다</h2>
-            <p className="text-gray-500">자격 증명을 관리하고 에이전트 상태를 보려면 로그인하세요.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* 좌측: 자격 증명 관리 */}
-            <div className="lg:col-span-1 space-y-8">
-              <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <span className="p-1.5 bg-indigo-100 rounded-lg">🔑</span> 자격 증명 등록
-                </h2>
-                <form onSubmit={saveCredential} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Git Provider</label>
-                    <select 
-                      value={newKey.provider}
-                      onChange={e => setNewKey({...newKey, provider: e.target.value})}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-bold"
-                    >
-                      <option value="GITHUB">GitHub</option>
-                      <option value="GITLAB">GitLab</option>
-                      <option value="BITBUCKET">Bitbucket</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Git Repository URL</label>
-                    <input 
-                      type="text" 
-                      placeholder="https://github.com/owner/repo"
-                      value={newKey.git_url}
-                      onChange={e => setNewKey({...newKey, git_url: e.target.value})}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono text-sm"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Personal Access Token (API Key)</label>
-                    <input 
-                      type="password" 
-                      placeholder="비밀 토큰을 입력하세요"
-                      value={newKey.value}
-                      onChange={e => setNewKey({...newKey, value: e.target.value})}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm"
-                      required
-                    />
-                  </div>
-                  <button 
-                    disabled={isSaving}
-                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
-                  >
-                    {isSaving ? '저장 중...' : '연결 정보 저장'}
-                  </button>
-                </form>
-              </section>
-
-              <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span className="p-1.5 bg-green-100 rounded-lg">📜</span> 내 연결 목록
-                </h2>
-                <div className="space-y-3">
-                  {credentials.map(cred => (
-                    <div key={cred.id} className="p-4 bg-gray-50 rounded-xl border border-gray-100 group relative">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-black 
-                          ${cred.key_name === 'GITHUB' ? 'bg-black text-white' : ''}
-                          ${cred.key_name === 'GITLAB' ? 'bg-orange-500 text-white' : ''}
-                          ${cred.key_name === 'BITBUCKET' ? 'bg-blue-600 text-white' : ''}
-                        `}>
-                          {cred.key_name}
-                        </span>
-                        <button 
-                          onClick={() => deleteCredential(cred.id)}
-                          className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all absolute top-4 right-4"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                      </div>
-                      <div className="text-xs font-bold text-gray-800 break-all pr-6">{cred.scope}</div>
-                      <div className="text-[10px] text-gray-400 mt-1">Saved: {new Date(cred.created_at).toLocaleDateString()}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {recentGoods.map(item => (
+                <a key={item.id} href={item.source_url} target="_blank" rel="noopener noreferrer" 
+                   className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-2">
+                  <div className="aspect-square relative overflow-hidden bg-gray-100">
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                    <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm">
+                      {item.source_platform}
                     </div>
-                  ))}
-                  {credentials.length === 0 && <p className="text-center text-gray-400 text-sm py-4">저장된 연결 정보가 없습니다.</p>}
-                </div>
-              </section>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm line-clamp-2 mb-2 h-10">{item.title}</h3>
+                    <p className="text-orange-500 font-black text-lg">{item.price?.toLocaleString()}원</p>
+                  </div>
+                </a>
+              ))}
+              {recentGoods.length === 0 && <p className="col-span-full py-20 text-center text-gray-400 font-bold">수집된 굿즈가 없습니다.</p>}
             </div>
+          )}
+        </section>
 
-            {/* 우측: 작업 히스토리 */}
-            <div className="lg:col-span-2">
-              <section className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                  <h2 className="text-xl font-bold">에이전트 작업 기록</h2>
-                  <button onClick={fetchTasks} className="p-2 hover:bg-white rounded-full transition-all">🔄</button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-100">
-                    <thead className="bg-gray-50/50">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Task Detail</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Requester</th>
-                        <th className="px-6 py-4 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-50">
-                      {tasks.map((task) => (
-                        <tr key={task.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase
-                              ${task.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
-                              ${task.status === 'running' ? 'bg-blue-100 text-blue-700 animate-pulse' : ''}
-                              ${task.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : ''}
-                              ${task.status === 'failed' ? 'bg-red-100 text-red-700' : ''}
-                            `}>
-                              {task.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-bold text-gray-900">{task.subject}</div>
-                            <div className="text-xs text-gray-400 truncate max-w-xs font-medium">{task.body}</div>
-                          </td>
-                          <td className="px-6 py-4 text-xs font-medium text-gray-500">{task.sender_email}</td>
-                          <td className="px-6 py-4 text-right text-xs font-mono text-gray-300">
-                            {new Date(task.created_at).toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' })}
-                          </td>
-                        </tr>
-                      ))}
-                      {tasks.length === 0 && (
-                        <tr><td colSpan="4" className="px-6 py-20 text-center text-gray-400 text-sm font-medium">활동 내역이 없습니다.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
+        {/* Upcoming Events */}
+        <section className="bg-white p-8 rounded-[3rem] shadow-sm border border-yellow-100">
+          <div className="flex justify-between items-end mb-8">
+            <h2 className="text-3xl font-black flex items-center gap-2">
+              <span className="text-4xl">📅</span> 다가오는 이벤트
+            </h2>
+            <Link href="/ducktem/calendar" className="text-sm font-bold text-gray-500 hover:text-black">달력에서 보기 →</Link>
           </div>
-        )}
-      </div>
-    </main>
+
+          <div className="space-y-4">
+            {upcomingEvents.map(event => (
+              <div key={event.id} className="flex items-center gap-6 p-6 bg-[#FFF9E6] rounded-2xl border border-yellow-200 group cursor-pointer hover:bg-yellow-50 transition-colors">
+                <div className="flex flex-col items-center justify-center bg-yellow-400 text-white p-4 rounded-xl min-w-[80px]">
+                  <span className="text-xs font-black uppercase">{new Date(event.start_date).toLocaleString('en', { month: 'short' })}</span>
+                  <span className="text-2xl font-black">{new Date(event.start_date).getDate()}</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-black text-xl mb-1">{event.title}</h3>
+                  <p className="text-gray-500 font-bold flex items-center gap-1 text-sm">
+                    📍 {event.location} | 🗓️ {event.start_date} ~ {event.end_date}
+                  </p>
+                </div>
+                <div className="text-2xl opacity-0 group-hover:opacity-100 transition-opacity">➡️</div>
+              </div>
+            ))}
+            {upcomingEvents.length === 0 && <p className="py-10 text-center text-gray-400 font-bold">진행 예정인 이벤트가 없습니다.</p>}
+          </div>
+        </section>
+      </main>
+
+      <footer className="p-12 text-center flex flex-col items-center gap-4">
+        <p className="text-gray-400 font-bold text-sm">© 2024 DUCKTEM. All rights reserved. 🦆</p>
+        <Link href="/agent" className="text-xs font-bold text-gray-300 hover:text-gray-500 transition-colors uppercase tracking-widest">
+          Admin Agent Vault →
+        </Link>
+      </footer>
+    </div>
   );
 }
