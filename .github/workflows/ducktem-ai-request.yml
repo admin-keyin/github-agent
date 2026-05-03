@@ -28,4 +28,4 @@ jobs:
           TARGET_KEYWORD: ${{ github.event.client_payload.keyword || github.event.inputs.keyword }}
         run: |
           # 특정 키워드에 대해 전 세계를 뒤지는 모드로 실행
-          python scripts/ducktem_crawler.py --keyword "$TARGET_KEYWORD"
+          python3 scripts/ducktem_crawler.py --keyword "$TARGET_KEYWORD"
