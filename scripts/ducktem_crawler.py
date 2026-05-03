@@ -8,10 +8,22 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+# .env.local 로드 (로컬 실행 시)
 load_dotenv(dotenv_path='.env.local')
 
-SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+# 환경 변수 우선순위: 1. 시스템 환경변수(GitHub Actions) 2. .env.local
+SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL') or os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_KEY')
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("❌ 에러: SUPABASE_URL 또는 SUPABASE_KEY가 설정되지 않았습니다.")
+    print("GitHub Secrets 또는 .env.local 파일을 확인해주세요.")
+    sys.exit(1)
+
+# URL 형식 검증
+if not SUPABASE_URL.startswith('http'):
+    print(f"❌ 에러: 잘못된 SUPABASE_URL 형식입니다: {SUPABASE_URL}")
+    sys.exit(1)
 
 HEADERS_SUPA = {
     "apikey": SUPABASE_KEY,
