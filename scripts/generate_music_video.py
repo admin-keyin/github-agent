@@ -172,4 +172,7 @@ if __name__ == "__main__":
     
     # 4. 정보 저장 (업로드 스크립트에서 읽을 수 있도록)
     with open("temp/video_info.txt", "w") as f:
-        f.write(f"{freq}Hz | {desc}")
+        if isinstance(freq, (int, float)):
+            f.write(f"{freq}Hz | {desc}")
+        else:
+            f.write(f"{freq} | {desc}")
