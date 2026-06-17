@@ -19,6 +19,16 @@ def main():
         print("오류: Client ID와 Secret이 필요합니다.")
         return
 
+    auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth"
+        f"?scope=https://www.googleapis.com/auth/youtube.upload"
+        f"&access_type=offline"
+        f"&prompt=consent"
+        f"&response_type=code"
+        f"&redirect_uri={REDIRECT_URI}"
+        f"&client_id={CLIENT_ID}"
+    )
+
     print("\n" + "="*60)
     print("1. 아래 주소를 브라우저에 붙여넣고 로그인하세요:")
     print(f"\n{auth_url}\n")

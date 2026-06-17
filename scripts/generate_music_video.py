@@ -7,63 +7,105 @@ import random
 import sys
 import subprocess
 
-def generate_sleep_sound(duration_sec, output_path):
-    # 솔페지오 주파수 정의 (특정 주파수일 경우 설명 제공)
-    solfeggio_desc = {
-        174: "Pain Relief", 432: "Deep Relaxation", 528: "DNA Repair", 639: "Connection"
-    }
+def generate_piano_note(freq, duration, fs=44100):
+    t = np.linspace(0, duration, int(fs * duration), False)
+    if freq == 0:
+        return np.zeros_like(t)
     
-    # 1~1000Hz 사이의 가변 랜덤 주파수 생성
-    base_freq = random.randint(1, 1000)
-    description = solfeggio_desc.get(base_freq, "Deep Meditation & Healing")
+    # 피아노 음색 합성 (기본음 + 배음)
+    wave = np.sin(2 * np.pi * freq * t) * np.exp(-t * 2.0)
+    wave += np.sin(2 * np.pi * 2 * freq * t) * 0.4 * np.exp(-t * 3.5)
+    wave += np.sin(2 * np.pi * 3 * freq * t) * 0.2 * np.exp(-t * 5.0)
+    wave += np.sin(2 * np.pi * 4 * freq * t) * 0.1 * np.exp(-t * 6.5)
     
+    # 어택 (틱음 방지)
+    attack_samples = int(fs * 0.005)
+    if len(wave) > attack_samples:
+        wave[:attack_samples] *= np.linspace(0, 1, attack_samples)
+        
+    return wave
+
+
+def generate_piano_music(duration_sec, output_path):
     fs = 44100
-    t = np.linspace(0, duration_sec, int(fs * duration_sec), False)
+    total_samples = int(fs * duration_sec)
+    buffer_l = np.zeros(total_samples, dtype=np.float32)
+    buffer_r = np.zeros(total_samples, dtype=np.float32)
     
-    # 1. 바이노럴 비트 & 솔페지오 톤
-    beat_freq = random.uniform(1.0, 3.0)
-    left_tone = np.sin(base_freq * 2 * np.pi * t) * 0.15
-    right_tone = np.sin((base_freq + beat_freq) * 2 * np.pi * t) * 0.15
+    # C major pentatonic (C3 ~ C6)
+    melody_midi = [48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72, 74, 76, 79, 81, 84]
+    melody_freqs = [440.0 * (2.0 ** ((m - 69.0) / 12.0)) for m in melody_midi]
     
-    # 2. ASMR 레이어: 빗소리 (Pinkish/Brownish Noise)
-    # 핑크 노이즈 생성 후 로우패스 필터로 부드러운 빗소리 구현
-    from scipy.signal import butter, lfilter
-    def lowpass(data, cutoff, fs, order=2):
-        nyq = 0.5 * fs
-        b, a = butter(order, cutoff / nyq, btype='low')
-        return lfilter(b, a, data)
-
-    rain_raw = np.random.normal(0, 1, len(t))
-    rain_sound = lowpass(rain_raw, 800, fs) * 0.08
+    # 베이스 용 저음역대 (C2 ~ C4)
+    bass_midi = [36, 38, 40, 43, 45, 48, 50, 52]
+    bass_freqs = [440.0 * (2.0 ** ((m - 69.0) / 12.0)) for m in bass_midi]
     
-    # 3. ASMR 레이어: 모닥불 장작 소리 (Crackling)
-    # 짧은 고주파 펄스를 불규칙하게 배치
-    crackling = np.zeros_like(t)
-    num_cracks = int(duration_sec * 2) # 초당 약 2번의 탁탁 소리
-    for _ in range(num_cracks):
-        pos = random.randint(0, len(t) - 1)
-        duration = random.randint(5, 20) # 아주 짧은 순간
-        if pos + duration < len(t):
-            crackling[pos:pos+duration] = np.random.normal(0, 1, duration) * 0.1
+    # 템포 설정 (BPM 70)
+    bpm = 70
+    beat_sec = 60.0 / bpm
+    beat_samples = int(fs * beat_sec)
     
-    # 4. 공간감 (Panning)
-    # 소리가 좌우로 아주 천천히 이동하도록 설정
-    pan_speed = 0.05
-    pan = (np.sin(pan_speed * 2 * np.pi * t) + 1) / 2 # 0 ~ 1 사이 진동
+    current_sample = 0
+    while current_sample < total_samples:
+        current_beat = current_sample // beat_samples
+        
+        # 1. 베이스 연주 (4박자마다 80% 확률로)
+        if current_beat % 4 == 0 and random.random() < 0.8:
+            freq = random.choice(bass_freqs)
+            note_duration = random.uniform(3.0, 5.0)
+            note_wave = generate_piano_note(freq, note_duration, fs)
+            
+            pan = random.uniform(0.4, 0.6)
+            volume = random.uniform(0.3, 0.5)
+            
+            end_sample = current_sample + len(note_wave)
+            if end_sample > total_samples:
+                note_wave = note_wave[:total_samples - current_sample]
+                end_sample = total_samples
+                
+            buffer_l[current_sample:end_sample] += note_wave * (1.0 - pan) * volume
+            buffer_r[current_sample:end_sample] += note_wave * pan * volume
+            
+        # 2. 멜로디 연주 (65% 확률)
+        if random.random() < 0.65:
+            play_double = random.random() < 0.25  # 25% 확률로 2화음
+            
+            notes_to_play = [random.choice(melody_freqs)]
+            if play_double:
+                notes_to_play.append(random.choice(melody_freqs))
+                
+            for freq in notes_to_play:
+                note_duration = random.choice([1.0, 1.5, 2.0, 3.0])
+                note_wave = generate_piano_note(freq, note_duration, fs)
+                
+                pan = random.uniform(0.1, 0.9)
+                volume = random.uniform(0.15, 0.35)
+                
+                end_sample = current_sample + len(note_wave)
+                if end_sample > total_samples:
+                    note_wave = note_wave[:total_samples - current_sample]
+                    end_sample = total_samples
+                    
+                buffer_l[current_sample:end_sample] += note_wave * (1.0 - pan) * volume
+                buffer_r[current_sample:end_sample] += note_wave * pan * volume
+        
+        # 박자 간격 이동
+        if random.random() < 0.4:
+            current_sample += beat_samples // 2
+        else:
+            current_sample += beat_samples
+            
+    # 정규화
+    max_val = max(np.max(np.abs(buffer_l)), np.max(np.abs(buffer_r)))
+    if max_val > 0:
+        buffer_l = buffer_l / max_val * 0.85
+        buffer_r = buffer_r / max_val * 0.85
+        
+    # 16-bit PCM
+    buffer_l = (buffer_l * 32767).astype(np.int16)
+    buffer_r = (buffer_r * 32767).astype(np.int16)
+    stereo_wave = np.vstack((buffer_l, buffer_r)).T.flatten()
     
-    final_l = (left_tone + rain_sound + crackling) * (1 - pan * 0.3)
-    final_r = (right_tone + rain_sound + crackling) * (pan * 0.3 + 0.7)
-
-    # 5. 수면 유도를 위한 부드러운 맥동 (Breath-like pulsation)
-    pulse = (np.sin((1.0/12.0) * 2 * np.pi * t) + 1.2) / 2.2
-    final_l *= pulse
-    final_r *= pulse
-
-    # 정규화 및 저장
-    final_l = (final_l / np.max(np.abs(final_l)) * 28000).astype(np.int16)
-    final_r = (final_r / np.max(np.abs(final_r)) * 28000).astype(np.int16)
-    stereo_wave = np.vstack((final_l, final_r)).T.flatten()
-
     temp_wav = "temp/base.wav"
     os.makedirs("temp", exist_ok=True)
     wavfile.write(temp_wav, fs, stereo_wave.reshape(-1, 2))
@@ -71,7 +113,7 @@ def generate_sleep_sound(duration_sec, output_path):
     audio = AudioSegment.from_wav(temp_wav)
     audio.export(output_path, format="mp3")
     
-    return base_freq, f"{description} with Soft Rain & Fire Crackling"
+    return "Random Piano", "Beautiful Random Piano Music using Pentatonic Scale"
 
 
 def create_8h_video(image_path, audio_path, output_path):
@@ -115,7 +157,7 @@ if __name__ == "__main__":
     final_video = "output_music_video.mp4"
 
     # 1. 5분 사운드 생성 (선택된 주파수 정보 획득)
-    freq, desc = generate_sleep_sound(300, base_audio)
+    freq, desc = generate_piano_music(300, base_audio)
     
     # 2. 이미지 생성
     prompts = [

@@ -4,6 +4,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+import google.auth.exceptions
 
 def get_authenticated_service():
     client_id = os.getenv("YOUTUBE_CLIENT_ID")
@@ -22,8 +23,24 @@ def get_authenticated_service():
         client_secret=client_secret
     )
     
-    # Refresh the token if it's expired
-    creds.refresh(Request())
+    try:
+        # Refresh the token if it's expired
+        print("Attempting to refresh access token...")
+        creds.refresh(Request())
+        print("Token refresh successful.")
+    except google.auth.exceptions.RefreshError as e:
+        print("\n" + "="*60)
+        print("Authentication Error: Failed to refresh the access token.")
+        print(f"Details: {e}")
+        print("\nThis typically happens due to one of the following reasons:")
+        print("1. The OAuth Consent Screen in Google Cloud Console is set to 'Testing' status.")
+        print("   -> In 'Testing' mode, refresh tokens expire after 7 days.")
+        print("   -> Solution: Change the Publishing Status to 'In production' (Go to Google Cloud Console -> APIs & Services -> OAuth consent screen).")
+        print("2. The user has revoked access or changed their Google password.")
+        print("3. YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, or YOUTUBE_REFRESH_TOKEN is invalid.")
+        print("Please check your GitHub Repository Secrets and regenerate OAuth credentials if necessary.")
+        print("="*60 + "\n")
+        sys.exit(1)
 
     return build("youtube", "v3", credentials=creds)
 
@@ -74,24 +91,23 @@ if __name__ == "__main__":
             freq_info = f.read().strip()
 
     # 기본 제목 및 설명 설정
-    base_title = os.getenv("VIDEO_TITLE", "음량에 따라 잘때도, 공부할때도 좋은 백색소음")
+    base_title = os.getenv("VIDEO_TITLE", "잠잘 때나 공부할 때 듣기 좋은 편안한 피아노 연주곡 (Sleep & Study Piano)")
     if freq_info:
-        # 제목 최적화: [8 Hours] 주파수Hz | 효과 | 백색소음
-        title = f"[8 Hours] {freq_info} | {base_title}"
+        info_part = freq_info.split('|')[0].strip()
+        title = f"[8 Hours] {info_part} - {base_title}"
     else:
         title = f"[8 Hours] {base_title}"
 
-    description = os.getenv("VIDEO_DESCRIPTION", "이 영상은 AI를 통해 생성된 최적의 수면 및 집중용 백색소음입니다.")
+    description = os.getenv("VIDEO_DESCRIPTION", "이 영상은 AI를 통해 무작위로 생성된 몽환적이고 아름다운 피아노 연주곡입니다. 펜타토닉 음계를 사용하여 마음을 차분하게 만들어줍니다.")
     if freq_info:
-        description += f"\n\n적용된 주파수: {freq_info}"
-        description += "\n\n솔페지오 주파수와 바이노럴 비트가 적용되어 깊은 휴식과 집중을 도와줍니다."
+        description += f"\n\n상세 정보: {freq_info}"
     
-    description += "\n\n#백색소음 #수면음악 #집중력 #Solfeggio #BinauralBeats #WhiteNoise"
+    description += "\n\n#피아노 #수면음악 #공부음악 #힐링피아노 #AmbientPiano #SleepMusic #StudyMusic"
 
     # 태그 최적화
-    tags = ['White Noise', 'Sleep Music', 'Study Aid', 'Meditation', 'AI']
+    tags = ['Piano', 'Sleep Music', 'Study Aid', 'Meditation', 'AI Music', 'Ambient Piano']
     if freq_info:
-        tags.extend([freq_info.split('|')[0].strip(), 'Solfeggio', 'Binaural Beats', 'Healing Tone'])
+        tags.extend(['Random Piano', 'Pentatonic Scale'])
 
     youtube_service = get_authenticated_service()
     
