@@ -94,9 +94,9 @@ if __name__ == "__main__":
     base_title = os.getenv("VIDEO_TITLE", "잠잘 때나 공부할 때 듣기 좋은 편안한 피아노 연주곡 (Sleep & Study Piano)")
     if freq_info:
         info_part = freq_info.split('|')[0].strip()
-        title = f"[10 Minutes] {info_part} - {base_title}"
+        title = f"[4 Hours] {info_part} - {base_title}"
     else:
-        title = f"[10 Minutes] {base_title}"
+        title = f"[4 Hours] {base_title}"
 
     description = os.getenv("VIDEO_DESCRIPTION", "이 영상은 AI를 통해 무작위로 생성된 몽환적이고 아름다운 피아노 연주곡입니다. 펜타토닉 음계를 사용하여 마음을 차분하게 만들어줍니다.")
     if freq_info:

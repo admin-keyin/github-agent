@@ -128,9 +128,9 @@ def create_8h_video(image_path, audio_path, output_path):
     ]
     subprocess.run(cmd_short, check=True)
 
-    # 2. 5분 영상을 2번 반복 (2 * 5분 = 10분)
+    # 2. 5분 영상을 48번 반복 (48 * 5분 = 4시간)
     with open("temp/concat.txt", "w") as f:
-        for _ in range(2):
+        for _ in range(48):
             f.write(f"file 'short.mp4'\n")
     
     cmd_concat = [
