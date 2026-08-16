@@ -40,8 +40,8 @@ def generate_piano_music(duration_sec, output_path):
     bass_midi = [36, 38, 40, 43, 45, 48, 50, 52]
     bass_freqs = [440.0 * (2.0 ** ((m - 69.0) / 12.0)) for m in bass_midi]
     
-    # 템포 설정 (BPM 70)
-    bpm = 70
+    # 템포 설정 (BPM 120)
+    bpm = 120
     beat_sec = 60.0 / bpm
     beat_samples = int(fs * beat_sec)
     
