@@ -90,24 +90,21 @@ if __name__ == "__main__":
         with open(info_path, "r") as f:
             freq_info = f.read().strip()
 
-    # 기본 제목 및 설명 설정
-    base_title = os.getenv("VIDEO_TITLE", "잠잘 때나 공부할 때 듣기 좋은 편안한 피아노 연주곡 (Sleep & Study Piano)")
-    if freq_info:
-        info_part = freq_info.split('|')[0].strip()
-        title = f"[8 Hours] {info_part} - {base_title}"
+    # 제목 및 설명 설정
+    if freq_info and '|' in freq_info:
+        info_part, desc_part = freq_info.split('|', 1)
+        info_part = info_part.strip()
+        desc_part = desc_part.strip()
+        title = f"[8 Hours] {info_part}"
+        description = f"{desc_part}\n\nMade by AI Sound Generator (Keyin)."
     else:
-        title = f"[8 Hours] {base_title}"
+        title = os.getenv("VIDEO_TITLE", "[8 Hours] 편안한 감성 피아노 연주곡 (Sleep & Study Piano)")
+        description = os.getenv("VIDEO_DESCRIPTION", "편안한 휴식과 수면, 집중을 돕는 감성 피아노 연주곡입니다.")
 
-    description = os.getenv("VIDEO_DESCRIPTION", "이 영상은 AI를 통해 무작위로 생성된 몽환적이고 아름다운 피아노 연주곡입니다. 펜타토닉 음계를 사용하여 마음을 차분하게 만들어줍니다.")
-    if freq_info:
-        description += f"\n\n상세 정보: {freq_info}"
-    
-    description += "\n\n#피아노 #수면음악 #공부음악 #힐링피아노 #AmbientPiano #SleepMusic #StudyMusic"
+    description += "\n\n#피아노 #수면음악 #공부음악 #힐링피아노 #로파이 #K발라드 #뉴에이지 #LofiPiano #BalladPiano #SleepMusic #StudyMusic"
 
     # 태그 최적화
-    tags = ['Piano', 'Sleep Music', 'Study Aid', 'Meditation', 'AI Music', 'Ambient Piano']
-    if freq_info:
-        tags.extend(['Random Piano', 'Pentatonic Scale'])
+    tags = ['Piano', 'Sleep Music', 'Study Aid', 'Meditation', 'AI Music', 'Ambient Piano', 'Lofi Hip Hop', 'New Age Piano', 'K-Ballad Piano']
 
     youtube_service = get_authenticated_service()
     
@@ -139,5 +136,20 @@ if __name__ == "__main__":
         if status:
             print(f"Uploaded {int(status.progress() * 100)}%")
 
-    print(f"Upload complete! Video ID: {response.get('id')}")
+    video_id = response.get('id')
+    print(f"Upload complete! Video ID: {video_id}")
+
+    # 썸네일 이미지(temp/bg.jpg)가 존재하면 공식 썸네일로 등록
+    thumb_path = "temp/bg.jpg"
+    if os.path.exists(thumb_path) and video_id:
+        try:
+            print("Setting custom thumbnail for the video...")
+            youtube_service.thumbnails().set(
+                videoId=video_id,
+                media_body=MediaFileUpload(thumb_path, mimetype='image/jpeg')
+            ).execute()
+            print("Custom thumbnail set successfully!")
+        except Exception as e:
+            print(f"Notice: Custom thumbnail could not be set automatically (e.g. channel phone verification required): {e}")
+
 

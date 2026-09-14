@@ -31,10 +31,13 @@ export default function DucktemHome() {
       <header className="bg-yellow-400 p-8 rounded-b-[3rem] shadow-lg">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-5xl font-black text-white italic tracking-tighter drop-shadow-md">
-              DUCKTEM <span className="text-2xl not-italic ml-2">🦆 덕템</span>
-            </h1>
-            <p className="text-yellow-900 font-bold mt-2 opacity-80">애니 굿즈 & 팝업스토어 정보 통합 플랫폼</p>
+            <div className="flex items-center gap-3">
+              <span className="bg-black text-white text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider">keyin app</span>
+              <h1 className="text-5xl font-black text-white italic tracking-tighter drop-shadow-md">
+                DUCKTEM <span className="text-2xl not-italic ml-2">🦆 덕템</span>
+              </h1>
+            </div>
+            <p className="text-yellow-900 font-bold mt-2 opacity-80">keyin 자동화 플랫폼 | 애니 굿즈 & 팝업스토어 정보 통합</p>
           </div>
           <nav className="flex gap-4">
             <Link href="/goods" className="px-6 py-3 bg-white rounded-2xl font-black hover:scale-105 transition-transform shadow-sm">
@@ -113,11 +116,16 @@ export default function DucktemHome() {
         </section>
       </main>
 
-      <footer className="p-12 text-center flex flex-col items-center gap-4">
-        <p className="text-gray-400 font-bold text-sm">© 2024 DUCKTEM. All rights reserved. 🦆</p>
-        <Link href="/agent" className="text-xs font-bold text-gray-300 hover:text-gray-500 transition-colors uppercase tracking-widest">
-          Admin Agent Vault →
-        </Link>
+      <footer className="p-12 text-center flex flex-col items-center gap-4 border-t border-yellow-200/50 mt-12">
+        <div className="flex gap-6 text-sm font-bold text-gray-500">
+          <Link href="/privacy" className="hover:text-black underline underline-offset-4">
+            개인정보처리방침 (Privacy Policy)
+          </Link>
+          <Link href="/agent" className="hover:text-black">
+            Admin Agent
+          </Link>
+        </div>
+        <p className="text-gray-400 font-bold text-sm">© 2026 keyin (DUCKTEM). All rights reserved. 🦆</p>
       </footer>
     </div>
   );
