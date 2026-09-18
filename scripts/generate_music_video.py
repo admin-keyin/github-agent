@@ -334,8 +334,8 @@ if __name__ == "__main__":
     create_8h_video(image_file, base_audio, final_video)
     
     # 5. 유튜브 업로드용 정보 기록
-    title = f"{song['artist']} - {song['title']} | 감성 K-발라드 피아노 연주 (Piano Cover)"
-    desc = f"멜론 실시간 발라드 TOP 100 인기곡 [{song['artist']} - {song['title']}]을 감미로운 그랜드 피아노 선율로 편곡한 연주곡입니다. 수면, 공부, 힐링과 편안한 휴식을 위해 8시간 연속 재생됩니다."
+    title = f"{song['artist']} - {song['title']} 연주"
+    desc = f"멜론 실시간 발라드 TOP 100 인기곡 [{song['artist']} - {song['title']}]을 감미로운 피아노 선율로 연주한 힐링 트랙입니다. 수면, 공부, 집중과 편안한 휴식을 위해 8시간 연속 재생됩니다."
     
     with open("temp/video_info.txt", "w", encoding="utf-8") as f:
         f.write(f"{title} | {desc} | {song['artist']} | {song['title']}")
