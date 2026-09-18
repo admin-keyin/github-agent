@@ -21,15 +21,19 @@ def fetch_melon_top100():
         res = requests.get(url, headers=headers, timeout=10)
         if res.status_code == 200:
             soup = BeautifulSoup(res.text, 'html.parser')
-            titles = soup.select('div.ellipsis.rank01 a')
-            artists = soup.select('div.ellipsis.rank02 a:first-child')
-            for rank, (t, a) in enumerate(zip(titles, artists), 1):
-                chart_items.append({
-                    "rank": rank,
-                    "title": t.text.strip().replace('\xa0', ' '),
-                    "artist": a.text.strip().replace('\xa0', ' ')
-                })
-            print(f"[Melon] TOP 100 차트 {len(chart_items)}곡 수집 완료")
+            rows = soup.select('tr.lst50, tr.lst100')
+            for r in rows:
+                rank_el = r.select_one('span.rank')
+                title_el = r.select_one('div.ellipsis.rank01 a')
+                artist_el = r.select_one('div.ellipsis.rank02 a')
+                if title_el and artist_el:
+                    rank_num = int(rank_el.text.strip()) if rank_el and rank_el.text.strip().isdigit() else len(chart_items) + 1
+                    chart_items.append({
+                        "rank": rank_num,
+                        "title": title_el.text.strip().replace('\xa0', ' '),
+                        "artist": artist_el.text.strip().replace('\xa0', ' ')
+                    })
+            print(f"[Melon] TOP 100 차트 {len(chart_items)}곡 정확 매칭 수집 완료")
     except Exception as e:
         print(f"[Melon] 크롤링 오류: {e}")
         
