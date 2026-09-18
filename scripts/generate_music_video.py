@@ -62,17 +62,20 @@ def apply_spatial_reverb(buffer_l, buffer_r, fs=44100):
 # --- K-POP & 인기 차트 명곡 정밀 악보 데이터베이스 (Note-by-Note Score DB) ---
 
 SONG_DATABASE = {
-    # 1. NewJeans - Hype Boy (K-POP 대표 댄스/팝을 감성 피아노 편곡)
+    # 1. NewJeans - Hype Boy
     "hype_boy": {
         "title": "Hype Boy",
         "artist": "NewJeans",
         "bpm": 80,
-        "image_prompt": "aesthetic retro pastel sunset bedroom, nostalgic 90s anime vibe, warm ambient lighting, cozy calm aesthetic, 4k digital art",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
-            {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 69, 0.9), (2.0, 67, 0.4), (2.5, 64, 0.4), (3.0, 62, 0.9)]}, # Fmaj7
-            {"bass": 40, "chords": [52, 55, 59, 62], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 71, 0.9), (2.0, 69, 0.4), (2.5, 67, 0.4), (3.0, 64, 0.9)]}, # Em7
-            {"bass": 38, "chords": [50, 53, 57, 60], "melody": [(0.0, 62, 0.4), (0.5, 65, 0.4), (1.0, 69, 0.9), (2.0, 67, 0.4), (2.5, 65, 0.4), (3.0, 64, 0.9)]}, # Dm7
-            {"bass": 36, "chords": [48, 52, 55, 59], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 72, 0.9), (2.0, 71, 0.9), (3.0, 67, 0.9)]}, # Cmaj7
+            {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 69, 0.9), (2.0, 67, 0.4), (2.5, 64, 0.4), (3.0, 62, 0.9)]},
+            {"bass": 40, "chords": [52, 55, 59, 62], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 71, 0.9), (2.0, 69, 0.4), (2.5, 67, 0.4), (3.0, 64, 0.9)]},
+            {"bass": 38, "chords": [50, 53, 57, 60], "melody": [(0.0, 62, 0.4), (0.5, 65, 0.4), (1.0, 69, 0.9), (2.0, 67, 0.4), (2.5, 65, 0.4), (3.0, 64, 0.9)]},
+            {"bass": 36, "chords": [48, 52, 55, 59], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 72, 0.9), (2.0, 71, 0.9), (3.0, 67, 0.9)]},
             # Chorus: "'Cause I know what you like boy, you're my chemical hype boy"
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 67, 0.4), (0.5, 69, 0.4), (1.0, 72, 0.9), (2.0, 71, 0.4), (2.5, 69, 0.4), (3.0, 67, 0.9)]},
             {"bass": 40, "chords": [52, 55, 59, 62], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 71, 0.9), (2.0, 69, 0.4), (2.5, 67, 0.4), (3.0, 64, 0.9)]},
@@ -80,30 +83,36 @@ SONG_DATABASE = {
             {"bass": 43, "chords": [53, 55, 59, 65], "melody": [(0.0, 65, 0.4), (0.5, 67, 0.4), (1.0, 71, 0.9), (2.0, 72, 1.9)]}
         ]
     },
-    # 2. NewJeans - Ditto (몽환적인 감성 멜로디)
+    # 2. NewJeans - Ditto
     "ditto": {
         "title": "Ditto",
         "artist": "NewJeans",
         "bpm": 74,
-        "image_prompt": "quiet snowy high school hallway in winter twilight, soft warm window sunlight, nostalgic 90s camcorder aesthetic, photorealistic",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 69, 0.5), (0.5, 67, 0.5), (1.0, 64, 0.9), (2.0, 60, 0.9), (3.0, 64, 0.9)]},
             {"bass": 40, "chords": [52, 55, 59, 62], "melody": [(0.0, 67, 0.5), (0.5, 64, 0.5), (1.0, 62, 0.9), (2.0, 59, 0.9), (3.0, 62, 0.9)]},
             {"bass": 38, "chords": [50, 53, 57, 60], "melody": [(0.0, 65, 0.5), (0.5, 64, 0.5), (1.0, 60, 0.9), (2.0, 57, 0.9), (3.0, 60, 0.9)]},
             {"bass": 36, "chords": [48, 52, 55, 59], "melody": [(0.0, 64, 0.5), (0.5, 62, 0.5), (1.0, 60, 0.9), (2.0, 64, 0.9), (3.0, 67, 0.9)]},
-            # Chorus: "Stay in the middle, Like you a little, Don't want no riddle"
+            # Chorus: "Stay in the middle, Like you a little"
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 69, 0.4), (0.5, 71, 0.4), (1.0, 72, 0.9), (2.0, 71, 0.4), (2.5, 69, 0.4), (3.0, 67, 0.9)]},
             {"bass": 40, "chords": [52, 55, 59, 62], "melody": [(0.0, 64, 0.4), (0.5, 67, 0.4), (1.0, 71, 0.9), (2.0, 69, 0.4), (2.5, 67, 0.4), (3.0, 64, 0.9)]},
             {"bass": 38, "chords": [50, 53, 57, 60], "melody": [(0.0, 62, 0.4), (0.5, 65, 0.4), (1.0, 69, 0.9), (2.0, 67, 0.4), (2.5, 65, 0.4), (3.0, 64, 0.9)]},
             {"bass": 43, "chords": [53, 55, 59, 65], "melody": [(0.0, 65, 0.5), (0.5, 67, 0.5), (1.0, 71, 0.9), (2.0, 72, 1.9)]}
         ]
     },
-    # 3. IVE - LOVE DIVE (몽환적인 피아노 어레인지)
+    # 3. IVE - LOVE DIVE
     "love_dive": {
         "title": "LOVE DIVE",
         "artist": "IVE",
         "bpm": 76,
-        "image_prompt": "deep turquoise celestial fantasy pool under starry night sky, shimmering water reflections, luxurious magical anime aesthetic",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 45, "chords": [57, 60, 64, 67], "melody": [(0.0, 64, 0.5), (0.5, 64, 0.5), (1.0, 67, 0.9), (2.0, 64, 0.5), (2.5, 62, 0.5), (3.0, 60, 0.9)]},
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 65, 0.5), (0.5, 65, 0.5), (1.0, 69, 0.9), (2.0, 67, 0.5), (2.5, 65, 0.5), (3.0, 64, 0.9)]},
@@ -121,7 +130,10 @@ SONG_DATABASE = {
         "title": "봄여름가을겨울 (Still Life)",
         "artist": "BIGBANG",
         "bpm": 68,
-        "image_prompt": "surreal artistic landscape with four seasons blending into one, blooming blossoms meeting autumn leaves, cinematic lighting, 4k masterpiece",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 36, "chords": [48, 52, 55, 60], "melody": [(0.0, 60, 0.5), (0.5, 64, 0.5), (1.0, 67, 0.9), (2.0, 65, 0.5), (2.5, 64, 0.5), (3.0, 62, 0.9)]},
             {"bass": 35, "chords": [47, 50, 55, 59], "melody": [(0.0, 62, 0.5), (0.5, 65, 0.5), (1.0, 65, 0.9), (2.0, 64, 0.5), (2.5, 62, 0.5), (3.0, 60, 0.9)]},
@@ -134,18 +146,21 @@ SONG_DATABASE = {
             {"bass": 31, "chords": [43, 48, 50, 55], "melody": [(0.0, 65, 0.9), (1.0, 62, 0.9), (2.0, 60, 1.9)]}
         ]
     },
-    # 5. 아이유 - 에잇 (eight - Prod. & Feat. SUGA of BTS)
+    # 5. 아이유 - 에잇
     "eight": {
         "title": "에잇",
         "artist": "아이유",
         "bpm": 76,
-        "image_prompt": "dreamy orange sunset island with gentle sea waves, airplane flying across golden twilight clouds, nostalgic aesthetic, anime painting",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 64, 0.5), (0.5, 65, 0.5), (1.0, 67, 0.9), (2.0, 64, 0.5), (2.5, 62, 0.5), (3.0, 60, 0.9)]},
             {"bass": 43, "chords": [55, 59, 62, 67], "melody": [(0.0, 62, 0.5), (0.5, 64, 0.5), (1.0, 65, 0.9), (2.0, 64, 0.5), (2.5, 62, 0.5), (3.0, 60, 0.9)]},
             {"bass": 40, "chords": [52, 55, 59, 64], "melody": [(0.0, 60, 0.5), (0.5, 64, 0.5), (1.0, 67, 0.9), (2.0, 69, 0.5), (2.5, 67, 0.5), (3.0, 64, 0.9)]},
             {"bass": 45, "chords": [57, 60, 64, 67], "melody": [(0.0, 62, 0.5), (0.5, 64, 0.5), (1.0, 65, 0.9), (2.0, 64, 0.5), (2.5, 62, 0.5), (3.0, 60, 1.0)]},
-            # Chorus: "우리는 오렌지 태양 아래 그림자 없이 함께 춤을 춰"
+            # Chorus: "우리는 오렌지 태양 아래"
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 67, 0.5), (0.5, 69, 0.5), (1.0, 72, 0.9), (2.0, 71, 0.5), (2.5, 69, 0.5), (3.0, 67, 0.9)]},
             {"bass": 43, "chords": [55, 59, 62, 67], "melody": [(0.0, 69, 0.5), (0.5, 71, 0.5), (1.0, 74, 0.9), (2.0, 72, 0.5), (2.5, 71, 0.5), (3.0, 69, 0.9)]},
             {"bass": 38, "chords": [50, 53, 57, 62], "melody": [(0.0, 67, 0.5), (0.5, 69, 0.5), (1.0, 72, 0.9), (2.0, 71, 0.9), (3.0, 69, 0.9)]},
@@ -157,7 +172,10 @@ SONG_DATABASE = {
         "title": "너의 모든 순간",
         "artist": "성시경",
         "bpm": 68,
-        "image_prompt": "solitary grand piano by a rain-slicked window overlooking seoul night skyline, warm golden ambient lights, romantic emotional Korean drama aesthetic, 4k cinematic",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 64, 0.9), (1.0, 65, 0.9), (2.0, 67, 1.8)]},
             {"bass": 40, "chords": [52, 55, 59, 64], "melody": [(0.0, 71, 0.9), (1.0, 69, 0.9), (2.0, 67, 1.8)]},
@@ -176,7 +194,10 @@ SONG_DATABASE = {
         "title": "밤편지",
         "artist": "아이유",
         "bpm": 70,
-        "image_prompt": "quiet traditional Korean room at night with soft warm lamp, open window overlooking starry summer night, romantic poetic IU aesthetic, 4k digital masterpiece",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 41, "chords": [53, 57, 60, 65], "melody": [(0.0, 65, 0.5), (0.5, 67, 0.5), (1.0, 69, 1.0), (2.0, 72, 1.8)]},
             {"bass": 38, "chords": [50, 53, 57, 62], "melody": [(0.0, 69, 0.5), (0.5, 67, 0.5), (1.0, 65, 1.0), (2.0, 60, 1.8)]},
@@ -193,7 +214,10 @@ SONG_DATABASE = {
         "title": "모든 날, 모든 순간",
         "artist": "폴킴",
         "bpm": 66,
-        "image_prompt": "warm autumn street in seoul with fallen golden leaves, soft romantic dusk sunlight, cinematic acoustic piano mood, 35mm film photography",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 36, "chords": [48, 52, 55, 60], "melody": [(0.0, 60, 0.5), (0.5, 64, 0.5), (1.0, 67, 0.5), (1.5, 67, 0.5), (2.0, 67, 0.9), (3.0, 65, 0.4), (3.5, 64, 0.4)]},
             {"bass": 35, "chords": [47, 50, 55, 59], "melody": [(0.0, 62, 0.5), (0.5, 65, 0.5), (1.0, 65, 0.5), (1.5, 65, 0.5), (2.0, 65, 0.9), (3.0, 64, 0.4), (3.5, 62, 0.4)]},
@@ -210,7 +234,10 @@ SONG_DATABASE = {
         "title": "숲",
         "artist": "최유리",
         "bpm": 68,
-        "image_prompt": "ethereal misty green forest with gentle morning light filtering through tree canopy, calm river flowing, peaceful emotional Korean acoustic mood, masterpiece",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 36, "chords": [48, 52, 55, 60], "melody": [(0.0, 60, 0.5), (0.5, 64, 0.5), (1.0, 67, 0.9), (2.0, 65, 0.5), (2.5, 64, 0.5), (3.0, 62, 0.9)]},
             {"bass": 33, "chords": [45, 48, 52, 57], "melody": [(0.0, 60, 0.5), (0.5, 64, 0.5), (1.0, 67, 0.5), (1.5, 69, 0.5), (2.0, 67, 0.9), (3.0, 64, 0.9)]},
@@ -227,7 +254,10 @@ SONG_DATABASE = {
         "title": "그라데이션",
         "artist": "10CM",
         "bpm": 74,
-        "image_prompt": "summer sunset over river in Seoul, warm orange and purple pastel sky, nostalgic romantic aesthetic, 4k cinematic",
+        "image_urls": [
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90"
+        ],
         "score": [
             {"bass": 41, "chords": [53, 57, 60, 64], "melody": [(0.0, 64, 0.5), (0.5, 65, 0.5), (1.0, 67, 0.9), (2.0, 65, 0.5), (2.5, 64, 0.5), (3.0, 62, 0.9)]},
             {"bass": 43, "chords": [55, 59, 62, 67], "melody": [(0.0, 62, 0.5), (0.5, 64, 0.5), (1.0, 65, 0.9), (2.0, 64, 0.5), (2.5, 62, 0.5), (3.0, 60, 0.9)]},
@@ -248,7 +278,6 @@ def get_target_song():
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
-    # 멜론 종합 실시간 TOP 100 차트
     url = 'https://www.melon.com/chart/index.htm'
     
     crawled_list = []
@@ -268,7 +297,7 @@ def get_target_song():
     except Exception as e:
         print(f"[Melon] 크롤링 오류: {e}")
 
-    # 크롤링한 실시간 종합 차트 아티스트/곡명과 일치하는 곡이 있는지 탐색
+    # 크롤링한 실시간 종합 차트 아티스트/곡명과 일치하는 곡 탐색
     matched_candidates = []
     for c in crawled_list:
         for key, song_data in SONG_DATABASE.items():
@@ -276,12 +305,11 @@ def get_target_song():
                 matched_candidates.append(song_data)
                 
     if matched_candidates:
-        # 차트에 진입해 있는 인기곡 중 무작위 1곡 선택
         selected = random.choice(matched_candidates)
         print(f"[Chart Match] 멜론 종합 인기차트 매칭 곡 선정: {selected['artist']} - {selected['title']}")
         return selected
 
-    # 차트 매칭 외에는 풀(Pool) 전체(K-POP / 발라드 / 댄스 / 팝 명곡)에서 완전 랜덤 선정
+    # 차트 매칭 외에는 풀 전체에서 완전 랜덤 선정
     chosen_key = random.choice(list(SONG_DATABASE.keys()))
     selected = SONG_DATABASE[chosen_key]
     print(f"[Popular Hit Selection] 인기 차트 명곡 풀에서 무작위 선정: {selected['artist']} - {selected['title']}")
@@ -402,19 +430,31 @@ def create_8h_video(image_path, audio_path, output_path):
     subprocess.run(cmd_concat, check=True)
     print(f"Final 8-hour video created: {output_path}")
 
-def generate_ai_image(prompt, filename):
-    print(f"Generating background image: {prompt}")
-    encoded_prompt = requests.utils.quote(prompt)
-    seed = random.randint(1, 99999999)
-    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&nologo=true&seed={seed}"
-    headers = {'User-Agent': 'Mozilla/5.0'}
+def fetch_hd_background(song_data, filename):
+    """워터마크 없는 감성 전문 고화질 사진(1280x720) 다운로드"""
+    image_pool = song_data.get("image_urls", [
+        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90"
+    ])
+    chosen_url = random.choice(image_pool)
+    print(f"Fetching clean HD background image: {chosen_url}")
+    
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
     try:
-        response = requests.get(url, headers=headers, timeout=30)
-        with open(filename, 'wb') as f:
-            f.write(response.content)
+        response = requests.get(chosen_url, headers=headers, timeout=20)
+        if response.status_code == 200 and len(response.content) > 1000:
+            with open(filename, 'wb') as f:
+                f.write(response.content)
+            print("HD Background image successfully saved.")
+            return
     except Exception as e:
-        print(f"Image generation fallback due to: {e}")
-        subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x111625:s=1280x720:d=1", "-vframes", "1", filename], check=True)
+        print(f"Background fetch fallback due to: {e}")
+
+    # 비상 폴백: ffmpeg 고화질 다크 엠비언트 그라디언트 배경 생성
+    subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x1a2130:s=1280x720:d=1", "-vframes", "1", filename], check=True)
 
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
@@ -428,9 +468,8 @@ if __name__ == "__main__":
     # 2. 5분 고품질 원곡 피아노 연주 트랙 생성
     generate_exact_score_track(song, 300, base_audio)
     
-    # 3. AI 배경 이미지 생성
-    img_prompt = song.get("image_prompt", f"peaceful grand piano in a quiet aesthetic room at dusk, romantic emotional Korean melody atmosphere, 4k masterpiece")
-    generate_ai_image(img_prompt, image_file)
+    # 3. 워터마크 없는 감성 프리미엄 HD 배경 이미지 다운로드
+    fetch_hd_background(song, image_file)
     
     # 4. 8시간 영상으로 확장
     create_8h_video(image_file, base_audio, final_video)
