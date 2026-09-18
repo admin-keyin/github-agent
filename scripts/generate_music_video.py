@@ -7,60 +7,118 @@ import json
 import requests
 from pydub import AudioSegment
 
-# --- 1. assets/audio/ 폴더에서 MP3 음원 선곡 및 메타데이터 파싱 ---
+# --- 1. 유튜브 URL 또는 assets/audio/ 에서 오디오 소스 준비 ---
+
+def download_youtube_audio(youtube_url, output_path):
+    """지정된 유튜브 URL에서 최고음질 오디오(MP3) 및 메타데이터 추출"""
+    print(f"[YouTube Download] URL 다운로드 시작: {youtube_url}")
+    
+    # 1. 메타데이터(제목, 업로더) 추출
+    info_cmd = [
+        "yt-dlp",
+        "--dump-json",
+        "--no-playlist",
+        youtube_url
+    ]
+    title = "힐링 피아노 연주곡"
+    artist = "Piano Music"
+    
+    try:
+        res = subprocess.run(info_cmd, capture_output=True, text=True, timeout=30)
+        if res.returncode == 0 and res.stdout.strip():
+            meta = json.loads(res.stdout.strip())
+            title = meta.get("title", title)
+            artist = meta.get("uploader", meta.get("channel", artist))
+            print(f"[YouTube Info] Title: {title}, Uploader: {artist}")
+    except Exception as e:
+        print(f"[YouTube Info Warning] 메타데이터 추출 오류 ({e}), 기본값 사용")
+
+    # 2. 오디오 다운로드 (MP3)
+    out_template = output_path.replace(".mp3", "")
+    dl_cmd = [
+        "yt-dlp",
+        "--extract-audio",
+        "--audio-format", "mp3",
+        "--audio-quality", "0",
+        "--output", f"{out_template}.%(ext)s",
+        "--no-playlist",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        youtube_url
+    ]
+    
+    try:
+        subprocess.run(dl_cmd, check=True, timeout=120)
+        # 생성된 파일 확인
+        if os.path.exists(output_path):
+            return {"path": output_path, "artist": artist, "title": title}
+        
+        for ext in [".mp3", ".m4a", ".wav", ".opus", ".webm"]:
+            alt = out_template + ext
+            if os.path.exists(alt):
+                os.rename(alt, output_path)
+                return {"path": output_path, "artist": artist, "title": title}
+    except Exception as e:
+        print(f"[YouTube Download Error] 다운로드 실패: {e}")
+        
+    return None
 
 def get_audio_source():
-    """assets/audio 디렉토리에서 음원 파일 탐색 및 정보 추출"""
+    """입력받은 유튜브 URL 또는 assets/audio/ 에서 오디오 가져오기"""
+    os.makedirs("temp", exist_ok=True)
+    custom_url = os.getenv("INPUT_YOUTUBE_URL", "").strip()
+    
+    # 1. GitHub Actions 수동 실행 시 입력받은 유튜브 URL이 있는 경우
+    if custom_url:
+        yt_target = "temp/youtube_source.mp3"
+        result = download_youtube_audio(custom_url, yt_target)
+        if result and os.path.exists(result["path"]) and os.path.getsize(result["path"]) > 10000:
+            print(f"[Audio Source] 유튜브 URL에서 성공적으로 추출 완료: {result['title']}")
+            return result
+        else:
+            print("[Audio Source] 유튜브 다운로드 실패, 로컬 assets 폴더 탐색으로 전환합니다.")
+
+    # 2. assets/audio/ 폴더에서 로컬 음원 탐색
     audio_dir = "assets/audio"
     valid_exts = ("*.mp3", "*.wav", "*.m4a", "*.flac", "*.ogg")
     audio_files = []
     for ext in valid_exts:
         audio_files.extend(glob.glob(os.path.join(audio_dir, ext)))
         
-    if not audio_files:
-        print(f"[Warning] '{audio_dir}' 폴더에 MP3 파일이 없습니다.")
-        print("기본 힐링 피아노 톤을 생성하여 진행합니다. (assets/audio/ 에 MP3를 업로드해주세요)")
-        fallback_path = "temp/default_piano.mp3"
-        os.makedirs("temp", exist_ok=True)
-        subprocess.run([
-            "ffmpeg", "-y", "-f", "lavfi",
-            "-i", "sine=frequency=523.25:duration=60",
-            fallback_path
-        ], check=True)
-        return {
-            "path": fallback_path,
-            "artist": "Keyin Studio",
-            "title": "편안한 힐링 피아노 연주곡"
-        }
+    if audio_files:
+        chosen_file = random.choice(audio_files)
+        filename = os.path.basename(chosen_file)
+        name_without_ext = os.path.splitext(filename)[0]
 
-    # 여러 파일이 있을 경우 무작위 1곡 선택
-    chosen_file = random.choice(audio_files)
-    filename = os.path.basename(chosen_file)
-    name_without_ext = os.path.splitext(filename)[0]
+        if " - " in name_without_ext:
+            parts = name_without_ext.split(" - ", 1)
+            artist = parts[0].strip()
+            title = parts[1].strip()
+        else:
+            artist = "Piano Music"
+            title = name_without_ext.strip()
 
-    # 파일명 형식 분석 ("가수 - 곡명" 또는 일반 파일명)
-    if " - " in name_without_ext:
-        parts = name_without_ext.split(" - ", 1)
-        artist = parts[0].strip()
-        title = parts[1].strip()
-    else:
-        artist = "Piano Music"
-        title = name_without_ext.strip()
+        print(f"[Audio Source] 로컬 에셋 선택: {chosen_file} ({artist} - {title})")
+        return {"path": chosen_file, "artist": artist, "title": title}
 
-    print(f"[Audio Selected] {chosen_file}")
-    print(f"-> Artist: {artist}, Title: {title}")
-    
+    # 3. Fallback 기본 톤
+    print(f"[Warning] 음원이 없어 기본 톤을 생성합니다.")
+    fallback_path = "temp/default_piano.mp3"
+    subprocess.run([
+        "ffmpeg", "-y", "-f", "lavfi",
+        "-i", "sine=frequency=523.25:duration=60",
+        fallback_path
+    ], check=True)
     return {
-        "path": chosen_file,
-        "artist": artist,
-        "title": title
+        "path": fallback_path,
+        "artist": "Keyin Studio",
+        "title": "편안한 힐링 피아노 연주곡"
     }
 
 # --- 2. 오디오 5분 루프 준비 및 노멀라이징 ---
 
 def prepare_base_audio(input_path, output_path, target_duration=300):
     """실제 MP3를 볼륨 최적화 및 5분(300초) 단위로 매끄럽게 연결"""
-    print("Processing and normalizing audio track...")
+    print(f"Processing and normalizing audio track: {input_path}...")
     audio = AudioSegment.from_file(input_path)
     
     # 볼륨 노멀라이즈
@@ -136,7 +194,7 @@ if __name__ == "__main__":
     bg_image = "temp/bg.jpg"
     final_video = "output_music_video.mp4"
 
-    # 1. assets/audio/ 폴더에서 실제 MP3 선택
+    # 1. 오디오 소스 선택 (유튜브 URL 또는 assets/audio/)
     source = get_audio_source()
 
     # 2. 오디오 노멀라이징 및 5분 단위 기본 트랙 준비
@@ -149,11 +207,16 @@ if __name__ == "__main__":
     create_8h_video(bg_image, base_audio, final_video)
 
     # 5. 유튜브 메타데이터 JSON 저장
-    title = f"{source['artist']} - {source['title']} 피아노 연주 (8 Hours Piano)"
+    custom_title_input = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
+    if custom_title_input:
+        title = custom_title_input
+    else:
+        title = f"{source['artist']} - {source['title']} (8 Hours Piano)"
+
     desc = (
-        f"감미로운 [{source['artist']} - {source['title']}] 피아노 연주곡입니다.\n"
-        f"수면, 공부, 집중, 카페, 편안한 휴식 시간에 듣기 좋은 8시간 연속 재생 음악입니다.\n\n"
-        f"Song: {source['title']}\n"
+        f"감미로운 [{source['artist']} - {source['title']}] 음악입니다.\n"
+        f"수면, 공부, 집중, 카페, 편안한 휴식 시간에 듣기 좋은 8시간 연속 재생 영상입니다.\n\n"
+        f"Track: {source['title']}\n"
         f"Artist: {source['artist']}\n\n"
         f"Uploaded via Keyin Studio."
     )
