@@ -44,14 +44,23 @@ if __name__ == "__main__":
     video_file = sys.argv[1]
     
     # 생성 스크립트에서 저장한 곡 메타데이터 읽기
-    info_path = "temp/video_info.txt"
+    json_path = "temp/video_info.json"
+    txt_path = "temp/video_info.txt"
     title_part = ""
     desc_part = ""
-    artist_name = "K-Ballad"
-    song_title = "발라드"
+    artist_name = "K-Pop Piano"
+    song_title = "멜론 인기곡"
 
-    if os.path.exists(info_path):
-        with open(info_path, "r", encoding="utf-8") as f:
+    if os.path.exists(json_path):
+        import json
+        with open(json_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+            title_part = meta.get("title", "")
+            desc_part = meta.get("description", "")
+            artist_name = meta.get("artist", artist_name)
+            song_title = meta.get("song_title", song_title)
+    elif os.path.exists(txt_path):
+        with open(txt_path, "r", encoding="utf-8") as f:
             raw_info = f.read().strip()
             parts = raw_info.split('|')
             if len(parts) >= 2:
@@ -63,12 +72,12 @@ if __name__ == "__main__":
 
     if title_part:
         title = f"[8 Hours] {title_part}"
-        description = f"{desc_part}\n\nProduced & Arranged by Keyin AI Studio."
+        description = desc_part
     else:
-        title = os.getenv("VIDEO_TITLE", "[8 Hours] 최신 K-발라드 피아노 연주곡 (Sleep & Study Piano)")
-        description = os.getenv("VIDEO_DESCRIPTION", "편안한 수면과 공부, 휴식을 위한 K-발라드 피아노 연주곡입니다.")
+        title = os.getenv("VIDEO_TITLE", "[8 Hours] 멜론 TOP 100 인기곡 감성 피아노 연주곡 모음 (Sleep & Study)")
+        description = os.getenv("VIDEO_DESCRIPTION", "멜론 실시간 인기곡들을 감미로운 피아노 연주로 감상하는 8시간 연속 재생 플레이리스트입니다.")
 
-    description += f"\n\n#{artist_name.replace(' ', '')} #{song_title.replace(' ', '')} #발라드 #피아노커버 #수면음악 #공부음악 #힐링피아노 #K발라드 #PianoCover #KPopBallad #SleepMusic #StudyMusic"
+    description += f"\n\n#{artist_name.replace(' ', '')} #{song_title.replace(' ', '')} #멜론TOP100 #피아노플레이리스트 #수면음악 #공부음악 #힐링피아노 #KPopPiano #PianoCover #SleepMusic #StudyMusic"
 
     # 태그 최적화
     tags = [artist_name, song_title, f"{song_title} 피아노", 'K-Ballad Piano', '피아노 커버', '수면음악', '공부할때듣는음악', '힐링음악', 'Piano Cover', 'Sleep Aid']
