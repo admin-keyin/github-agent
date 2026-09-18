@@ -10,7 +10,7 @@ from pydub import AudioSegment
 # --- 1. 유튜브 URL 또는 assets/audio/ 에서 오디오 소스 준비 ---
 
 def download_youtube_audio(youtube_url, output_path):
-    """지정된 유튜브 URL에서 최고음질 오디오(MP3) 및 메타데이터 추출"""
+    """지정된 유튜브 URL에서 최고음질 오디오(MP3) 및 메타데이터 추출 (봇 차단 우회)"""
     print(f"[YouTube Download] URL 다운로드 시작: {youtube_url}")
     
     # 1. 메타데이터(제목, 업로더) 추출
@@ -18,13 +18,14 @@ def download_youtube_audio(youtube_url, output_path):
         "yt-dlp",
         "--dump-json",
         "--no-playlist",
+        "--extractor-args", "youtube:player_client=android,ios,web",
         youtube_url
     ]
     title = "힐링 피아노 연주곡"
     artist = "Piano Music"
     
     try:
-        res = subprocess.run(info_cmd, capture_output=True, text=True, timeout=30)
+        res = subprocess.run(info_cmd, capture_output=True, text=True, timeout=40)
         if res.returncode == 0 and res.stdout.strip():
             meta = json.loads(res.stdout.strip())
             title = meta.get("title", title)
@@ -40,15 +41,16 @@ def download_youtube_audio(youtube_url, output_path):
         "--extract-audio",
         "--audio-format", "mp3",
         "--audio-quality", "0",
+        "--extractor-args", "youtube:player_client=android,ios,web",
         "--output", f"{out_template}.%(ext)s",
         "--no-playlist",
-        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "--no-check-certificates",
+        "--user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
         youtube_url
     ]
     
     try:
         subprocess.run(dl_cmd, check=True, timeout=120)
-        # 생성된 파일 확인
         if os.path.exists(output_path):
             return {"path": output_path, "artist": artist, "title": title}
         
