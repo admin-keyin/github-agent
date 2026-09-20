@@ -9,7 +9,7 @@ import requests
 from pydub import AudioSegment
 from PIL import Image, ImageDraw, ImageFont
 
-# --- 1. 무한 조합 동적 프롬프트 & 신박한 제목 생성 엔진 ---
+# --- 1. 장르별 악기, 템포, 무드 및 신박한 제목 생성 엔진 ---
 
 INSTRUMENTS = {
     "piano": [
@@ -36,22 +36,35 @@ INSTRUMENTS = {
         "serene cosmic synth pads with 432Hz deep relaxation drone",
         "ethereal floating ambient soundscape with crystal harp overtones",
         "peaceful ocean waves and slow cinematic atmospheric pads"
+    ],
+    "edm": [
+        "energetic festival progressive house drop with punchy kicks and saw leads",
+        "uplifting future bass with sidechained emotional vocal chops and huge supersaws",
+        "driving melodic techno bassline with hypnotic synth arpeggios and laser FX"
+    ],
+    "jpop": [
+        "upbeat anime opening rock with sparkling electric guitar riffs and fast drums",
+        "emotional Shibuya night pop with sweet synth strings and fast driving bassline",
+        "breezy summer youth anime OST with energetic acoustic guitar and piano runs"
     ]
 }
 
 MOODS = [
     "deeply emotional and nostalgic", "warm and cozy for deep relaxation",
     "peaceful and calming for sleep", "focus and inspiring for study and coding",
-    "wistful and bittersweet", "dreamy and cinematic", "heartwarming and serene"
+    "wistful and bittersweet", "dreamy and cinematic", "heartwarming and serene",
+    "euphoric and full of festival energy", "breezy and refreshing youth vibe"
 ]
 
-KEYS = ["C Major", "A Minor", "D Major", "B Minor", "G Major", "E Minor", "F Major", "D Minor", "Ab Major", "Eb Major"]
+KEYS = ["C Major", "A Minor", "D Major", "B Minor", "G Major", "E Minor", "F Major", "D Minor", "Ab Major", "Eb Major", "F# Minor"]
 TEMPOS = {
-    "piano": [60, 64, 68, 72, 76],
+    "piano": [60, 64, 68, 72],
     "lofi": [70, 74, 78, 82],
     "citypop": [108, 114, 120],
     "jazz": [75, 80, 85, 90],
-    "ambient": [48, 52, 56, 60]
+    "ambient": [48, 52, 56, 60],
+    "edm": [126, 128, 130, 132],
+    "jpop": [135, 140, 145, 150]
 }
 
 POETIC_TITLE_PIECES = {
@@ -77,6 +90,14 @@ POETIC_TITLE_PIECES = {
     "ambient": [
         ("우주 끝자락에", ["혼자 멈춰선 고요의 순간", "숨결조차 닿지 않는 평온함", "별들의 속삭임이 머무는 곳"]),
         ("깊은 밤의 쉼표", ["모든 소음이 사라진 깊은 바닷속", "지친 마음을 감싸주는 고요한 숨결"])
+    ],
+    "edm": [
+        ("심장을 뛰게 하는", ["페스티벌의 뜨거운 밤", "네온 불빛 아래 터지는 에너지", "새벽까지 멈추지 않는 비트"]),
+        ("끝없는 질주", ["한계를 넘어 날아오르는 순간", "도시의 밤을 가르는 신스 사운드"])
+    ],
+    "jpop": [
+        ("푸른 하늘 아래", ["질주하는 청춘의 계절", "너와 함께 달렸던 언덕길", "끝나지 않을 우리들의 여름"]),
+        ("시부야의 저녁 노을", ["이어폰 속으로 터져 나오는 멜로디", "빛나는 내일을 향한 발걸음"])
     ]
 }
 
@@ -84,13 +105,11 @@ GENRE_IMAGES = {
     "piano": [
         "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
         "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90"
+        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
     ],
     "lofi": [
         "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
+        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90"
     ],
     "citypop": [
         "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
@@ -103,6 +122,14 @@ GENRE_IMAGES = {
     "ambient": [
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
         "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "edm": [
+        "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "jpop": [
+        "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1280&h=720&q=90"
     ]
 }
 
@@ -126,17 +153,17 @@ def build_dynamic_prompt_and_title(genre):
     
     return prompt, title, bpm, key
 
-# --- 2. 매번 100% 새로운 곡을 생성하는 AI 작곡 & 동적 리마스터링 엔진 ---
+# --- 2. 3~4분(210초) 완성형 신곡 생성 및 동적 편곡 엔진 ---
 
-def get_unique_audio_track(genre, prompt_text, output_mp3_path):
+def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_sec=210):
     """
-    동일 장르라도 매번 100% 다른 멜로디와 톤이 나오도록
-    실시간 AI 작곡 및 무작위 피치/템포/이펙트 동적 변조 적용
+    3~4분(약 210초) 길이의 완성도 높은 오리지널 곡을 생성하며,
+    동일 장르라도 매번 100% 다른 조성(Key), 템포, 사운드 이펙트 적용
     """
     random_seed = random.randint(100000, 999999999)
-    print(f"\n[Unique Audio Engine] '{genre.upper()}' 장르 신곡 생성 (Seed: {random_seed})")
+    print(f"\n[Audio Track Engine] '{genre.upper()}' 장르 3~4분 신곡 생성 (Seed: {random_seed})")
 
-    # 1. Hugging Face Inference API 실시간 작곡 시도
+    # 1. Hugging Face Inference API 시도 (토큰이 있을 경우)
     hf_token = os.getenv("HF_TOKEN", "").strip()
     if hf_token:
         api_url = "https://router.huggingface.co/hf-inference/models/facebook/musicgen-small"
@@ -152,50 +179,68 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path):
                 with open(temp_raw, "wb") as f:
                     f.write(res.content)
                 audio = AudioSegment.from_file(temp_raw)
-                if len(audio) < 55000:
-                    audio = audio.append(audio, crossfade=1500)
-                audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
+                
+                # 3~4분(210초)으로 자연스럽게 크로스페이드 루프 확장
+                target_ms = target_duration_sec * 1000
+                if len(audio) < target_ms:
+                    repeats = int(target_ms // len(audio)) + 1
+                    looped = audio
+                    for _ in range(repeats):
+                        looped = looped.append(audio, crossfade=2000)
+                    audio = looped[:target_ms]
+                else:
+                    audio = audio[:target_ms]
+                    
+                audio = audio.normalize(headroom=0.5).fade_in(2000).fade_out(3500)
                 audio.export(output_mp3_path, format="mp3", bitrate="320k")
-                print(f"[AI Realtime Composition Success] 독창적 신곡 작곡 완료: {len(audio)/1000:.1f}초")
+                print(f"[AI Realtime 3-4min Composition Success] 신곡 작곡 완료: {len(audio)/1000:.1f}초")
                 return True
         except Exception as e:
             print(f"HF Realtime API skipped: {e}")
 
-    # 2. 장르별 트랙 기반 동적 리마스터링 (매번 조성/템포/톤 변조로 완전히 새로운 곡 탄생)
+    # 2. 장르별 고유 트랙 기반 동적 편곡 (3~4분 완성)
     genre_dir = f"assets/audio/{genre}"
     genre_files = glob.glob(f"{genre_dir}/*.mp3")
     if not genre_files:
         genre_files = glob.glob("assets/audio/*/*.mp3")
         
     chosen_base = random.choice(genre_files)
-    print(f"[Dynamic Audio Rearranger] Base: {chosen_base}")
+    print(f"[Dynamic Audio Rearranger] Base Track: {chosen_base}")
     
-    # 매번 완전히 다른 멜로디 음높이(조성)와 템포로 변환 (-3 ~ +3 반음 변화)
+    # 조성 변화 (-3 ~ +3 반음) 및 템포 가변
     semitone = random.choice([-3, -2, -1, 1, 2, 3])
     pitch_factor = 2 ** (semitone / 12.0)
-    speed_factor = random.uniform(0.92, 1.08)
+    speed_factor = random.uniform(0.94, 1.06)
     sample_rate = int(44100 * pitch_factor)
     atempo = speed_factor / pitch_factor
     
-    # 공간감 및 리버브 이펙터 필터
-    reverb_mix = random.uniform(0.2, 0.4)
-    delay_ms = random.choice([30, 45, 60])
-    audio_filter = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},aecho=0.8:0.85:{delay_ms}:{reverb_mix:.2f}"
+    reverb_mix = random.uniform(0.2, 0.35)
+    audio_filter = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},aecho=0.8:0.85:35:{reverb_mix:.2f}"
     
     temp_transformed = "temp/transformed.mp3"
     cmd = [
         "ffmpeg", "-y",
         "-i", chosen_base,
         "-af", audio_filter,
-        "-t", "70", # 1분 10초
         temp_transformed
     ]
     subprocess.run(cmd, check=True)
     
-    # 부드러운 페이드인 / 페이드아웃 적용
-    final_audio = AudioSegment.from_file(temp_transformed).normalize(headroom=0.5).fade_in(2000).fade_out(3000)
-    final_audio.export(output_mp3_path, format="mp3", bitrate="320k")
-    print(f"[Dynamic Rearranged Track Ready] {output_mp3_path} (조성 변화: {semitone:+d}반음, 템포: {speed_factor:.2f}x, 길이: {len(final_audio)/1000:.1f}초)")
+    # 3~4분(210초) 길이로 자연스럽게 크로스페이드 확장
+    audio = AudioSegment.from_file(temp_transformed)
+    target_ms = target_duration_sec * 1000
+    if len(audio) < target_ms:
+        repeats = int(target_ms // len(audio)) + 1
+        looped = audio
+        for _ in range(repeats):
+            looped = looped.append(audio, crossfade=2500)
+        audio = looped[:target_ms]
+    else:
+        audio = audio[:target_ms]
+        
+    audio = audio.normalize(headroom=0.5).fade_in(2000).fade_out(3500)
+    audio.export(output_mp3_path, format="mp3", bitrate="320k")
+    print(f"[3-4min Track Ready] {output_mp3_path} (길이: {len(audio)/1000:.1f}초, 조성: {semitone:+d}반음)")
     return True
 
 # --- 3. Pillow 기반 한글 깨짐 0% 고화질 타이틀 오버레이 생성기 ---
@@ -300,7 +345,7 @@ def create_equalizer_music_video(image_path, title_png_path, audio_path, output_
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
     genre_input = os.getenv("INPUT_GENRE", "").strip().lower()
-    available_genres = ["piano", "lofi", "citypop", "jazz", "ambient"]
+    available_genres = ["piano", "lofi", "citypop", "jazz", "ambient", "edm", "jpop"]
     
     if genre_input not in available_genres:
         genre = random.choice(available_genres)
@@ -310,7 +355,7 @@ if __name__ == "__main__":
     custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
     custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
     
-    # 1. 매번 100% 다른 동적 프롬프트 및 신박한 제목 생성
+    # 1. 동적 프롬프트 및 신박한 제목 생성
     auto_prompt, auto_title, bpm, key = build_dynamic_prompt_and_title(genre)
     final_prompt = custom_prompt if custom_prompt else auto_prompt
     final_title = custom_title if custom_title else f"[AI Music] {auto_title}"
@@ -320,8 +365,8 @@ if __name__ == "__main__":
     title_png = "temp/title_overlay.png"
     final_video = "output_music_video.mp4"
 
-    # 2. 매번 100% 다른 고유한 신곡 생성 (실시간 AI 작곡 or 동적 리마스터링)
-    get_unique_audio_track(genre, final_prompt, ai_mp3)
+    # 2. 3~4분(약 210초) 고유 신곡 생성 (실시간 AI 작곡 or 동적 편곡)
+    get_unique_audio_track(genre, final_prompt, ai_mp3, target_duration_sec=210)
 
     # 3. 장르별 감성 고화질 배경 이미지 다운로드
     fetch_hd_background(genre, bg_image)
@@ -329,7 +374,7 @@ if __name__ == "__main__":
     # 4. Pillow로 한글 깨짐 0% 타이틀 PNG 생성
     create_title_overlay_png(final_title, title_png)
 
-    # 5. 실시간 오디오 이퀄라이저 비디오 렌더링
+    # 5. 실시간 오디오 이퀄라이저 비디오 렌더링 (3~4분)
     create_equalizer_music_video(bg_image, title_png, ai_mp3, final_video)
 
     # 6. 유튜브 메타데이터 JSON 저장
@@ -338,7 +383,7 @@ if __name__ == "__main__":
         f"Genre: {genre.upper()} | Key: {key} | BPM: {bpm}\n"
         f"AI Prompt: \"{final_prompt}\"\n\n"
         f"Composed & Visualized by Keyin AI Music Studio.\n\n"
-        f"#{genre.upper()} #AIMusic #AI작곡 #감성음악 #이퀄라이저 #Visualizer #RelaxingMusic"
+        f"#{genre.upper()} #AIMusic #AI작곡 #감성음악 #이퀄라이저 #Visualizer #EDM #JPOP"
     )
 
     meta_info = {
