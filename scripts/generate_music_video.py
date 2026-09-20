@@ -8,7 +8,7 @@ import time
 import requests
 from pydub import AudioSegment
 
-# --- 1. 신박한 감성 곡 제목 & 가사(스토리) 생성 엔진 ---
+# --- 1. 신박한 감성 곡 제목 & 장르별 프롬프트 설정 ---
 
 CREATIVE_SONG_STORIES = [
     {
@@ -19,16 +19,12 @@ CREATIVE_SONG_STORIES = [
             "우리가 사랑이라 불렀던 계절의 끝에서",
             "너를 지우려다 하루가 다 지나버렸어",
             "비 내리는 창가에 남겨둔 너의 온기",
-            "다시 돌아갈 수 없어서 더 아름다운 날들"
+            "다시 돌아갈 수 없어서 더 아름다운 날들",
+            "어느 날 문득 너의 이름이 떠오를 때",
+            "아무도 모르게 흘려보낸 나의 새벽"
         ],
-        "lyrics": [
-            "어둠이 내려앉은 방 한구석",
-            "켜지지 않는 전화기만 바라보다가",
-            "문득 스쳐 지나간 너의 미소에",
-            "애써 묻어둔 기억들이 다시 피어나",
-            "전하지 못한 말들이 가슴에 남아",
-            "오늘 밤도 이렇게 너를 그려본다"
-        ],
+        "desc": "마음이 차분해지는 서정적인 피아노 연주곡입니다. 하루의 피로를 덜어내고 편안한 휴식과 몰입의 시간을 가져보세요.",
+        "tags": ["#AI피아노", "#피아노연주", "#힐링피아노", "#수면음악", "#감성피아노", "#이퀄라이저", "#AudioVisualizer", "#PianoMusic"],
         "prompt": "Emotional sentimental Korean ballad acoustic grand piano solo, delicate touch, romantic nostalgic melody, soft strings ambiance, 68 bpm"
     },
     {
@@ -38,15 +34,11 @@ CREATIVE_SONG_STORIES = [
             "아무도 없는 한밤중 편의점 앞에서",
             "어질러진 책상 위 식어버린 커피 한 잔",
             "괜찮은 척 웃어넘긴 하루의 끝",
-            "잠들지 못하는 새벽의 소소한 생각들"
+            "잠들지 못하는 새벽의 소소한 생각들",
+            "비 오는 밤, 방 안에서 듣는 따뜻한 비트"
         ],
-        "lyrics": [
-            "하루 종일 무거웠던 마음을 내려놓고",
-            "창문 틈으로 들어오는 차가운 새벽 공기",
-            "이어폰을 타고 흐르는 멜로디에",
-            "오늘도 수고했다고 가만히 다독여줘",
-            "내일은 조금 더 따뜻한 하루가 되기를"
-        ],
+        "desc": "새벽 감성을 자극하는 아늑한 로파이(Lo-Fi) 칠합 비트입니다. 코딩, 공부, 독서, 야간 작업용으로 추천합니다.",
+        "tags": ["#로파이", "#LofiBeats", "#칠합", "#코딩음악", "#새벽감성", "#ChillLofi", "#비주얼라이저", "#StudyVibe"],
         "prompt": "Cozy late night lo-fi chill hip hop beat with warm rhodes electric piano chords, soft vinyl crackle, gentle aesthetic bass, 75 bpm"
     },
     {
@@ -55,15 +47,11 @@ CREATIVE_SONG_STORIES = [
             "자정이 넘은 한강 다리 위를 달리며",
             "네온사인 불빛 아래 너와 나만의 춤",
             "어젯밤 꿈속에서 본 너의 뒷모습",
-            "반짝이는 도심 속 사라져가는 실루엣"
+            "반짝이는 도심 속 사라져가는 실루엣",
+            "도심의 밤바람을 가르는 드라이브"
         ],
-        "lyrics": [
-            "도시는 잠들고 반짝이는 네온 불빛",
-            "차가운 밤공기 속을 가르며 달려가",
-            "스쳐 지나가는 불빛 사이로",
-            "선명해지는 너의 잔상",
-            "오늘 밤은 멈추지 않고 어디론가 떠나고 싶어"
-        ],
+        "desc": "레트로한 감성과 그루브가 살아있는 80년대 시티팝 사운드입니다. 야간 드라이브나 기분 전환용으로 감상해보세요.",
+        "tags": ["#시티팝", "#CityPop", "#레트로음악", "#드라이브음악", "#RetroVibe", "#80sVibe", "#Visualizer"],
         "prompt": "Groovy 80s Korean retro city pop instrumental, catchy funky bassline, sparkling synth brass, nostalgic breezy night drive, 110 bpm"
     },
     {
@@ -72,15 +60,11 @@ CREATIVE_SONG_STORIES = [
             "우주 끝자락에 혼자 멈춰선 순간",
             "파도 소리조차 닿지 않는 깊은 밤",
             "지친 영혼을 감싸주는 고요한 숨결",
-            "꿈결 속에서 만난 잊혀진 행성"
+            "꿈결 속에서 만난 잊혀진 행성",
+            "모든 소음이 멈춘 고요의 시간"
         ],
-        "lyrics": [
-            "시간이 멈춘 것만 같은 고요함",
-            "모든 소음이 사라진 깊은 바닷속처럼",
-            "숨을 들이쉬고 내쉬며",
-            "복잡했던 생각들을 멀리 흘려보내",
-            "이 평온함 속에 온전히 머물러"
-        ],
+        "desc": "복잡한 생각을 비우고 깊은 명상과 수면에 빠져들 수 있도록 도와주는 앰비언트 힐링 사운드스케이프입니다.",
+        "tags": ["#앰비언트", "#명상음악", "#힐링사운드", "#수면음악", "#AmbientMusic", "#Meditation", "#DeepSleep"],
         "prompt": "Deep meditative cosmic ambient soundscape, soothing ethereal synth pads, peaceful theta wave frequency for deep sleep, 50 bpm"
     }
 ]
@@ -150,33 +134,7 @@ def generate_musicgen_audio(prompt_text, output_mp3_path):
         return True
     return False
 
-# --- 3. 자막(SRT) 생성 (가사 타이밍 동기화) ---
-
-def create_srt_lyrics_file(lyrics_list, total_duration_sec, output_srt_path):
-    """곡 길이에 맞춰 감성 가사가 화면 하단에 차례대로 흐르도록 SRT 자막 파일 생성"""
-    if not lyrics_list:
-        return
-        
-    num_lines = len(lyrics_list)
-    line_duration = total_duration_sec / (num_lines + 1)
-    
-    def format_time(seconds):
-        hrs = int(seconds // 3600)
-        mins = int((seconds % 3600) // 60)
-        secs = int(seconds % 60)
-        millis = int((seconds - int(seconds)) * 1000)
-        return f"{hrs:02d}:{mins:02d}:{secs:02d},{millis:03d}"
-
-    with open(output_srt_path, "w", encoding="utf-8") as f:
-        for idx, line in enumerate(lyrics_list):
-            start_sec = idx * line_duration + 1.0
-            end_sec = min(total_duration_sec - 1.0, (idx + 1) * line_duration + 0.8)
-            f.write(f"{idx + 1}\n")
-            f.write(f"{format_time(start_sec)} --> {format_time(end_sec)}\n")
-            f.write(f"{line}\n\n")
-    print(f"SRT Lyrics file created: {output_srt_path}")
-
-# --- 4. 감성 앨범 아트 및 가사 자막 결합 비디오 렌더링 ---
+# --- 3. 고화질 감성 배경 이미지 다운로드 ---
 
 def fetch_hd_background(genre, filename):
     image_pool = GENRE_IMAGES.get(genre, GENRE_IMAGES["piano"])
@@ -191,40 +149,53 @@ def fetch_hd_background(genre, filename):
         print(f"Image fetch fallback: {e}")
     subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x1a2130:s=1280x720:d=1", "-vframes", "1", filename], check=True)
 
-def create_lyric_music_video(image_path, audio_path, srt_path, song_title, output_path):
-    """배경 이미지 + 가사 자막 + 곡 제목 오버레이 렌더링"""
+# --- 4. 실시간 반응형 오디오 이퀄라이저 비주얼라이저 비디오 렌더링 ---
+
+def create_equalizer_music_video(image_path, audio_path, song_title, output_path):
+    """
+    음악의 멜로디와 리듬에 실시간으로 반응하여 춤추는
+    반투명 화이트/네온 오디오 이퀄라이저 바(Audio Visualizer) 렌더링
+    """
+    print("Rendering audio visualizer music video...")
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
-    
-    # 폰트 및 스타일 필터
-    # 제목 오버레이 및 자막 필터
     safe_title = song_title.replace(":", " -").replace("'", "").replace('"', "")
-    video_filter = f"scale=1280:720,drawtext=text='{safe_title}':x=(w-text_w)/2:y=80:fontsize=28:fontcolor=white@0.9:box=1:boxcolor=black@0.4:boxborderw=10"
     
-    # 자막 파일이 있으면 subtitles 필터 추가
-    if os.path.exists(srt_path):
-        video_filter += f",subtitles='{srt_path}':force_style='FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=60'"
-        
+    # FFmpeg 필터 컴플렉스:
+    # 1. 배경 이미지 리사이즈 (1280x720) 및 상단 감성 타이틀 박스 오버레이
+    # 2. 오디오 주파수 스펙트럼 분석 -> 실시간 반응형 막대 이퀄라이저(showfreqs) 생성 (860x140)
+    # 3. 배경 하단 중앙에 이퀄라이저 바를 오버레이
+    filter_complex = (
+        f"[0:v]scale=1280:720,"
+        f"drawtext=text='{safe_title}':x=(w-text_w)/2:y=90:fontsize=30:fontcolor=white@0.95:box=1:boxcolor=black@0.45:boxborderw=12[bg];"
+        f"[1:a]showfreqs=s=860x130:mode=bar:fscale=log:colors=white@0.85|white@0.4:win_size=1024[eq];"
+        f"[bg][eq]overlay=x=(W-w)/2:y=H-190[v]"
+    )
+    
     cmd = [
-        "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
-        "-c:v", "libx264", "-t", str(duration_sec), "-pix_fmt", "yuv420p",
-        "-vf", video_filter,
-        "-preset", "ultrafast", "-crf", "22", "-c:a", "aac", "-b:a", "320k", "-shortest", output_path
+        "ffmpeg", "-y",
+        "-loop", "1", "-i", image_path,
+        "-i", audio_path,
+        "-filter_complex", filter_complex,
+        "-map", "[v]", "-map", "1:a",
+        "-c:v", "libx264", "-t", str(duration_sec),
+        "-pix_fmt", "yuv420p",
+        "-preset", "ultrafast", "-crf", "22",
+        "-c:a", "aac", "-b:a", "320k",
+        "-shortest", output_path
     ]
     
     try:
         subprocess.run(cmd, check=True)
+        print(f"[Visualizer Render Success] {output_path} (길이: {duration_sec:.1f}s)")
     except Exception as e:
-        print(f"Subtitle render fallback without subs ({e})")
-        # 자막 렌더링 실패 시 기본 렌더링
+        print(f"Visualizer render error ({e}), falling back to simple video...")
         cmd_fallback = [
             "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
             "-c:v", "libx264", "-t", str(duration_sec), "-pix_fmt", "yuv420p", "-vf", "scale=1280:720",
             "-preset", "ultrafast", "-crf", "22", "-c:a", "aac", "-b:a", "320k", "-shortest", output_path
         ]
         subprocess.run(cmd_fallback, check=True)
-        
-    print(f"Lyric Music Video created: {output_path} (Duration: {duration_sec:.1f}s)")
 
 # --- 메인 실행 ---
 
@@ -245,37 +216,29 @@ if __name__ == "__main__":
     
     final_prompt = custom_prompt if custom_prompt else story["prompt"]
     final_title = custom_title if custom_title else random.choice(story["title_templates"])
-    lyrics = story["lyrics"]
     
     ai_mp3 = "temp/ai_song.mp3"
     bg_image = "temp/bg.jpg"
-    srt_file = "temp/lyrics.srt"
     final_video = "output_music_video.mp4"
 
     # 1. AI 작곡
     generate_musicgen_audio(final_prompt, ai_mp3)
 
-    # 2. 곡 길이에 맞춘 가사 자막(SRT) 생성
-    audio = AudioSegment.from_file(ai_mp3)
-    create_srt_lyrics_file(lyrics, len(audio) / 1000.0, srt_file)
-
-    # 3. 고화질 배경 이미지 준비
+    # 2. 고화질 배경 이미지 다운로드
     fetch_hd_background(genre, bg_image)
 
-    # 4. 감성 가사 자막 + 타이틀 오버레이 리릭 비디오 렌더링
-    create_lyric_music_video(bg_image, ai_mp3, srt_file, final_title, final_video)
+    # 3. 음악에 맞춰 실시간 춤추는 오디오 이퀄라이저 비주얼라이저 비디오 렌더링
+    create_equalizer_music_video(bg_image, ai_mp3, final_title, final_video)
 
-    # 5. 유튜브 설명란용 가사 전문 및 메타데이터 작성
-    lyrics_text = "\n".join(lyrics)
+    # 4. 유튜브 메타데이터 JSON 저장
+    tags_str = " ".join(story["tags"])
     desc = (
         f"🎧 {final_title}\n\n"
-        f"📜 [가사 / Lyrics]\n"
-        f"-----------------------------\n"
-        f"{lyrics_text}\n"
-        f"-----------------------------\n\n"
+        f"{story['desc']}\n\n"
         f"Genre: {genre.upper()}\n"
-        f"Composed & Produced by Keyin AI Studio.\n\n"
-        f"#AI작곡 #감성노래 #가사비디오 #LyricVideo #감성발라드 #수면음악 #새벽감성"
+        f"AI Prompt: \"{final_prompt}\"\n\n"
+        f"Composed & Visualized by Keyin AI Music Studio.\n\n"
+        f"{tags_str}"
     )
 
     meta_info = {
@@ -286,4 +249,4 @@ if __name__ == "__main__":
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
-    print(f"Video metadata saved successfully with lyrics for: {final_title}")
+    print(f"Video metadata saved successfully for: {final_title}")
