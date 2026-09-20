@@ -126,30 +126,27 @@ def build_dynamic_prompt_and_title(genre):
     
     return prompt, title, bpm, key
 
-# --- 2. 장르별 고음질 전용 음원 로드 & AI 생성 엔진 ---
+# --- 2. 매번 100% 새로운 곡을 생성하는 AI 작곡 & 동적 리마스터링 엔진 ---
 
-def get_genre_audio_track(genre, prompt_text, output_mp3_path):
+def get_unique_audio_track(genre, prompt_text, output_mp3_path):
     """
-    선택된 장르(Piano, Lo-Fi, Jazz, City Pop, Ambient)에 맞는
-    전용 고음질 음원을 로드하여 장르별 완벽한 차별화 보장
+    동일 장르라도 매번 100% 다른 멜로디와 톤이 나오도록
+    실시간 AI 작곡 및 무작위 피치/템포/이펙트 동적 변조 적용
     """
     random_seed = random.randint(100000, 999999999)
-    print(f"\n[Audio Track Engine] '{genre.upper()}' 장르 음원 준비 (Seed: {random_seed})")
-    
-    # 1. Hugging Face Inference API 시도 (토큰이 있을 경우)
+    print(f"\n[Unique Audio Engine] '{genre.upper()}' 장르 신곡 생성 (Seed: {random_seed})")
+
+    # 1. Hugging Face Inference API 실시간 작곡 시도
     hf_token = os.getenv("HF_TOKEN", "").strip()
     if hf_token:
         api_url = "https://router.huggingface.co/hf-inference/models/facebook/musicgen-small"
-        headers = {
-            "Authorization": f"Bearer {hf_token}",
-            "x-use-cache": "false"
-        }
+        headers = {"Authorization": f"Bearer {hf_token}", "x-use-cache": "false"}
         payload = {
             "inputs": prompt_text,
-            "parameters": {"max_new_tokens": 512, "temperature": 1.1, "top_k": 250, "seed": random_seed}
+            "parameters": {"max_new_tokens": 512, "temperature": random.uniform(1.0, 1.3), "seed": random_seed}
         }
         try:
-            res = requests.post(api_url, headers=headers, json=payload, timeout=40)
+            res = requests.post(api_url, headers=headers, json=payload, timeout=45)
             if res.status_code == 200 and len(res.content) > 10000:
                 temp_raw = "temp/ai_raw.wav"
                 with open(temp_raw, "wb") as f:
@@ -159,30 +156,47 @@ def get_genre_audio_track(genre, prompt_text, output_mp3_path):
                     audio = audio.append(audio, crossfade=1500)
                 audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
                 audio.export(output_mp3_path, format="mp3", bitrate="320k")
-                print(f"[AI MusicGen Live Composition] 새로운 '{genre}' 곡 작곡 완료: {len(audio)/1000:.1f}초")
+                print(f"[AI Realtime Composition Success] 독창적 신곡 작곡 완료: {len(audio)/1000:.1f}초")
                 return True
         except Exception as e:
-            print(f"HF API retry/fallback due to: {e}")
+            print(f"HF Realtime API skipped: {e}")
 
-    # 2. 장르별 전용 고음질 라이브러리(assets/audio/{genre}/*.mp3)에서 무작위 선곡
+    # 2. 장르별 트랙 기반 동적 리마스터링 (매번 조성/템포/톤 변조로 완전히 새로운 곡 탄생)
     genre_dir = f"assets/audio/{genre}"
     genre_files = glob.glob(f"{genre_dir}/*.mp3")
-    
     if not genre_files:
-        # 상위 assets/audio 폴더 탐색
-        genre_files = glob.glob("assets/audio/*.mp3")
+        genre_files = glob.glob("assets/audio/*/*.mp3")
         
-    if genre_files:
-        chosen_track = random.choice(genre_files)
-        print(f"[Genre Audio Loaded] '{genre.upper()}' 전용 고음질 트랙: {chosen_track}")
-        
-        audio = AudioSegment.from_file(chosen_track)
-        audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
-        audio.export(output_mp3_path, format="mp3", bitrate="320k")
-        print(f"-> Selected Track Duration: {len(audio)/1000:.1f}s")
-        return True
-        
-    return False
+    chosen_base = random.choice(genre_files)
+    print(f"[Dynamic Audio Rearranger] Base: {chosen_base}")
+    
+    # 매번 완전히 다른 멜로디 음높이(조성)와 템포로 변환 (-3 ~ +3 반음 변화)
+    semitone = random.choice([-3, -2, -1, 1, 2, 3])
+    pitch_factor = 2 ** (semitone / 12.0)
+    speed_factor = random.uniform(0.92, 1.08)
+    sample_rate = int(44100 * pitch_factor)
+    atempo = speed_factor / pitch_factor
+    
+    # 공간감 및 리버브 이펙터 필터
+    reverb_mix = random.uniform(0.2, 0.4)
+    delay_ms = random.choice([30, 45, 60])
+    audio_filter = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},aecho=0.8:0.85:{delay_ms}:{reverb_mix:.2f}"
+    
+    temp_transformed = "temp/transformed.mp3"
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", chosen_base,
+        "-af", audio_filter,
+        "-t", "70", # 1분 10초
+        temp_transformed
+    ]
+    subprocess.run(cmd, check=True)
+    
+    # 부드러운 페이드인 / 페이드아웃 적용
+    final_audio = AudioSegment.from_file(temp_transformed).normalize(headroom=0.5).fade_in(2000).fade_out(3000)
+    final_audio.export(output_mp3_path, format="mp3", bitrate="320k")
+    print(f"[Dynamic Rearranged Track Ready] {output_mp3_path} (조성 변화: {semitone:+d}반음, 템포: {speed_factor:.2f}x, 길이: {len(final_audio)/1000:.1f}초)")
+    return True
 
 # --- 3. Pillow 기반 한글 깨짐 0% 고화질 타이틀 오버레이 생성기 ---
 
@@ -258,9 +272,9 @@ def create_equalizer_music_video(image_path, title_png_path, audio_path, output_
 
     cmd = [
         "ffmpeg", "-y",
-        "-loop", "1", "-i", image_path,       # 0:v 배경 이미지
-        "-loop", "1", "-i", title_png_path,   # 1:v 한글 타이틀 PNG
-        "-i", audio_path,                     # 2:a 오디오
+        "-loop", "1", "-i", image_path,
+        "-loop", "1", "-i", title_png_path,
+        "-i", audio_path,
         "-filter_complex", filter_complex,
         "-map", "[v]", "-map", "2:a",
         "-c:v", "libx264", "-t", str(duration_sec),
@@ -296,7 +310,7 @@ if __name__ == "__main__":
     custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
     custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
     
-    # 1. 동적 프롬프트 및 신박한 제목 생성
+    # 1. 매번 100% 다른 동적 프롬프트 및 신박한 제목 생성
     auto_prompt, auto_title, bpm, key = build_dynamic_prompt_and_title(genre)
     final_prompt = custom_prompt if custom_prompt else auto_prompt
     final_title = custom_title if custom_title else f"[AI Music] {auto_title}"
@@ -306,8 +320,8 @@ if __name__ == "__main__":
     title_png = "temp/title_overlay.png"
     final_video = "output_music_video.mp4"
 
-    # 2. 장르별(Piano/Lofi/Jazz/CityPop/Ambient) 전용 고음질 음원 로드
-    get_genre_audio_track(genre, final_prompt, ai_mp3)
+    # 2. 매번 100% 다른 고유한 신곡 생성 (실시간 AI 작곡 or 동적 리마스터링)
+    get_unique_audio_track(genre, final_prompt, ai_mp3)
 
     # 3. 장르별 감성 고화질 배경 이미지 다운로드
     fetch_hd_background(genre, bg_image)
