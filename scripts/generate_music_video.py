@@ -5,154 +5,185 @@ import random
 import subprocess
 import json
 import requests
+import numpy as np
 from pydub import AudioSegment
+from scipy.io import wavfile
 
-# --- 1. 유튜브 URL 또는 assets/audio/ 에서 오디오 소스 준비 ---
+# --- 1. 테마별 메타데이터 및 배경 이미지 설정 ---
 
-def download_youtube_audio(youtube_url, output_path):
-    """지정된 유튜브 URL에서 최고음질 오디오(MP3) 및 메타데이터 추출 (봇 차단 우회)"""
-    print(f"[YouTube Download] URL 다운로드 시작: {youtube_url}")
+THEME_CONFIG = {
+    "piano": {
+        "title": "잠잘 때나 공부할 때 듣기 좋은 편안한 감성 피아노 연주곡 (8 Hours Piano)",
+        "desc": "마음이 편안해지는 감성 피아노 연주곡입니다. 수면, 공부, 집중, 카페, 휴식 시간에 편안하게 감상하세요.",
+        "tags": ["#피아노연주", "#수면음악", "#공부음악", "#힐링피아노", "#PianoMusic", "#SleepAid", "#StudyMusic"],
+        "images": [
+            "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+        ]
+    },
+    "lofi": {
+        "title": "새벽에 듣기 좋은 감성 로파이 칠합 비트 (8 Hours Lo-Fi Chill Beats)",
+        "desc": "따뜻하고 아늑한 로파이(Lo-Fi) 칠합 음악입니다. 코딩, 과제, 야간 작업, 휴식에 최적화된 연속 재생 플레이리스트입니다.",
+        "tags": ["#로파이", "#LofiBeats", "#칠합", "#코딩음악", "#공부할때듣는음악", "#LofiChill", "#NightVibe"],
+        "images": [
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
+        ]
+    },
+    "sleep": {
+        "title": "불면증을 위한 깊은 수면 유도 힐링 음악 (8 Hours Deep Sleep Music)",
+        "desc": "복잡한 생각을 비우고 깊은 잠에 빠져들 수 있도록 도와주는 수면 유도 음악입니다. 편안한 밤 되세요.",
+        "tags": ["#수면음악", "#불면증치료", "#딥슬립", "#힐링음악", "#SleepMusic", "#DeepSleep", "#Relaxing"],
+        "images": [
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
+        ]
+    },
+    "study": {
+        "title": "집중력 향상과 몰입을 위한 차분한 연주곡 (8 Hours Study & Focus)",
+        "desc": "집중이 필요할 때 뇌파를 안정시키고 몰입을 도와주는 BGM입니다. 독서, 공부, 작업용으로 추천합니다.",
+        "tags": ["#공부음악", "#집중력음악", "#몰입음악", "#작업용BGM", "#StudyBGM", "#FocusMusic"],
+        "images": [
+            "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1280&h=720&q=90",
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1280&h=720&q=90"
+        ]
+    }
+}
+
+# --- 2. 오디오 소스 준비 (assets/audio/ 우선 또는 고품질 앰비언트 엔진) ---
+
+def generate_ambient_piano_melody(output_wav, duration=300):
+    """assets 폴더에 파일이 없을 경우 풍성한 배음과 리버브가 적용된 5분 힐링 피아노 멜로디 생성"""
+    print("Generating high-quality ambient piano track...")
+    fs = 44100
+    total_samples = int(fs * duration)
+    buffer_l = np.zeros(total_samples, dtype=np.float32)
+    buffer_r = np.zeros(total_samples, dtype=np.float32)
     
-    # 1. 메타데이터(제목, 업로더) 추출
-    info_cmd = [
-        "yt-dlp",
-        "--dump-json",
-        "--no-playlist",
-        "--extractor-args", "youtube:player_client=android,ios,web",
-        youtube_url
+    # 편안한 코드 진행 (Cmaj7 - Am7 - Fmaj7 - G7sus4)
+    chords = [
+        [48, 52, 55, 59, 64], # Cmaj7
+        [45, 48, 52, 55, 60], # Am7
+        [41, 45, 48, 52, 57], # Fmaj7
+        [43, 48, 50, 55, 59]  # G7sus4
     ]
-    title = "힐링 피아노 연주곡"
-    artist = "Piano Music"
     
-    try:
-        res = subprocess.run(info_cmd, capture_output=True, text=True, timeout=40)
-        if res.returncode == 0 and res.stdout.strip():
-            meta = json.loads(res.stdout.strip())
-            title = meta.get("title", title)
-            artist = meta.get("uploader", meta.get("channel", artist))
-            print(f"[YouTube Info] Title: {title}, Uploader: {artist}")
-    except Exception as e:
-        print(f"[YouTube Info Warning] 메타데이터 추출 오류 ({e}), 기본값 사용")
+    melody_scale = [60, 62, 64, 67, 69, 72, 74, 76, 79] # 펜타토닉 힐링 스케일
+    
+    def synth_note(midi_pitch, note_dur, vel):
+        freq = 440.0 * (2.0 ** ((midi_pitch - 69.0) / 12.0))
+        t = np.linspace(0, note_dur, int(fs * note_dur), False)
+        # 배음 감쇠
+        w = np.sin(2 * np.pi * freq * t) * np.exp(-t * 0.8)
+        w += np.sin(2 * np.pi * (freq * 2) * t) * 0.4 * np.exp(-t * 1.6)
+        w += np.sin(2 * np.pi * (freq * 3) * t) * 0.2 * np.exp(-t * 2.8)
+        w *= vel
+        attack = int(fs * 0.005)
+        if len(w) > attack:
+            w[:attack] *= np.linspace(0, 1, attack)
+        return w
 
-    # 2. 오디오 다운로드 (MP3)
-    out_template = output_path.replace(".mp3", "")
-    dl_cmd = [
-        "yt-dlp",
-        "--extract-audio",
-        "--audio-format", "mp3",
-        "--audio-quality", "0",
-        "--extractor-args", "youtube:player_client=android,ios,web",
-        "--output", f"{out_template}.%(ext)s",
-        "--no-playlist",
-        "--no-check-certificates",
-        "--user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
-        youtube_url
-    ]
+    cur_sample = 0
+    chord_dur_sec = 4.0
+    chord_samples = int(fs * chord_dur_sec)
     
-    try:
-        subprocess.run(dl_cmd, check=True, timeout=120)
-        if os.path.exists(output_path):
-            return {"path": output_path, "artist": artist, "title": title}
+    while cur_sample < total_samples:
+        chord = chords[(cur_sample // chord_samples) % len(chords)]
         
-        for ext in [".mp3", ".m4a", ".wav", ".opus", ".webm"]:
-            alt = out_template + ext
-            if os.path.exists(alt):
-                os.rename(alt, output_path)
-                return {"path": output_path, "artist": artist, "title": title}
-    except Exception as e:
-        print(f"[YouTube Download Error] 다운로드 실패: {e}")
-        
-    return None
+        # 코드 아르페지오 (왼손)
+        for i, pitch in enumerate(chord):
+            offset = int(i * 0.6 * fs)
+            note_start = cur_sample + offset
+            if note_start < total_samples:
+                w = synth_note(pitch, 3.8, 0.45)
+                end = min(total_samples, note_start + len(w))
+                buffer_l[note_start:end] += w[:end-note_start] * 0.6
+                buffer_r[note_start:end] += w[:end-note_start] * 0.4
+                
+        # 서정적 멜로디 (오른손)
+        for m_step in range(4):
+            if random.random() > 0.3:
+                m_pitch = random.choice(melody_scale)
+                m_offset = int(m_step * 1.0 * fs + random.uniform(0.1, 0.4) * fs)
+                m_start = cur_sample + m_offset
+                if m_start < total_samples:
+                    m_dur = random.choice([1.2, 1.8, 2.5])
+                    w = synth_note(m_pitch, m_dur, 0.6)
+                    end = min(total_samples, m_start + len(w))
+                    pan = random.uniform(0.4, 0.6)
+                    buffer_l[m_start:end] += w[:end-m_start] * (1.0 - pan)
+                    buffer_r[m_start:end] += w[:end-m_start] * pan
 
-def get_audio_source():
-    """입력받은 유튜브 URL 또는 assets/audio/ 에서 오디오 가져오기"""
-    os.makedirs("temp", exist_ok=True)
-    custom_url = os.getenv("INPUT_YOUTUBE_URL", "").strip()
-    
-    # 1. GitHub Actions 수동 실행 시 입력받은 유튜브 URL이 있는 경우
-    if custom_url:
-        yt_target = "temp/youtube_source.mp3"
-        result = download_youtube_audio(custom_url, yt_target)
-        if result and os.path.exists(result["path"]) and os.path.getsize(result["path"]) > 10000:
-            print(f"[Audio Source] 유튜브 URL에서 성공적으로 추출 완료: {result['title']}")
-            return result
-        else:
-            print("[Audio Source] 유튜브 다운로드 실패, 로컬 assets 폴더 탐색으로 전환합니다.")
+        cur_sample += chord_samples
 
-    # 2. assets/audio/ 폴더에서 로컬 음원 탐색
+    # 리버브 (공간감 잔향)
+    reverb_delay = int(fs * 0.25)
+    if reverb_delay < total_samples:
+        buffer_l[reverb_delay:] += buffer_r[:-reverb_delay] * 0.3
+        buffer_r[reverb_delay:] += buffer_l[:-reverb_delay] * 0.3
+
+    # 노멀라이징
+    max_val = max(np.max(np.abs(buffer_l)), np.max(np.abs(buffer_r)))
+    if max_val > 0:
+        buffer_l = (buffer_l / max_val) * 0.88
+        buffer_r = (buffer_r / max_val) * 0.88
+
+    stereo = np.vstack(((buffer_l * 32767).astype(np.int16), (buffer_r * 32767).astype(np.int16))).T
+    wavfile.write(output_wav, fs, stereo)
+
+def get_audio_track(theme_key):
+    """assets/audio 디렉토리의 실제 MP3 탐색 (없으면 자동 앰비언트 트랙 생성)"""
     audio_dir = "assets/audio"
     valid_exts = ("*.mp3", "*.wav", "*.m4a", "*.flac", "*.ogg")
     audio_files = []
     for ext in valid_exts:
         audio_files.extend(glob.glob(os.path.join(audio_dir, ext)))
         
+    os.makedirs("temp", exist_ok=True)
+    temp_wav = "temp/generated_base.wav"
+    output_mp3 = "temp/base.mp3"
+
     if audio_files:
-        chosen_file = random.choice(audio_files)
-        filename = os.path.basename(chosen_file)
-        name_without_ext = os.path.splitext(filename)[0]
-
-        if " - " in name_without_ext:
-            parts = name_without_ext.split(" - ", 1)
-            artist = parts[0].strip()
-            title = parts[1].strip()
-        else:
-            artist = "Piano Music"
-            title = name_without_ext.strip()
-
-        print(f"[Audio Source] 로컬 에셋 선택: {chosen_file} ({artist} - {title})")
-        return {"path": chosen_file, "artist": artist, "title": title}
-
-    # 3. Fallback 기본 톤
-    print(f"[Warning] 음원이 없어 기본 톤을 생성합니다.")
-    fallback_path = "temp/default_piano.mp3"
-    subprocess.run([
-        "ffmpeg", "-y", "-f", "lavfi",
-        "-i", "sine=frequency=523.25:duration=60",
-        fallback_path
-    ], check=True)
-    return {
-        "path": fallback_path,
-        "artist": "Keyin Studio",
-        "title": "편안한 힐링 피아노 연주곡"
-    }
-
-# --- 2. 오디오 5분 루프 준비 및 노멀라이징 ---
-
-def prepare_base_audio(input_path, output_path, target_duration=300):
-    """실제 MP3를 볼륨 최적화 및 5분(300초) 단위로 매끄럽게 연결"""
-    print(f"Processing and normalizing audio track: {input_path}...")
-    audio = AudioSegment.from_file(input_path)
-    
-    # 볼륨 노멀라이즈
-    audio = audio.normalize(headroom=0.5)
-    
-    # 5분(300초) 이상으로 루프 확장
-    target_ms = target_duration * 1000
-    if len(audio) < target_ms:
-        repeats = int(target_ms // len(audio)) + 1
-        looped = audio
-        for _ in range(repeats):
-            looped = looped.append(audio, crossfade=1500)
-        audio = looped[:target_ms]
-    else:
-        audio = audio[:target_ms]
+        chosen = random.choice(audio_files)
+        filename = os.path.basename(chosen)
+        name_no_ext = os.path.splitext(filename)[0]
+        print(f"[Audio] assets/audio/ 로컬 파일 사용: {filename}")
         
-    audio = audio.fade_in(2000).fade_out(3000)
-    audio.export(output_path, format="mp3", bitrate="320k")
-    print(f"Base audio ready: {output_path} (Duration: {len(audio)/1000}s)")
+        audio = AudioSegment.from_file(chosen)
+        audio = audio.normalize(headroom=0.5)
+        target_ms = 300 * 1000
+        if len(audio) < target_ms:
+            repeats = int(target_ms // len(audio)) + 1
+            looped = audio
+            for _ in range(repeats):
+                looped = looped.append(audio, crossfade=1500)
+            audio = looped[:target_ms]
+        else:
+            audio = audio[:target_ms]
+        audio.fade_in(2000).fade_out(3000).export(output_mp3, format="mp3", bitrate="320k")
+        
+        if " - " in name_no_ext:
+            parts = name_no_ext.split(" - ", 1)
+            return {"artist": parts[0].strip(), "title": parts[1].strip(), "path": output_mp3}
+        return {"artist": "Piano Relax", "title": name_no_ext.strip(), "path": output_mp3}
 
-# --- 3. 감성 고화질 배경 이미지 다운로드 ---
+    # 파일이 없으면 고품질 앰비언트 연주곡 생성
+    generate_ambient_piano_melody(temp_wav, duration=300)
+    audio = AudioSegment.from_wav(temp_wav)
+    audio.fade_in(2000).fade_out(3000).export(output_mp3, format="mp3", bitrate="320k")
+    
+    cfg = THEME_CONFIG.get(theme_key, THEME_CONFIG["piano"])
+    return {"artist": "Keyin Relaxing Music", "title": cfg["title"].split('(')[0].strip(), "path": output_mp3}
 
-def fetch_hd_background(filename):
-    image_pool = [
-        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
-    ]
-    chosen_url = random.choice(image_pool)
-    print(f"Fetching HD background image: {chosen_url}")
+# --- 3. 고화질 감성 배경 이미지 다운로드 ---
+
+def fetch_hd_background(theme_key, filename):
+    cfg = THEME_CONFIG.get(theme_key, THEME_CONFIG["piano"])
+    chosen_url = random.choice(cfg["images"])
+    print(f"Fetching HD background image ({theme_key}): {chosen_url}")
     try:
         resp = requests.get(chosen_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
         if resp.status_code == 200 and len(resp.content) > 1000:
@@ -178,7 +209,7 @@ def create_8h_video(image_path, audio_path, output_path):
     subprocess.run(cmd_short, check=True)
 
     with open("temp/concat.txt", "w") as f:
-        for _ in range(96): # 5분 x 96 = 8시간 (480분)
+        for _ in range(96): # 5분 x 96 = 8시간
             f.write("file 'short.mp4'\n")
     
     cmd_concat = [
@@ -191,43 +222,44 @@ def create_8h_video(image_path, audio_path, output_path):
 # --- 메인 실행 ---
 
 if __name__ == "__main__":
-    os.makedirs("temp", exist_ok=True)
-    base_audio = "temp/base.mp3"
+    theme = os.getenv("INPUT_THEME", "piano").strip().lower()
+    if theme not in THEME_CONFIG:
+        theme = "piano"
+        
+    cfg = THEME_CONFIG[theme]
     bg_image = "temp/bg.jpg"
     final_video = "output_music_video.mp4"
 
-    # 1. 오디오 소스 선택 (유튜브 URL 또는 assets/audio/)
-    source = get_audio_source()
+    # 1. 고음질 오디오 트랙 준비 (assets/audio/ 우선 또는 고품질 엔진 생성)
+    audio_info = get_audio_track(theme)
 
-    # 2. 오디오 노멀라이징 및 5분 단위 기본 트랙 준비
-    prepare_base_audio(source["path"], base_audio, target_duration=300)
+    # 2. 테마별 고화질 감성 배경 이미지 다운로드
+    fetch_hd_background(theme, bg_image)
 
-    # 3. 고화질 감성 배경 이미지 다운로드
-    fetch_hd_background(bg_image)
+    # 3. 8시간 무손실 연속 재생 비디오 초고속 생성
+    create_8h_video(bg_image, audio_info["path"], final_video)
 
-    # 4. 8시간 비디오 렌더링
-    create_8h_video(bg_image, base_audio, final_video)
-
-    # 5. 유튜브 메타데이터 JSON 저장
-    custom_title_input = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
-    if custom_title_input:
-        title = custom_title_input
+    # 4. 유튜브 메타데이터 JSON 저장
+    custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
+    if custom_title:
+        title = custom_title
     else:
-        title = f"{source['artist']} - {source['title']} (8 Hours Piano)"
+        title = f"[8 Hours] {audio_info['title']}"
 
+    tags_str = " ".join(cfg["tags"])
     desc = (
-        f"감미로운 [{source['artist']} - {source['title']}] 음악입니다.\n"
-        f"수면, 공부, 집중, 카페, 편안한 휴식 시간에 듣기 좋은 8시간 연속 재생 영상입니다.\n\n"
-        f"Track: {source['title']}\n"
-        f"Artist: {source['artist']}\n\n"
-        f"Uploaded via Keyin Studio."
+        f"{cfg['desc']}\n\n"
+        f"Track: {audio_info['title']}\n"
+        f"Artist: {audio_info['artist']}\n\n"
+        f"{tags_str}\n\n"
+        f"Produced & Provided by Keyin Studio."
     )
-    
+
     meta_info = {
-        "title": title,
+        "title": title[:100],
         "description": desc,
-        "artist": source["artist"],
-        "song_title": source["title"]
+        "artist": audio_info["artist"],
+        "song_title": audio_info["title"]
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
