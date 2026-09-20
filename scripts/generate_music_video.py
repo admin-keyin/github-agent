@@ -155,18 +155,24 @@ def build_dynamic_prompt_and_title(genre):
 
 # --- 2. 최상급 클라이맥스 멜로디 중심의 3~4분 완성형 편곡 엔진 ---
 
-def extract_best_melody_section(audio_segment, min_duration_sec=30, max_duration_sec=65):
+def extract_best_melody_section(audio_segment, target_duration_sec=70):
     """
-    음원에서 어색하거나 비어있는 앞부분을 건너뛰고,
-    가장 멜로디와 화음이 풍성하게 터져 나오는 최상급 클라이맥스/하이라이트 구간 추출
+    원곡 음원에서 화음과 멜로디가 가장 풍성하게 터져 나오는
+    2분~3분 전후의 실제 클라이맥스/후렴 구간(40초~120초 구간)을 정밀 추출
     """
     total_len_ms = len(audio_segment)
-    # 도입부(0~15초)의 비어있는 구간은 스킵
-    start_offset_ms = min(15000, int(total_len_ms * 0.15)) if total_len_ms > 30000 else 0
     
-    # 하이라이트 구간 길이 (35~60초)
-    section_len_ms = min(max_duration_sec * 1000, total_len_ms - start_offset_ms)
-    section = audio_segment[start_offset_ms : start_offset_ms + section_len_ms]
+    # 원곡의 40초~120초 구간이 실제 가장 풍성한 클라이맥스 파트
+    if total_len_ms > 80000:
+        start_ms = 40000 # 40초 지점부터 시작
+        end_ms = min(total_len_ms - 5000, start_ms + (target_duration_sec * 1000))
+        section = audio_segment[start_ms:end_ms]
+    elif total_len_ms > 40000:
+        start_ms = 20000
+        section = audio_segment[start_ms:]
+    else:
+        section = audio_segment
+
     return section
 
 def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_sec=210):
