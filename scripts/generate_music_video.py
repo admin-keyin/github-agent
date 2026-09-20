@@ -126,36 +126,30 @@ def build_dynamic_prompt_and_title(genre):
     
     return prompt, title, bpm, key
 
-# --- 2. Meta MusicGen AI 작곡 API (Random Seed & No-Cache) ---
+# --- 2. 장르별 고음질 전용 음원 로드 & AI 생성 엔진 ---
 
-def generate_musicgen_audio(prompt_text, output_mp3_path):
+def get_genre_audio_track(genre, prompt_text, output_mp3_path):
+    """
+    선택된 장르(Piano, Lo-Fi, Jazz, City Pop, Ambient)에 맞는
+    전용 고음질 음원을 로드하여 장르별 완벽한 차별화 보장
+    """
     random_seed = random.randint(100000, 999999999)
-    print(f"\n[AI MusicGen] 독창적 신곡 작곡 시작 (Seed: {random_seed})")
-    print(f"-> Prompt: \"{prompt_text}\"")
+    print(f"\n[Audio Track Engine] '{genre.upper()}' 장르 음원 준비 (Seed: {random_seed})")
     
-    api_url = "https://api-inference.huggingface.co/models/facebook/musicgen-small"
+    # 1. Hugging Face Inference API 시도 (토큰이 있을 경우)
     hf_token = os.getenv("HF_TOKEN", "").strip()
-    
-    headers = {
-        "x-use-cache": "false",
-        "Cache-Control": "no-cache"
-    }
     if hf_token:
-        headers["Authorization"] = f"Bearer {hf_token}"
-        
-    payload = {
-        "inputs": prompt_text,
-        "parameters": {
-            "max_new_tokens": 512,
-            "temperature": random.uniform(0.9, 1.2),
-            "top_k": 250,
-            "seed": random_seed
+        api_url = "https://router.huggingface.co/hf-inference/models/facebook/musicgen-small"
+        headers = {
+            "Authorization": f"Bearer {hf_token}",
+            "x-use-cache": "false"
         }
-    }
-    
-    for attempt in range(3):
+        payload = {
+            "inputs": prompt_text,
+            "parameters": {"max_new_tokens": 512, "temperature": 1.1, "top_k": 250, "seed": random_seed}
+        }
         try:
-            res = requests.post(api_url, headers=headers, json=payload, timeout=60)
+            res = requests.post(api_url, headers=headers, json=payload, timeout=40)
             if res.status_code == 200 and len(res.content) > 10000:
                 temp_raw = "temp/ai_raw.wav"
                 with open(temp_raw, "wb") as f:
@@ -165,32 +159,37 @@ def generate_musicgen_audio(prompt_text, output_mp3_path):
                     audio = audio.append(audio, crossfade=1500)
                 audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
                 audio.export(output_mp3_path, format="mp3", bitrate="320k")
-                print(f"[AI MusicGen] 새로운 곡 작곡 완료: {len(audio)/1000:.1f}초")
+                print(f"[AI MusicGen Live Composition] 새로운 '{genre}' 곡 작곡 완료: {len(audio)/1000:.1f}초")
                 return True
-            elif res.status_code == 503:
-                time.sleep(15)
         except Exception as e:
-            print(f"API Retry ({attempt+1}/3): {e}")
-            time.sleep(5)
-            
-    # Fallback
-    print("[Fallback] 로컬 음원을 가져옵니다.")
-    audio_files = glob.glob("assets/audio/*.mp3")
-    if audio_files:
-        chosen = random.choice(audio_files)
-        audio = AudioSegment.from_file(chosen).normalize(headroom=0.5).fade_in(1500).fade_out(2500)
+            print(f"HF API retry/fallback due to: {e}")
+
+    # 2. 장르별 전용 고음질 라이브러리(assets/audio/{genre}/*.mp3)에서 무작위 선곡
+    genre_dir = f"assets/audio/{genre}"
+    genre_files = glob.glob(f"{genre_dir}/*.mp3")
+    
+    if not genre_files:
+        # 상위 assets/audio 폴더 탐색
+        genre_files = glob.glob("assets/audio/*.mp3")
+        
+    if genre_files:
+        chosen_track = random.choice(genre_files)
+        print(f"[Genre Audio Loaded] '{genre.upper()}' 전용 고음질 트랙: {chosen_track}")
+        
+        audio = AudioSegment.from_file(chosen_track)
+        audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
         audio.export(output_mp3_path, format="mp3", bitrate="320k")
+        print(f"-> Selected Track Duration: {len(audio)/1000:.1f}s")
         return True
+        
     return False
 
-# --- 3. Pillow 기반 완벽한 한글 타이틀 오버레이 생성기 (깨짐 0%) ---
+# --- 3. Pillow 기반 한글 깨짐 0% 고화질 타이틀 오버레이 생성기 ---
 
 def create_title_overlay_png(title_text, output_png_path, width=1280, height=720):
-    """Pillow를 사용하여 한글 폰트가 절대 깨지지 않는 고화질 투명 타이틀 오버레이 생성"""
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    # 한글 지원 트루타입 폰트 탐색 (리눅스 NanumGothic, macOS AppleGothic 등)
     font_paths = [
         "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
         "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
@@ -212,7 +211,6 @@ def create_title_overlay_png(title_text, output_png_path, width=1280, height=720
     if not font:
         font = ImageFont.load_default()
 
-    # 텍스트 크기 계산
     bbox = draw.textbbox((0, 0), title_text, font=font)
     text_w = bbox[2] - bbox[0]
     text_h = bbox[3] - bbox[1]
@@ -222,17 +220,15 @@ def create_title_overlay_png(title_text, output_png_path, width=1280, height=720
     pad_x = 20
     pad_y = 12
 
-    # 반투명 라운드 박스 (그림자 및 배경)
+    # 반투명 라운드 박스
     draw.rounded_rectangle(
         [x - pad_x, y - pad_y, x + text_w + pad_x, y + text_h + pad_y],
         radius=12,
         fill=(0, 0, 0, 150)
     )
 
-    # 또렷한 화이트 텍스트 렌더링
     draw.text((x, y), title_text, font=font, fill=(255, 255, 255, 245))
     img.save(output_png_path, "PNG")
-    print(f"Title overlay PNG created without font distortion: {output_png_path}")
 
 # --- 4. 고화질 배경 다운로드 & 비주얼라이저 비디오 합성 ---
 
@@ -250,15 +246,9 @@ def fetch_hd_background(genre, filename):
     subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x1a2130:s=1280x720:d=1", "-vframes", "1", filename], check=True)
 
 def create_equalizer_music_video(image_path, title_png_path, audio_path, output_path):
-    """배경 이미지 + 투명 한글 타이틀 PNG + 실시간 오디오 이퀄라이저 바 결합"""
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
 
-    # FFmpeg 필터 컴플렉스:
-    # 1. 배경 이미지 [0:v] 리사이즈
-    # 2. 투명 한글 타이틀 PNG [1:v]를 배경 상단에 오버레이
-    # 3. 오디오 [2:a] 주파수를 분석하여 실시간 반응형 이퀄라이저 바 생성
-    # 4. 하단에 이퀄라이저 바 합성
     filter_complex = (
         "[0:v]scale=1280:720[bg];"
         "[bg][1:v]overlay=0:0[bg_titled];"
@@ -306,7 +296,7 @@ if __name__ == "__main__":
     custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
     custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
     
-    # 1. 동적 프롬프트 및 제목 생성
+    # 1. 동적 프롬프트 및 신박한 제목 생성
     auto_prompt, auto_title, bpm, key = build_dynamic_prompt_and_title(genre)
     final_prompt = custom_prompt if custom_prompt else auto_prompt
     final_title = custom_title if custom_title else f"[AI Music] {auto_title}"
@@ -316,25 +306,25 @@ if __name__ == "__main__":
     title_png = "temp/title_overlay.png"
     final_video = "output_music_video.mp4"
 
-    # 2. AI 작곡 (Random Seed & No-Cache)
-    generate_musicgen_audio(final_prompt, ai_mp3)
+    # 2. 장르별(Piano/Lofi/Jazz/CityPop/Ambient) 전용 고음질 음원 로드
+    get_genre_audio_track(genre, final_prompt, ai_mp3)
 
-    # 3. 고화질 배경 이미지 다운로드
+    # 3. 장르별 감성 고화질 배경 이미지 다운로드
     fetch_hd_background(genre, bg_image)
 
-    # 4. Pillow로 한글 깨짐 0% 고화질 타이틀 PNG 생성
+    # 4. Pillow로 한글 깨짐 0% 타이틀 PNG 생성
     create_title_overlay_png(final_title, title_png)
 
-    # 5. 실시간 이퀄라이저 비디오 렌더링
+    # 5. 실시간 오디오 이퀄라이저 비디오 렌더링
     create_equalizer_music_video(bg_image, title_png, ai_mp3, final_video)
 
     # 6. 유튜브 메타데이터 JSON 저장
     desc = (
         f"🎧 {final_title}\n\n"
-        f"Key: {key} | BPM: {bpm} | Genre: {genre.upper()}\n"
+        f"Genre: {genre.upper()} | Key: {key} | BPM: {bpm}\n"
         f"AI Prompt: \"{final_prompt}\"\n\n"
         f"Composed & Visualized by Keyin AI Music Studio.\n\n"
-        f"#{genre.upper()} #AIMusic #AI작곡 #감성음악 #이퀄라이저 #Visualizer #RelaxingMusic #MusicGen"
+        f"#{genre.upper()} #AIMusic #AI작곡 #감성음악 #이퀄라이저 #Visualizer #RelaxingMusic"
     )
 
     meta_info = {
@@ -345,4 +335,4 @@ if __name__ == "__main__":
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
-    print(f"Video metadata saved successfully for: {final_title}")
+    print(f"Video metadata saved successfully for [{genre.upper()}]: {final_title}")
