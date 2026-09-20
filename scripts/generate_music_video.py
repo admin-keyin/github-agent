@@ -181,23 +181,49 @@ def build_dynamic_prompt_and_title(genre):
 
 # --- 2. 장르별 특색 마스터링 & 3~4분 완성형 편곡 엔진 ---
 
-def extract_best_melody_section(audio_segment, min_duration_sec=35, max_duration_sec=65):
-    total_len_ms = len(audio_segment)
-    if total_len_ms > 70000:
-        start_ms = 35000
-        end_ms = min(total_len_ms - 2000, start_ms + (max_duration_sec * 1000))
-        section = audio_segment[start_ms:end_ms]
-    elif total_len_ms > 35000:
-        start_ms = 15000
-        section = audio_segment[start_ms:]
-    else:
-        section = audio_segment
-    return section
+def arrange_full_structured_song(base_audio, target_duration_sec=210):
+    """
+    원곡의 고유한 기승전결(인트로 -> 빌드업 -> 클라이맥스/드랍 -> 아웃트로)을
+    그대로 살리면서 목표 시간(3~4분) 동안 다이내믹한 곡 전개를 만드는 스마트 편곡기
+    """
+    base_len = len(base_audio)
+    target_ms = target_duration_sec * 1000
+
+    # 원곡이 이미 목표 길이 이상이면 자연스러운 페이드아웃 적용
+    if base_len >= target_ms:
+        return base_audio[:target_ms].fade_out(4000)
+
+    # 원곡을 기승전결 4개 파트로 분석/분할
+    # 1. 인트로 (도입부)
+    intro_end = min(15000, int(base_len * 0.2))
+    intro_part = base_audio[:intro_end]
+
+    # 2. 메인 바디 (빌드업 + 클라이맥스)
+    outro_start = max(base_len - 15000, int(base_len * 0.8))
+    main_body = base_audio[intro_end:outro_start]
+    
+    # 3. 아웃트로 (마무리)
+    outro_part = base_audio[outro_start:]
+
+    # 곡 구성: 인트로 -> 메인 파트 1 (Verse/Build) -> 클라이맥스 반복 및 발전 -> 아웃트로
+    arranged = intro_part
+    
+    # 메인 바디를 크로스페이드로 연결하여 기승전결의 흐름을 유지
+    while len(arranged) < (target_ms - len(outro_part) - 2000):
+        arranged = arranged.append(main_body, crossfade=min(3000, len(main_body)//3))
+
+    # 마무리 아웃트로 연결
+    arranged = arranged.append(outro_part, crossfade=min(2500, len(outro_part)//2))
+    
+    # 목표 길이 맞추기 & 볼륨 마스터링
+    arranged = arranged[:target_ms]
+    arranged = arranged.normalize(headroom=0.5).fade_out(3500)
+    return arranged
 
 def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_sec=210):
     profile = GENRE_PROFILES.get(genre, GENRE_PROFILES["piano"])
     random_seed = random.randint(100000, 999999999)
-    print(f"\n[Genre Master Engine] '{genre.upper()}' 장르 전용 특색 마스터링 편곡 (Seed: {random_seed})")
+    print(f"\n[Dynamic Structure Composer] '{genre.upper()}' 기승전결 풀 편곡 (Seed: {random_seed})")
 
     genre_dir = f"assets/audio/{genre}"
     genre_files = glob.glob(f"{genre_dir}/*.mp3")
@@ -226,30 +252,22 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_
             except Exception:
                 pass
 
-    print(f"[Master Highlight Track] {chosen_file}")
+    print(f"[Selected Master Track] {chosen_file} (원곡 길이: {len(base_audio)/1000:.1f}초)")
     
-    # 1. 클라이맥스 멜로디 구간 추출
-    highlight_section = extract_best_melody_section(base_audio, min_duration_sec=35, max_duration_sec=65)
+    # 1. 인트로 -> 빌드업 -> 클라이맥스 드랍 -> 아웃트로 기승전결 완벽 편곡
+    full_song = arrange_full_structured_song(base_audio, target_duration_sec=target_duration_sec)
     
-    # 2. 조성 변화 (-2 ~ +2 반음) 및 템포 가변
-    semitone = random.choice([-2, -1, 1, 2])
-    pitch_factor = 2 ** (semitone / 12.0)
-    speed_factor = random.uniform(0.96, 1.04)
-    sample_rate = int(44100 * pitch_factor)
-    atempo = speed_factor / pitch_factor
-
-    # 3. 3~4분(210초) 확장
-    full_song = highlight_section.fade_in(1500)
-    target_ms = target_duration_sec * 1000
-    while len(full_song) < target_ms:
-        full_song = full_song.append(highlight_section, crossfade=2000)
-    full_song = full_song[:target_ms]
-    
-    full_song = full_song.normalize(headroom=0.5).fade_out(4000)
     temp_arranged = "temp/arranged.wav"
     full_song.export(temp_arranged, format="wav")
     
-    # 4. 장르별 맞춤 DSP 사운드 마스터링 필터 적용
+    # 2. 조성 변화 (-2 ~ +2 반음) 및 템포 미세 가변 (원곡 고유 질감 유지 범위)
+    semitone = random.choice([-2, -1, 1, 2])
+    pitch_factor = 2 ** (semitone / 12.0)
+    speed_factor = random.uniform(0.98, 1.02)
+    sample_rate = int(44100 * pitch_factor)
+    atempo = speed_factor / pitch_factor
+
+    # 3. 장르별 맞춤 DSP 사운드 마스터링 필터 적용
     genre_dsp = profile["audio_filter"]
     af = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},{genre_dsp}"
     
@@ -257,13 +275,14 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_
         "ffmpeg", "-y",
         "-i", temp_arranged,
         "-af", af,
-        "-c:a", "libmp3lame", "-b:a", "320k",
+        "-ar", "44100",
+        "-b:a", "320k",
         output_mp3_path
     ]
     subprocess.run(cmd, check=True)
     
     final_audio = AudioSegment.from_file(output_mp3_path)
-    print(f"[Genre Tuned Track Complete] {output_mp3_path} (길이: {len(final_audio)/1000:.1f}초, 필터: {genre_dsp})")
+    print(f"[Structured Track Complete] {output_mp3_path} (길이: {len(final_audio)/1000:.1f}초, 기승전결 완벽 적용)")
     return True
 
 # --- 3. Pillow 기반 장르별 감성 컬러 타이틀 오버레이 생성기 ---
