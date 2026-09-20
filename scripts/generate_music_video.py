@@ -5,16 +5,14 @@ import random
 import subprocess
 import json
 import requests
-import numpy as np
 from pydub import AudioSegment
-from scipy.io import wavfile
 
-# --- 1. 테마별 메타데이터 및 배경 이미지 설정 ---
+# --- 1. 테마 및 메타데이터 설정 ---
 
 THEME_CONFIG = {
     "piano": {
         "title": "잠잘 때나 공부할 때 듣기 좋은 편안한 감성 피아노 연주곡 (8 Hours Piano)",
-        "desc": "마음이 편안해지는 감성 피아노 연주곡입니다. 수면, 공부, 집중, 카페, 휴식 시간에 편안하게 감상하세요.",
+        "desc": "마음이 편안해지는 고품질 감성 피아노 연주곡입니다. 수면, 공부, 집중, 카페, 휴식 시간에 편안하게 감상하세요.",
         "tags": ["#피아노연주", "#수면음악", "#공부음악", "#힐링피아노", "#PianoMusic", "#SleepAid", "#StudyMusic"],
         "images": [
             "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
@@ -53,89 +51,10 @@ THEME_CONFIG = {
     }
 }
 
-# --- 2. 오디오 소스 준비 (assets/audio/ 우선 또는 고품질 앰비언트 엔진) ---
-
-def generate_ambient_piano_melody(output_wav, duration=300):
-    """assets 폴더에 파일이 없을 경우 풍성한 배음과 리버브가 적용된 5분 힐링 피아노 멜로디 생성"""
-    print("Generating high-quality ambient piano track...")
-    fs = 44100
-    total_samples = int(fs * duration)
-    buffer_l = np.zeros(total_samples, dtype=np.float32)
-    buffer_r = np.zeros(total_samples, dtype=np.float32)
-    
-    # 편안한 코드 진행 (Cmaj7 - Am7 - Fmaj7 - G7sus4)
-    chords = [
-        [48, 52, 55, 59, 64], # Cmaj7
-        [45, 48, 52, 55, 60], # Am7
-        [41, 45, 48, 52, 57], # Fmaj7
-        [43, 48, 50, 55, 59]  # G7sus4
-    ]
-    
-    melody_scale = [60, 62, 64, 67, 69, 72, 74, 76, 79] # 펜타토닉 힐링 스케일
-    
-    def synth_note(midi_pitch, note_dur, vel):
-        freq = 440.0 * (2.0 ** ((midi_pitch - 69.0) / 12.0))
-        t = np.linspace(0, note_dur, int(fs * note_dur), False)
-        # 배음 감쇠
-        w = np.sin(2 * np.pi * freq * t) * np.exp(-t * 0.8)
-        w += np.sin(2 * np.pi * (freq * 2) * t) * 0.4 * np.exp(-t * 1.6)
-        w += np.sin(2 * np.pi * (freq * 3) * t) * 0.2 * np.exp(-t * 2.8)
-        w *= vel
-        attack = int(fs * 0.005)
-        if len(w) > attack:
-            w[:attack] *= np.linspace(0, 1, attack)
-        return w
-
-    cur_sample = 0
-    chord_dur_sec = 4.0
-    chord_samples = int(fs * chord_dur_sec)
-    
-    while cur_sample < total_samples:
-        chord = chords[(cur_sample // chord_samples) % len(chords)]
-        
-        # 코드 아르페지오 (왼손)
-        for i, pitch in enumerate(chord):
-            offset = int(i * 0.6 * fs)
-            note_start = cur_sample + offset
-            if note_start < total_samples:
-                w = synth_note(pitch, 3.8, 0.45)
-                end = min(total_samples, note_start + len(w))
-                buffer_l[note_start:end] += w[:end-note_start] * 0.6
-                buffer_r[note_start:end] += w[:end-note_start] * 0.4
-                
-        # 서정적 멜로디 (오른손)
-        for m_step in range(4):
-            if random.random() > 0.3:
-                m_pitch = random.choice(melody_scale)
-                m_offset = int(m_step * 1.0 * fs + random.uniform(0.1, 0.4) * fs)
-                m_start = cur_sample + m_offset
-                if m_start < total_samples:
-                    m_dur = random.choice([1.2, 1.8, 2.5])
-                    w = synth_note(m_pitch, m_dur, 0.6)
-                    end = min(total_samples, m_start + len(w))
-                    pan = random.uniform(0.4, 0.6)
-                    buffer_l[m_start:end] += w[:end-m_start] * (1.0 - pan)
-                    buffer_r[m_start:end] += w[:end-m_start] * pan
-
-        cur_sample += chord_samples
-
-    # 리버브 (공간감 잔향)
-    reverb_delay = int(fs * 0.25)
-    if reverb_delay < total_samples:
-        buffer_l[reverb_delay:] += buffer_r[:-reverb_delay] * 0.3
-        buffer_r[reverb_delay:] += buffer_l[:-reverb_delay] * 0.3
-
-    # 노멀라이징
-    max_val = max(np.max(np.abs(buffer_l)), np.max(np.abs(buffer_r)))
-    if max_val > 0:
-        buffer_l = (buffer_l / max_val) * 0.88
-        buffer_r = (buffer_r / max_val) * 0.88
-
-    stereo = np.vstack(((buffer_l * 32767).astype(np.int16), (buffer_r * 32767).astype(np.int16))).T
-    wavfile.write(output_wav, fs, stereo)
+# --- 2. 완성형 고음질 MP3 음원 가져오기 & 8시간 루프 준비 ---
 
 def get_audio_track(theme_key):
-    """assets/audio 디렉토리의 실제 MP3 탐색 (없으면 자동 앰비언트 트랙 생성)"""
+    """assets/audio 디렉토리의 완성형 고음질 MP3를 읽어와 5분 루프 준비"""
     audio_dir = "assets/audio"
     valid_exts = ("*.mp3", "*.wav", "*.m4a", "*.flac", "*.ogg")
     audio_files = []
@@ -143,40 +62,43 @@ def get_audio_track(theme_key):
         audio_files.extend(glob.glob(os.path.join(audio_dir, ext)))
         
     os.makedirs("temp", exist_ok=True)
-    temp_wav = "temp/generated_base.wav"
     output_mp3 = "temp/base.mp3"
 
-    if audio_files:
-        chosen = random.choice(audio_files)
-        filename = os.path.basename(chosen)
-        name_no_ext = os.path.splitext(filename)[0]
-        print(f"[Audio] assets/audio/ 로컬 파일 사용: {filename}")
-        
-        audio = AudioSegment.from_file(chosen)
-        audio = audio.normalize(headroom=0.5)
-        target_ms = 300 * 1000
-        if len(audio) < target_ms:
-            repeats = int(target_ms // len(audio)) + 1
-            looped = audio
-            for _ in range(repeats):
-                looped = looped.append(audio, crossfade=1500)
-            audio = looped[:target_ms]
-        else:
-            audio = audio[:target_ms]
-        audio.fade_in(2000).fade_out(3000).export(output_mp3, format="mp3", bitrate="320k")
-        
-        if " - " in name_no_ext:
-            parts = name_no_ext.split(" - ", 1)
-            return {"artist": parts[0].strip(), "title": parts[1].strip(), "path": output_mp3}
-        return {"artist": "Piano Relax", "title": name_no_ext.strip(), "path": output_mp3}
+    if not audio_files:
+        print("[Error] assets/audio 폴더에 음원이 없습니다. 기본 고음질 음원을 다운로드합니다.")
+        default_url = "https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=piano-moment-110241.mp3"
+        dl = requests.get(default_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with open("assets/audio/Piano_Moment_Calm_Relaxing.mp3", "wb") as f:
+            f.write(dl.content)
+        audio_files = ["assets/audio/Piano_Moment_Calm_Relaxing.mp3"]
 
-    # 파일이 없으면 고품질 앰비언트 연주곡 생성
-    generate_ambient_piano_melody(temp_wav, duration=300)
-    audio = AudioSegment.from_wav(temp_wav)
-    audio.fade_in(2000).fade_out(3000).export(output_mp3, format="mp3", bitrate="320k")
+    chosen = random.choice(audio_files)
+    filename = os.path.basename(chosen)
+    name_no_ext = os.path.splitext(filename)[0]
+    print(f"[Selected High-Quality Audio] {chosen}")
+
+    # 원본 음원을 훼손하지 않고 볼륨 정규화 & 매끄러운 5분 루프 생성
+    audio = AudioSegment.from_file(chosen)
+    audio = audio.normalize(headroom=0.5)
     
-    cfg = THEME_CONFIG.get(theme_key, THEME_CONFIG["piano"])
-    return {"artist": "Keyin Relaxing Music", "title": cfg["title"].split('(')[0].strip(), "path": output_mp3}
+    target_ms = 300 * 1000 # 5분
+    if len(audio) < target_ms:
+        repeats = int(target_ms // len(audio)) + 1
+        looped = audio
+        for _ in range(repeats):
+            looped = looped.append(audio, crossfade=1500)
+        audio = looped[:target_ms]
+    else:
+        audio = audio[:target_ms]
+        
+    audio = audio.fade_in(2000).fade_out(3000)
+    audio.export(output_mp3, format="mp3", bitrate="320k")
+
+    clean_name = name_no_ext.replace("_", " ").strip()
+    if " - " in clean_name:
+        parts = clean_name.split(" - ", 1)
+        return {"artist": parts[0].strip(), "title": parts[1].strip(), "path": output_mp3}
+    return {"artist": "Relaxing Piano Studio", "title": clean_name, "path": output_mp3}
 
 # --- 3. 고화질 감성 배경 이미지 다운로드 ---
 
@@ -209,7 +131,7 @@ def create_8h_video(image_path, audio_path, output_path):
     subprocess.run(cmd_short, check=True)
 
     with open("temp/concat.txt", "w") as f:
-        for _ in range(96): # 5분 x 96 = 8시간
+        for _ in range(96): # 5분 x 96 = 8시간 (480분)
             f.write("file 'short.mp4'\n")
     
     cmd_concat = [
@@ -230,7 +152,7 @@ if __name__ == "__main__":
     bg_image = "temp/bg.jpg"
     final_video = "output_music_video.mp4"
 
-    # 1. 고음질 오디오 트랙 준비 (assets/audio/ 우선 또는 고품질 엔진 생성)
+    # 1. assets/audio/의 실제 완성형 고음질 MP3 트랙 선택
     audio_info = get_audio_track(theme)
 
     # 2. 테마별 고화질 감성 배경 이미지 다운로드
@@ -244,7 +166,7 @@ if __name__ == "__main__":
     if custom_title:
         title = custom_title
     else:
-        title = f"[8 Hours] {audio_info['title']}"
+        title = f"[8 Hours] {audio_info['title']} - 편안한 피아노 연주곡"
 
     tags_str = " ".join(cfg["tags"])
     desc = (
