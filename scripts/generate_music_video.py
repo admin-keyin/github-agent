@@ -8,80 +8,97 @@ import time
 import requests
 from pydub import AudioSegment
 
-# --- 1. 신박한 감성 곡 제목 & 장르별 프롬프트 설정 ---
+# --- 1. 무한 조합 동적 프롬프트 & 신박한 제목 생성 엔진 ---
 
-CREATIVE_SONG_STORIES = [
-    {
-        "genre": "piano",
-        "title_templates": [
-            "새벽 3시 42분, 불 꺼진 방에서 너를 생각하며",
-            "그때 너에게 하지 못했던 마지막 한마디",
-            "우리가 사랑이라 불렀던 계절의 끝에서",
-            "너를 지우려다 하루가 다 지나버렸어",
-            "비 내리는 창가에 남겨둔 너의 온기",
-            "다시 돌아갈 수 없어서 더 아름다운 날들",
-            "어느 날 문득 너의 이름이 떠오를 때",
-            "아무도 모르게 흘려보낸 나의 새벽"
-        ],
-        "desc": "마음이 차분해지는 서정적인 피아노 연주곡입니다. 하루의 피로를 덜어내고 편안한 휴식과 몰입의 시간을 가져보세요.",
-        "tags": ["#AI피아노", "#피아노연주", "#힐링피아노", "#수면음악", "#감성피아노", "#이퀄라이저", "#AudioVisualizer", "#PianoMusic"],
-        "prompt": "Emotional sentimental Korean ballad acoustic grand piano solo, delicate touch, romantic nostalgic melody, soft strings ambiance, 68 bpm"
-    },
-    {
-        "genre": "lofi",
-        "title_templates": [
-            "퇴근길 지하철 막차, 이어폰 너머의 위로",
-            "아무도 없는 한밤중 편의점 앞에서",
-            "어질러진 책상 위 식어버린 커피 한 잔",
-            "괜찮은 척 웃어넘긴 하루의 끝",
-            "잠들지 못하는 새벽의 소소한 생각들",
-            "비 오는 밤, 방 안에서 듣는 따뜻한 비트"
-        ],
-        "desc": "새벽 감성을 자극하는 아늑한 로파이(Lo-Fi) 칠합 비트입니다. 코딩, 공부, 독서, 야간 작업용으로 추천합니다.",
-        "tags": ["#로파이", "#LofiBeats", "#칠합", "#코딩음악", "#새벽감성", "#ChillLofi", "#비주얼라이저", "#StudyVibe"],
-        "prompt": "Cozy late night lo-fi chill hip hop beat with warm rhodes electric piano chords, soft vinyl crackle, gentle aesthetic bass, 75 bpm"
-    },
-    {
-        "genre": "citypop",
-        "title_templates": [
-            "자정이 넘은 한강 다리 위를 달리며",
-            "네온사인 불빛 아래 너와 나만의 춤",
-            "어젯밤 꿈속에서 본 너의 뒷모습",
-            "반짝이는 도심 속 사라져가는 실루엣",
-            "도심의 밤바람을 가르는 드라이브"
-        ],
-        "desc": "레트로한 감성과 그루브가 살아있는 80년대 시티팝 사운드입니다. 야간 드라이브나 기분 전환용으로 감상해보세요.",
-        "tags": ["#시티팝", "#CityPop", "#레트로음악", "#드라이브음악", "#RetroVibe", "#80sVibe", "#Visualizer"],
-        "prompt": "Groovy 80s Korean retro city pop instrumental, catchy funky bassline, sparkling synth brass, nostalgic breezy night drive, 110 bpm"
-    },
-    {
-        "genre": "ambient",
-        "title_templates": [
-            "우주 끝자락에 혼자 멈춰선 순간",
-            "파도 소리조차 닿지 않는 깊은 밤",
-            "지친 영혼을 감싸주는 고요한 숨결",
-            "꿈결 속에서 만난 잊혀진 행성",
-            "모든 소음이 멈춘 고요의 시간"
-        ],
-        "desc": "복잡한 생각을 비우고 깊은 명상과 수면에 빠져들 수 있도록 도와주는 앰비언트 힐링 사운드스케이프입니다.",
-        "tags": ["#앰비언트", "#명상음악", "#힐링사운드", "#수면음악", "#AmbientMusic", "#Meditation", "#DeepSleep"],
-        "prompt": "Deep meditative cosmic ambient soundscape, soothing ethereal synth pads, peaceful theta wave frequency for deep sleep, 50 bpm"
-    }
+INSTRUMENTS = {
+    "piano": [
+        "acoustic grand piano solo", "warm upright piano with soft felt dampers",
+        "cinematic piano with subtle violin strings", "romantic jazz piano with delicate touches",
+        "flowing arpeggio new age piano", "melancholic ballad piano with vintage studio room reverb"
+    ],
+    "lofi": [
+        "warm Rhodes electric piano and cozy boom bap drums", "mellow nylon acoustic guitar and lo-fi hip hop beat",
+        "vintage synth chords with gentle vinyl crackle and chill groove", "rainy ambient window sound with soft jazz piano chords",
+        "deep warm 808 sub bass and relaxed soulful lofi melody"
+    ],
+    "citypop": [
+        "80s Tokyo nighttime groove with funky slap bass and bright synth brass",
+        "breezy seaside city pop with catchy electric guitar riffs and retro drums",
+        "nostalgic analog synthesizers with upbeat 80s disco groove and sax accents"
+    ],
+    "jazz": [
+        "laid-back bossa nova acoustic guitar with soft shaker rhythm",
+        "smoky late-night jazz club trio with upright bass and brushed snare",
+        "sweet lyrical saxophone over gentle acoustic jazz piano chords"
+    ],
+    "ambient": [
+        "serene cosmic synth pads with 432Hz deep relaxation drone",
+        "ethereal floating ambient soundscape with crystal harp overtones",
+        "peaceful ocean waves and slow cinematic atmospheric pads"
+    ]
+}
+
+MOODS = [
+    "deeply emotional and nostalgic", "warm and cozy for deep relaxation",
+    "peaceful and calming for sleep", "focus and inspiring for study and coding",
+    "wistful and bittersweet", "dreamy and cinematic", "heartwarming and serene"
 ]
+
+KEYS = ["C Major", "A Minor", "D Major", "B Minor", "G Major", "E Minor", "F Major", "D Minor", "Ab Major", "Eb Major"]
+TEMPOS = {
+    "piano": [60, 64, 68, 72, 76],
+    "lofi": [70, 74, 78, 82],
+    "citypop": [108, 114, 120],
+    "jazz": [75, 80, 85, 90],
+    "ambient": [48, 52, 56, 60]
+}
+
+# 신박하고 시적인 스토리형 제목 풀
+POETIC_TITLE_PIECES = {
+    "piano": [
+        ("새벽 {h}시 {m}분", ["불 꺼진 방에서 너를 떠올리며", "나지막이 흐르는 피아노", "잊혀지지 않는 계절의 기억", "우리가 머물렀던 그 자리에"]),
+        ("그때 너에게", ["하지 못했던 마지막 한마디", "전하지 못한 편지 한 장", "꼭 들려주고 싶었던 노래", "남겨둔 작은 온기"]),
+        ("비 내리는 {w}", ["창가에 맺힌 너의 얼굴", "작은 우산 아래의 우리", "골목길 카페에서", "흘러나오는 선율"]),
+        ("언젠가 우리가", ["다시 만날 수 있다면", "사랑이라 불렀던 날들의 끝", "서로를 기억하게 될 때", "지나온 계절을 돌아보며"])
+    ],
+    "lofi": [
+        ("퇴근길 지하철 막차", ["이어폰 너머로 번지는 위로", "창밖으로 스쳐가는 도심의 불빛", "나를 다독이는 따뜻한 비트"]),
+        ("새벽 2시", ["편의점 앞 흐린 가로등 아래", "어질러진 책상 위 식어버린 커피", "조용히 흘러가는 나만의 시간"]),
+        ("잠들지 못하는 밤", ["창문 틈으로 스며드는 새벽 공기", "괜찮은 척 웃어넘긴 하루의 끝", "따뜻한 이불 속에서 듣는 노래"])
+    ],
+    "citypop": [
+        ("자정이 넘은", ["한강 다리 위를 달리며", "네온사인 불빛 아래 너와 나만의 춤", "도심의 밤바람을 가르는 드라이브"]),
+        ("80년대 서울의 밤", ["반짝이는 빌딩 숲과 너의 실루엣", "레트로 카세트테이프에서 흘러나오는 노래", "도시의 낭만이 가득한 밤"])
+    ],
+    "jazz": [
+        ("골목길 모퉁이", ["작은 재즈 카페의 온기", "비 내리는 밤의 색소폰", "따뜻한 와인 한 잔과 흐르는 음악"]),
+        ("늦은 밤 홀로 앉아", ["조용히 울리는 콘트라베이스", "피아노 건반 위로 흩어지는 생각들"])
+    ],
+    "ambient": [
+        ("우주 끝자락에", ["혼자 멈춰선 고요의 순간", "숨결조차 닿지 않는 평온함", "별들의 속삭임이 머무는 곳"]),
+        ("깊은 밤의 쉼표", ["모든 소음이 사라진 깊은 바닷속", "지친 마음을 감싸주는 고요한 숨결"])
+    ]
+}
 
 GENRE_IMAGES = {
     "piano": [
         "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
         "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90"
     ],
     "lofi": [
         "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
-        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90"
+        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
     ],
     "citypop": [
         "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
         "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "jazz": [
+        "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=1280&h=720&q=90"
     ],
     "ambient": [
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
@@ -89,19 +106,61 @@ GENRE_IMAGES = {
     ]
 }
 
-# --- 2. Meta MusicGen AI 작곡 API 호출 ---
+def build_dynamic_prompt_and_title(genre):
+    """매번 100% 새로운 화음, 분위기, 템포의 동적 프롬프트 및 신박한 제목 생성"""
+    inst = random.choice(INSTRUMENTS.get(genre, INSTRUMENTS["piano"]))
+    mood = random.choice(MOODS)
+    key = random.choice(KEYS)
+    bpm = random.choice(TEMPOS.get(genre, [70]))
+    
+    # AI 프롬프트 (중복 방지 난수 텍스트 태그 포함)
+    prompt = f"{inst}, in {key} key, {mood}, beautiful melodic progression, studio quality mastering, {bpm} bpm"
+    
+    # 신박한 제목 생성
+    pieces = POETIC_TITLE_PIECES.get(genre, POETIC_TITLE_PIECES["piano"])
+    prefix_template, suffixes = random.choice(pieces)
+    
+    # 시간/요일 변수 채우기
+    prefix = prefix_template.format(
+        h=random.choice([1, 2, 3, 4]),
+        m=random.choice([12, 25, 34, 42, 51]),
+        w=random.choice(["월요일", "수요일", "금요일", "주말 밤", "오후"])
+    )
+    suffix = random.choice(suffixes)
+    title = f"{prefix}, {suffix}"
+    
+    return prompt, title, bpm, key
+
+# --- 2. Meta MusicGen AI 작곡 API (Random Seed & No-Cache 강제 적용) ---
 
 def generate_musicgen_audio(prompt_text, output_mp3_path):
-    print(f"\n[AI MusicGen] 작곡 시작: \"{prompt_text}\"")
+    """
+    무작위 시드(Random Seed) 및 캐시 무효화 헤더를 적용하여
+    매 실행마다 완전히 새로운 멜로디와 화음의 곡 작곡
+    """
+    random_seed = random.randint(100000, 999999999)
+    print(f"\n[AI MusicGen] 독창적 신곡 작곡 시작 (Seed: {random_seed})")
+    print(f"-> Prompt: \"{prompt_text}\"")
+    
     api_url = "https://api-inference.huggingface.co/models/facebook/musicgen-small"
     hf_token = os.getenv("HF_TOKEN", "").strip()
-    headers = {}
+    
+    # 캐시 방지 및 시드 설정
+    headers = {
+        "x-use-cache": "false", # 이전과 똑같은 파일 반환 방지!
+        "Cache-Control": "no-cache"
+    }
     if hf_token:
         headers["Authorization"] = f"Bearer {hf_token}"
         
     payload = {
         "inputs": prompt_text,
-        "parameters": {"max_new_tokens": 512, "temperature": 1.0, "top_k": 250}
+        "parameters": {
+            "max_new_tokens": 512,
+            "temperature": random.uniform(0.9, 1.2), # 창의성 조절
+            "top_k": 250,
+            "seed": random_seed # 매번 다른 곡 생성의 핵심!
+        }
     }
     
     for attempt in range(3):
@@ -112,20 +171,23 @@ def generate_musicgen_audio(prompt_text, output_mp3_path):
                 with open(temp_raw, "wb") as f:
                     f.write(res.content)
                 audio = AudioSegment.from_file(temp_raw)
-                if len(audio) < 60000:
+                
+                # 자연스러운 1분 내외 완성형 트랙 구성
+                if len(audio) < 55000:
                     audio = audio.append(audio, crossfade=1500)
+                    
                 audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
                 audio.export(output_mp3_path, format="mp3", bitrate="320k")
-                print(f"[AI MusicGen] 작곡 완료: {len(audio)/1000:.1f}초")
+                print(f"[AI MusicGen] 새로운 곡 작곡 완료: {len(audio)/1000:.1f}초")
                 return True
             elif res.status_code == 503:
                 time.sleep(15)
         except Exception as e:
-            print(f"API Retry: {e}")
+            print(f"API Retry ({attempt+1}/3): {e}")
             time.sleep(5)
             
-    # Fallback 음원
-    print("[Fallback] assets/audio/ 로컬 고음질 음원 사용")
+    # Fallback 로컬 음원 (만약 있을 경우)
+    print("[Fallback] 로컬 음원을 가져옵니다.")
     audio_files = glob.glob("assets/audio/*.mp3")
     if audio_files:
         chosen = random.choice(audio_files)
@@ -152,19 +214,11 @@ def fetch_hd_background(genre, filename):
 # --- 4. 실시간 반응형 오디오 이퀄라이저 비주얼라이저 비디오 렌더링 ---
 
 def create_equalizer_music_video(image_path, audio_path, song_title, output_path):
-    """
-    음악의 멜로디와 리듬에 실시간으로 반응하여 춤추는
-    반투명 화이트/네온 오디오 이퀄라이저 바(Audio Visualizer) 렌더링
-    """
-    print("Rendering audio visualizer music video...")
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
     safe_title = song_title.replace(":", " -").replace("'", "").replace('"', "")
     
-    # FFmpeg 필터 컴플렉스:
-    # 1. 배경 이미지 리사이즈 (1280x720) 및 상단 감성 타이틀 박스 오버레이
-    # 2. 오디오 주파수 스펙트럼 분석 -> 실시간 반응형 막대 이퀄라이저(showfreqs) 생성 (860x140)
-    # 3. 배경 하단 중앙에 이퀄라이저 바를 오버레이
+    # 실시간 이퀄라이저 바 오버레이 필터
     filter_complex = (
         f"[0:v]scale=1280:720,"
         f"drawtext=text='{safe_title}':x=(w-text_w)/2:y=90:fontsize=30:fontcolor=white@0.95:box=1:boxcolor=black@0.45:boxborderw=12[bg];"
@@ -187,58 +241,57 @@ def create_equalizer_music_video(image_path, audio_path, song_title, output_path
     
     try:
         subprocess.run(cmd, check=True)
-        print(f"[Visualizer Render Success] {output_path} (길이: {duration_sec:.1f}s)")
+        print(f"[Visualizer Success] {output_path} (Duration: {duration_sec:.1f}s)")
     except Exception as e:
-        print(f"Visualizer render error ({e}), falling back to simple video...")
-        cmd_fallback = [
+        print(f"Visualizer fallback simple render ({e})")
+        subprocess.run([
             "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
             "-c:v", "libx264", "-t", str(duration_sec), "-pix_fmt", "yuv420p", "-vf", "scale=1280:720",
             "-preset", "ultrafast", "-crf", "22", "-c:a", "aac", "-b:a", "320k", "-shortest", output_path
-        ]
-        subprocess.run(cmd_fallback, check=True)
+        ], check=True)
 
 # --- 메인 실행 ---
 
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
     genre_input = os.getenv("INPUT_GENRE", "").strip().lower()
+    available_genres = ["piano", "lofi", "citypop", "jazz", "ambient"]
     
-    # 장르 및 스토리 무작위/지정 매칭
-    candidates = [s for s in CREATIVE_SONG_STORIES if s["genre"] == genre_input]
-    if not candidates:
-        story = random.choice(CREATIVE_SONG_STORIES)
+    # 장르가 비어있으면 랜덤 선택
+    if genre_input not in available_genres:
+        genre = random.choice(available_genres)
     else:
-        story = random.choice(candidates)
+        genre = genre_input
         
-    genre = story["genre"]
     custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
     custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
     
-    final_prompt = custom_prompt if custom_prompt else story["prompt"]
-    final_title = custom_title if custom_title else random.choice(story["title_templates"])
+    # 1. 매번 100% 다른 동적 프롬프트 & 신박한 제목 생성
+    auto_prompt, auto_title, bpm, key = build_dynamic_prompt_and_title(genre)
+    
+    final_prompt = custom_prompt if custom_prompt else auto_prompt
+    final_title = custom_title if custom_title else f"[AI Music] {auto_title}"
     
     ai_mp3 = "temp/ai_song.mp3"
     bg_image = "temp/bg.jpg"
     final_video = "output_music_video.mp4"
 
-    # 1. AI 작곡
+    # 2. Random Seed & No-Cache 적용 AI 작곡
     generate_musicgen_audio(final_prompt, ai_mp3)
 
-    # 2. 고화질 배경 이미지 다운로드
+    # 3. 고화질 배경 이미지 다운로드
     fetch_hd_background(genre, bg_image)
 
-    # 3. 음악에 맞춰 실시간 춤추는 오디오 이퀄라이저 비주얼라이저 비디오 렌더링
+    # 4. 음악에 반응하는 실시간 이퀄라이저 비디오 렌더링
     create_equalizer_music_video(bg_image, ai_mp3, final_title, final_video)
 
-    # 4. 유튜브 메타데이터 JSON 저장
-    tags_str = " ".join(story["tags"])
+    # 5. 유튜브 메타데이터 JSON 저장
     desc = (
         f"🎧 {final_title}\n\n"
-        f"{story['desc']}\n\n"
-        f"Genre: {genre.upper()}\n"
+        f"Key: {key} | BPM: {bpm} | Genre: {genre.upper()}\n"
         f"AI Prompt: \"{final_prompt}\"\n\n"
         f"Composed & Visualized by Keyin AI Music Studio.\n\n"
-        f"{tags_str}"
+        f"#{genre.upper()} #AIMusic #AI작곡 #감성음악 #이퀄라이저 #Visualizer #RelaxingMusic #MusicGen"
     )
 
     meta_info = {
