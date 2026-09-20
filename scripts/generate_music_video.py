@@ -240,9 +240,21 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_
     temp_arranged = "temp/arranged.wav"
     full_song.export(temp_arranged, format="wav")
     
-    # FFmpeg로 풍부한 스튜디오 앰비언스 및 EQ 마스터링
-    reverb_mix = random.uniform(0.2, 0.32)
-    af = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},aecho=0.8:0.85:30:{reverb_mix:.2f}"
+    # 장르별 맞춤 마스터링 필터 (EDM/JPOP은 펀치감 있는 드럼 비트 강조, Piano/Ambient는 부드러운 리버브)
+    if genre in ["edm", "jpop"]:
+        reverb_mix = 0.08 # EDM은 비트가 뭉개지지 않게 드라이하고 펀치감 있게!
+        delay_ms = 15
+        eq_filter = "bass=g=3:f=100,treble=g=2:f=4000"
+    elif genre == "lofi":
+        reverb_mix = 0.18
+        delay_ms = 30
+        eq_filter = "lowpass=f=4500,bass=g=2:f=120"
+    else:
+        reverb_mix = random.uniform(0.2, 0.32)
+        delay_ms = 35
+        eq_filter = "treble=g=1:f=3500"
+
+    af = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},aecho=0.8:0.85:{delay_ms}:{reverb_mix:.2f},{eq_filter}"
     
     cmd = [
         "ffmpeg", "-y",
