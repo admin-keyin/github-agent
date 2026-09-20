@@ -188,10 +188,30 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_
     if not genre_files:
         genre_files = glob.glob("assets/audio/*/*.mp3")
         
-    chosen_file = random.choice(genre_files)
+    base_audio = None
+    random.shuffle(genre_files)
+    for fpath in genre_files:
+        try:
+            temp_a = AudioSegment.from_file(fpath)
+            if len(temp_a) > 5000:
+                base_audio = temp_a
+                chosen_file = fpath
+                break
+        except Exception as e:
+            print(f"Warning: Failed to load {fpath} ({e}), trying next track...")
+
+    if base_audio is None:
+        # 최종 fallback (모든 파일 실패 시)
+        fallback_files = glob.glob("assets/audio/*/*.mp3")
+        for fpath in fallback_files:
+            try:
+                base_audio = AudioSegment.from_file(fpath)
+                chosen_file = fpath
+                break
+            except Exception:
+                pass
+
     print(f"[Master Highlight Track] {chosen_file}")
-    
-    base_audio = AudioSegment.from_file(chosen_file)
     
     # 1. 가장 풍성하고 멜로디가 좋은 알짜배기 클라이맥스 구간 추출
     highlight_section = extract_best_melody_section(base_audio, min_duration_sec=35, max_duration_sec=65)
