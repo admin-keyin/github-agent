@@ -139,7 +139,7 @@ def build_dynamic_prompt_and_title(genre):
     key = random.choice(KEYS)
     bpm = random.choice(TEMPOS.get(genre, [70]))
     
-    prompt = f"{inst}, in {key} key, {mood}, beautiful melodic progression with diverse harmonic shifts, bridge variation, studio quality mastering, {bpm} bpm"
+    prompt = f"{inst}, in {key} key, {mood}, beautiful emotional melody, rich harmonic chorus climax, studio quality mastering, {bpm} bpm"
     
     pieces = POETIC_TITLE_PIECES.get(genre, POETIC_TITLE_PIECES["piano"])
     prefix_template, suffixes = random.choice(pieces)
@@ -153,34 +153,43 @@ def build_dynamic_prompt_and_title(genre):
     
     return prompt, title, bpm, key
 
-# --- 2. 기승전결(Song Structure)이 살아있는 다이내믹 3~4분 편곡 엔진 ---
+# --- 2. 최상급 클라이맥스 멜로디 중심의 3~4분 완성형 편곡 엔진 ---
+
+def extract_best_melody_section(audio_segment, min_duration_sec=30, max_duration_sec=65):
+    """
+    음원에서 어색하거나 비어있는 앞부분을 건너뛰고,
+    가장 멜로디와 화음이 풍성하게 터져 나오는 최상급 클라이맥스/하이라이트 구간 추출
+    """
+    total_len_ms = len(audio_segment)
+    # 도입부(0~15초)의 비어있는 구간은 스킵
+    start_offset_ms = min(15000, int(total_len_ms * 0.15)) if total_len_ms > 30000 else 0
+    
+    # 하이라이트 구간 길이 (35~60초)
+    section_len_ms = min(max_duration_sec * 1000, total_len_ms - start_offset_ms)
+    section = audio_segment[start_offset_ms : start_offset_ms + section_len_ms]
+    return section
 
 def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_sec=210):
     """
-    단조로움을 완벽히 제거하기 위해:
-    1. 인트로(잔잔한 시작) -> 2. 메인 전개(멜로디 발전) -> 3. 브릿지(조성/화음 전환) -> 4. 클라이맥스 후렴 -> 5. 아웃트로
-    기승전결 구조의 다이내믹 편곡을 적용하여 3~4분 내내 풍성한 사운드 완성
+    가장 듣기 좋은 풍성한 클라이맥스 멜로디를 전면에 배치하여
+    처음부터 끝까지 3~4분 내내 최고의 멜로디 감성을 유지하도록 편곡
     """
     random_seed = random.randint(100000, 999999999)
-    print(f"\n[Dynamic Song Composer] '{genre.upper()}' 다이내믹 기승전결 3~4분 편곡 (Seed: {random_seed})")
+    print(f"\n[Highlight-Driven Composer] '{genre.upper()}' 클라이맥스 멜로디 중심 편곡 (Seed: {random_seed})")
 
     genre_dir = f"assets/audio/{genre}"
     genre_files = glob.glob(f"{genre_dir}/*.mp3")
     if not genre_files:
         genre_files = glob.glob("assets/audio/*/*.mp3")
         
-    # 복수 트랙을 크로스페이드하여 멜로디 테마 다양화
-    selected_files = random.sample(genre_files, min(2, len(genre_files))) if len(genre_files) >= 2 else genre_files
+    chosen_file = random.choice(genre_files)
+    print(f"[Master Highlight Track] {chosen_file}")
     
-    # 파트 1: 메인 테마
-    track1 = AudioSegment.from_file(selected_files[0])
-    # 파트 2: 서브 테마/브릿지 (다른 곡 또는 피치 변조 트랙)
-    if len(selected_files) > 1:
-        track2 = AudioSegment.from_file(selected_files[1])
-    else:
-        # 단일 트랙일 경우 2반음 올려서 신선한 브릿지 파트 생성
-        track2 = track1
-        
+    base_audio = AudioSegment.from_file(chosen_file)
+    
+    # 1. 가장 풍성하고 멜로디가 좋은 알짜배기 클라이맥스 구간 추출
+    highlight_section = extract_best_melody_section(base_audio, min_duration_sec=35, max_duration_sec=65)
+    
     # 조성 변화 (-2 ~ +2 반음)
     semitone = random.choice([-2, -1, 1, 2])
     pitch_factor = 2 ** (semitone / 12.0)
@@ -188,40 +197,25 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_
     sample_rate = int(44100 * pitch_factor)
     atempo = speed_factor / pitch_factor
 
-    # 기승전결 구조 빌드:
-    # 1. 인트로: 부드러운 도입부 (0~30초)
-    intro_part = track1[:35000].fade_in(2500)
+    # 2. 처음부터 풍성한 멜로디로 시작하는 하이라이트 루프 구성
+    # 부드러운 1.5초 페이드인과 함께 바로 감미로운 메인 멜로디 시작
+    full_song = highlight_section.fade_in(1500)
     
-    # 2. 전개 & 메인 멜로디 (30초~1분 40초)
-    verse_part = track1[10000:80000] if len(track1) > 80000 else track1
-    
-    # 3. 브릿지/변화 파트 (화음/분위기 전환) (1분 40초~2분 40초)
-    bridge_part = track2[:60000] if len(track2) > 60000 else track2
-    
-    # 4. 클라이맥스/후렴 전개 (2분 40초~3분 30초)
-    climax_part = track1[20000:80000] if len(track1) > 80000 else track1
-    
-    # 파트들을 매끄러운 2.5초 크로스페이드로 결합
-    full_song = intro_part.append(verse_part, crossfade=2500)
-    full_song = full_song.append(bridge_part, crossfade=2500)
-    full_song = full_song.append(climax_part, crossfade=2500)
-    
-    # 목표 길이(약 210초 = 3분 30초) 맞춤
-    target_ms = target_duration_sec * 1000
-    if len(full_song) < target_ms:
-        needed = target_ms - len(full_song)
-        full_song = full_song.append(verse_part[:needed], crossfade=2500)
-    else:
-        full_song = full_song[:target_ms]
+    target_ms = target_duration_sec * 1000 # 3분 30초
+    while len(full_song) < target_ms:
+        # 매끄러운 2초 크로스페이드로 클라이맥스 멜로디를 자연스럽게 순환
+        full_song = full_song.append(highlight_section, crossfade=2000)
         
-    # 최종 마스터링: 공간감 리버브 및 아웃트로 페이드아웃
+    full_song = full_song[:target_ms]
+    
+    # 최종 마스터링: 볼륨 노멀라이즈 & 서서히 사라지는 4초 엔딩 페이드아웃
     full_song = full_song.normalize(headroom=0.5).fade_out(4000)
     
     temp_arranged = "temp/arranged.wav"
     full_song.export(temp_arranged, format="wav")
     
-    # FFmpeg로 풍부한 콘서트홀 앰비언스 및 EQ 마스터링
-    reverb_mix = random.uniform(0.18, 0.32)
+    # FFmpeg로 풍부한 스튜디오 앰비언스 및 EQ 마스터링
+    reverb_mix = random.uniform(0.2, 0.32)
     af = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},aecho=0.8:0.85:30:{reverb_mix:.2f}"
     
     cmd = [
@@ -234,7 +228,7 @@ def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_
     subprocess.run(cmd, check=True)
     
     final_audio = AudioSegment.from_file(output_mp3_path)
-    print(f"[Dynamic Multi-Part Arrangement Complete] {output_mp3_path} (길이: {len(final_audio)/1000:.1f}초, 다이내믹 파트 결합 성공)")
+    print(f"[Highlight Master Composition Complete] {output_mp3_path} (길이: {len(final_audio)/1000:.1f}초, 클라이맥스 멜로디 풀 적용)")
     return True
 
 # --- 3. Pillow 기반 한글 깨짐 0% 고화질 타이틀 오버레이 생성기 ---
@@ -359,7 +353,7 @@ if __name__ == "__main__":
     title_png = "temp/title_overlay.png"
     final_video = "output_music_video.mp4"
 
-    # 2. 기승전결 다이내믹 3~4분 신곡 편곡 및 렌더링
+    # 2. 클라이맥스 멜로디 중심 3~4분 완성형 신곡 편곡
     get_unique_audio_track(genre, final_prompt, ai_mp3, target_duration_sec=210)
 
     # 3. 장르별 감성 고화질 배경 이미지 다운로드
