@@ -71,16 +71,14 @@ if __name__ == "__main__":
                 song_title = parts[3].strip()
 
     if title_part:
-        title = f"[8 Hours] {title_part}"
+        title = title_part
         description = desc_part
     else:
-        title = os.getenv("VIDEO_TITLE", "[8 Hours] 멜론 TOP 100 인기곡 감성 피아노 연주곡 모음 (Sleep & Study)")
-        description = os.getenv("VIDEO_DESCRIPTION", "멜론 실시간 인기곡들을 감미로운 피아노 연주로 감상하는 8시간 연속 재생 플레이리스트입니다.")
-
-    description += f"\n\n#{artist_name.replace(' ', '')} #{song_title.replace(' ', '')} #멜론TOP100 #피아노플레이리스트 #수면음악 #공부음악 #힐링피아노 #KPopPiano #PianoCover #SleepMusic #StudyMusic"
+        title = os.getenv("VIDEO_TITLE", "[AI Music] 감성 힐링 연주곡 (Peaceful AI Music)")
+        description = os.getenv("VIDEO_DESCRIPTION", "Meta MusicGen AI가 작곡한 감성 음악입니다.")
 
     # 태그 최적화
-    tags = [artist_name, song_title, f"{song_title} 피아노", 'K-Ballad Piano', '피아노 커버', '수면음악', '공부할때듣는음악', '힐링음악', 'Piano Cover', 'Sleep Aid']
+    tags = ['AIMusic', 'MusicGen', 'AI음악', '피아노', '로파이', '힐링음악', '수면음악', 'Piano', 'LoFi', 'Relaxing']
 
     youtube_service = get_authenticated_service()
     

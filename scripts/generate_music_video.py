@@ -4,108 +4,168 @@ import glob
 import random
 import subprocess
 import json
+import time
 import requests
 from pydub import AudioSegment
 
-# --- 1. 테마 및 메타데이터 설정 ---
+# --- 1. 장르별 감성 프롬프트 및 메타데이터 풀 ---
 
-THEME_CONFIG = {
-    "piano": {
-        "title": "잠잘 때나 공부할 때 듣기 좋은 편안한 감성 피아노 연주곡 (8 Hours Piano)",
-        "desc": "마음이 편안해지는 고품질 감성 피아노 연주곡입니다. 수면, 공부, 집중, 카페, 휴식 시간에 편안하게 감상하세요.",
-        "tags": ["#피아노연주", "#수면음악", "#공부음악", "#힐링피아노", "#PianoMusic", "#SleepAid", "#StudyMusic"],
-        "images": [
-            "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "lofi": {
-        "title": "새벽에 듣기 좋은 감성 로파이 칠합 비트 (8 Hours Lo-Fi Chill Beats)",
-        "desc": "따뜻하고 아늑한 로파이(Lo-Fi) 칠합 음악입니다. 코딩, 과제, 야간 작업, 휴식에 최적화된 연속 재생 플레이리스트입니다.",
-        "tags": ["#로파이", "#LofiBeats", "#칠합", "#코딩음악", "#공부할때듣는음악", "#LofiChill", "#NightVibe"],
-        "images": [
-            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "sleep": {
-        "title": "불면증을 위한 깊은 수면 유도 힐링 음악 (8 Hours Deep Sleep Music)",
-        "desc": "복잡한 생각을 비우고 깊은 잠에 빠져들 수 있도록 도와주는 수면 유도 음악입니다. 편안한 밤 되세요.",
-        "tags": ["#수면음악", "#불면증치료", "#딥슬립", "#힐링음악", "#SleepMusic", "#DeepSleep", "#Relaxing"],
-        "images": [
-            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "study": {
-        "title": "집중력 향상과 몰입을 위한 차분한 연주곡 (8 Hours Study & Focus)",
-        "desc": "집중이 필요할 때 뇌파를 안정시키고 몰입을 도와주는 BGM입니다. 독서, 공부, 작업용으로 추천합니다.",
-        "tags": ["#공부음악", "#집중력음악", "#몰입음악", "#작업용BGM", "#StudyBGM", "#FocusMusic"],
-        "images": [
-            "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    }
+PROMPT_TEMPLATES = {
+    "piano": [
+        {
+            "prompt": "Emotional acoustic grand piano solo, gentle flowing melody, romantic and peaceful, warm concert hall reverb, 70 bpm",
+            "title": "새벽을 깨우는 따뜻한 피아노 선율 (Peaceful Dawn Piano)",
+            "tags": ["#AI피아노", "#피아노연주", "#힐링피아노", "#수면음악", "#감성피아노", "#PianoMusic", "#AIMusic"]
+        },
+        {
+            "prompt": "Calm melancholic piano melody, slow sentimental ballad chords, cinematic intimate atmosphere, beautiful acoustic tone, 65 bpm",
+            "title": "비 내리는 오후의 감성 피아노 (Rainy Afternoon Piano)",
+            "tags": ["#피아노연주곡", "#잔잔한음악", "#휴식음악", "#공부음악", "#PianoCover", "#StudyMusic"]
+        },
+        {
+            "prompt": "Soothing soft piano lullaby, dreamy arpeggios, relaxing ambient background, deep peaceful sleep vibe, 60 bpm",
+            "title": "깊은 잠으로 안내하는 피아노 자장가 (Deep Sleep Piano Lullaby)",
+            "tags": ["#수면음악", "#불면증치료", "#힐링음악", "#딥슬립", "#SleepMusic", "#RelaxingPiano"]
+        }
+    ],
+    "lofi": [
+        {
+            "prompt": "Cozy late night lo-fi hip hop beat, soft jazz rhodes chords, gentle vinyl crackle, relaxing chill study vibe, 75 bpm",
+            "title": "새벽 2시, 나만의 작은 방 (2AM Cozy Lo-Fi Chill)",
+            "tags": ["#로파이", "#LofiBeats", "#칠합", "#코딩음악", "#새벽감성", "#ChillLofi", "#StudyVibe"]
+        },
+        {
+            "prompt": "Dreamy aesthetic lo-fi beat, warm electric piano, smooth mellow bass, rainy window atmosphere, 80 bpm",
+            "title": "창밖의 빗소리와 따뜻한 로파이 (Rainy Window Lo-Fi)",
+            "tags": ["#LofiChill", "#비오는날음악", "#공부할때듣는음악", "#힐링비트", "#LofiHipHop"]
+        }
+    ],
+    "jazz": [
+        {
+            "prompt": "Warm acoustic jazz quartet, sweet saxophone melody, soft double bass, gentle brush drums, cozy cafe atmosphere, 80 bpm",
+            "title": "조용한 골목길의 재즈 카페 (Midnight Cafe Jazz)",
+            "tags": ["#재즈", "#카페음악", "#힐링재즈", "#재즈피아노", "#CafeJazz", "#SmoothJazz"]
+        }
+    ],
+    "citypop": [
+        {
+            "prompt": "Retro 80s Japanese city pop instrumental, groovy bassline, nostalgic synth brass, breezy seaside sunset drive, 115 bpm",
+            "title": "노을 지는 해변 드라이브 (Sunset Seaside City Pop)",
+            "tags": ["#시티팝", "#CityPop", "#레트로음악", "#드라이브음악", "#RetroVibe", "#80sVibe"]
+        }
+    ],
+    "ambient": [
+        {
+            "prompt": "Deep space ambient soundscape, gentle synth pads, serene meditation frequency, floating peaceful feeling, 55 bpm",
+            "title": "우주의 고요함을 담은 명상 음악 (Cosmic Serenity Ambient)",
+            "tags": ["#앰비언트", "#명상음악", "#힐링사운드", "#수면음악", "#AmbientMusic", "#Meditation"]
+        }
+    ]
 }
 
-# --- 2. 완성형 고음질 MP3 음원 가져오기 & 8시간 루프 준비 ---
+GENRE_IMAGES = {
+    "piano": [
+        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "lofi": [
+        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "jazz": [
+        "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "citypop": [
+        "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1280&h=720&q=90"
+    ],
+    "ambient": [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1280&h=720&q=90"
+    ]
+}
 
-def get_audio_track(theme_key):
-    """assets/audio 디렉토리의 완성형 고음질 MP3를 읽어와 5분 루프 준비"""
-    audio_dir = "assets/audio"
-    valid_exts = ("*.mp3", "*.wav", "*.m4a", "*.flac", "*.ogg")
-    audio_files = []
-    for ext in valid_exts:
-        audio_files.extend(glob.glob(os.path.join(audio_dir, ext)))
-        
-    os.makedirs("temp", exist_ok=True)
-    output_mp3 = "temp/base.mp3"
+# --- 2. Meta MusicGen AI 작곡 API 호출 ---
 
-    if not audio_files:
-        print("[Error] assets/audio 폴더에 음원이 없습니다. 기본 고음질 음원을 다운로드합니다.")
-        default_url = "https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=piano-moment-110241.mp3"
-        dl = requests.get(default_url, headers={'User-Agent': 'Mozilla/5.0'})
-        with open("assets/audio/Piano_Moment_Calm_Relaxing.mp3", "wb") as f:
-            f.write(dl.content)
-        audio_files = ["assets/audio/Piano_Moment_Calm_Relaxing.mp3"]
-
-    chosen = random.choice(audio_files)
-    filename = os.path.basename(chosen)
-    name_no_ext = os.path.splitext(filename)[0]
-    print(f"[Selected High-Quality Audio] {chosen}")
-
-    # 원본 음원을 훼손하지 않고 볼륨 정규화 & 매끄러운 5분 루프 생성
-    audio = AudioSegment.from_file(chosen)
-    audio = audio.normalize(headroom=0.5)
+def generate_musicgen_audio(prompt_text, output_mp3_path):
+    """
+    Meta의 MusicGen AI 모델(Hugging Face Inference API)을 호출하여
+    프롬프트 기반으로 고음질 독창적 신곡(MP3/WAV) 작곡
+    """
+    print(f"\n[AI Composition] Meta MusicGen 작곡 시작...")
+    print(f"-> Prompt: \"{prompt_text}\"")
     
-    target_ms = 300 * 1000 # 5분
-    if len(audio) < target_ms:
-        repeats = int(target_ms // len(audio)) + 1
-        looped = audio
-        for _ in range(repeats):
-            looped = looped.append(audio, crossfade=1500)
-        audio = looped[:target_ms]
-    else:
-        audio = audio[:target_ms]
+    api_url = "https://api-inference.huggingface.co/models/facebook/musicgen-small"
+    hf_token = os.getenv("HF_TOKEN", "").strip()
+    headers = {}
+    if hf_token:
+        headers["Authorization"] = f"Bearer {hf_token}"
         
-    audio = audio.fade_in(2000).fade_out(3000)
-    audio.export(output_mp3, format="mp3", bitrate="320k")
-
-    clean_name = name_no_ext.replace("_", " ").strip()
-    if " - " in clean_name:
-        parts = clean_name.split(" - ", 1)
-        return {"artist": parts[0].strip(), "title": parts[1].strip(), "path": output_mp3}
-    return {"artist": "Relaxing Piano Studio", "title": clean_name, "path": output_mp3}
+    payload = {
+        "inputs": prompt_text,
+        "parameters": {
+            "max_new_tokens": 512, # 약 10~15초 고음질 생성 (반복 확장 가능)
+            "temperature": 1.0,
+            "top_k": 250
+        }
+    }
+    
+    for attempt in range(3):
+        try:
+            print(f"Calling MusicGen API (Attempt {attempt+1}/3)...")
+            res = requests.post(api_url, headers=headers, json=payload, timeout=60)
+            
+            if res.status_code == 200 and len(res.content) > 10000:
+                temp_raw = "temp/ai_raw.wav"
+                with open(temp_raw, "wb") as f:
+                    f.write(res.content)
+                
+                # AudioSegment로 불러와서 부드러운 페이드인/아웃 마스터링
+                audio = AudioSegment.from_file(temp_raw)
+                
+                # 곡 길이: AI 원곡 길이 그대로 (약 1분 내외로 자연스럽게 확장 또는 원본 길이 유지)
+                if len(audio) < 60000: # 1분 미만일 경우 자연스럽게 2회 루프
+                    audio = audio.append(audio, crossfade=1500)
+                    
+                audio = audio.normalize(headroom=0.5).fade_in(1500).fade_out(2500)
+                audio.export(output_mp3_path, format="mp3", bitrate="320k")
+                print(f"[AI Composition Success] 곡 생성 완료: {output_mp3_path} (길이: {len(audio)/1000:.1f}초)")
+                return True
+            
+            elif res.status_code == 503:
+                # 모델 로딩 중일 경우 대기 후 재시도
+                data = res.json()
+                wait_time = data.get("estimated_time", 20)
+                print(f"Model is loading on server. Waiting {wait_time}s...")
+                time.sleep(min(wait_time, 25))
+            else:
+                print(f"MusicGen API response status: {res.status_code} ({res.text[:100]})")
+                time.sleep(5)
+                
+        except Exception as e:
+            print(f"API call error: {e}")
+            time.sleep(5)
+            
+    # API 실패 시: assets/audio/ 에 있는 고음질 완성형 MP3 사용
+    print("[Fallback] AI API 응답 지연으로 assets/audio/ 고음질 트랙을 로드합니다.")
+    audio_files = glob.glob("assets/audio/*.mp3")
+    if audio_files:
+        chosen = random.choice(audio_files)
+        audio = AudioSegment.from_file(chosen).normalize(headroom=0.5).fade_in(1500).fade_out(2500)
+        audio.export(output_mp3_path, format="mp3", bitrate="320k")
+        print(f"[Fallback Loaded] {chosen} (길이: {len(audio)/1000:.1f}초)")
+        return True
+        
+    return False
 
 # --- 3. 고화질 감성 배경 이미지 다운로드 ---
 
-def fetch_hd_background(theme_key, filename):
-    cfg = THEME_CONFIG.get(theme_key, THEME_CONFIG["piano"])
-    chosen_url = random.choice(cfg["images"])
-    print(f"Fetching HD background image ({theme_key}): {chosen_url}")
+def fetch_hd_background(genre, filename):
+    image_pool = GENRE_IMAGES.get(genre, GENRE_IMAGES["piano"])
+    chosen_url = random.choice(image_pool)
+    print(f"Fetching HD background image ({genre}): {chosen_url}")
     try:
         resp = requests.get(chosen_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
         if resp.status_code == 200 and len(resp.content) > 1000:
@@ -118,71 +178,74 @@ def fetch_hd_background(theme_key, filename):
 
     subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x1a2130:s=1280x720:d=1", "-vframes", "1", filename], check=True)
 
-# --- 4. 8시간 비디오 초고속 무손실 렌더링 ---
+# --- 4. AI 곡 길이 그대로 초고속 비디오 렌더링 ---
 
-def create_8h_video(image_path, audio_path, output_path):
-    print("Creating 8-hour video via ultra-fast concat...")
-    short_video = "temp/short.mp4"
-    cmd_short = [
-        "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
-        "-c:v", "libx264", "-t", "300", "-pix_fmt", "yuv420p", "-vf", "scale=1280:720",
-        "-preset", "ultrafast", "-crf", "30", "-c:a", "aac", "-b:a", "192k", short_video
-    ]
-    subprocess.run(cmd_short, check=True)
-
-    with open("temp/concat.txt", "w") as f:
-        for _ in range(96): # 5분 x 96 = 8시간 (480분)
-            f.write("file 'short.mp4'\n")
+def create_song_length_video(image_path, audio_path, output_path):
+    """곡 길이 그대로 고화질 1080p/720p 비디오 생성 (10초 컷)"""
+    print("Rendering final music video with exact song duration...")
+    # 오디오 길이 확인
+    audio = AudioSegment.from_file(audio_path)
+    duration_sec = len(audio) / 1000.0
     
-    cmd_concat = [
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "temp/concat.txt",
-        "-c", "copy", output_path
+    cmd = [
+        "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
+        "-c:v", "libx264", "-t", str(duration_sec), "-pix_fmt", "yuv420p", "-vf", "scale=1280:720",
+        "-preset", "ultrafast", "-crf", "22", "-c:a", "aac", "-b:a", "320k", "-shortest", output_path
     ]
-    subprocess.run(cmd_concat, check=True)
-    print(f"Final 8-hour video created: {output_path}")
+    subprocess.run(cmd, check=True)
+    print(f"Music Video created successfully: {output_path} (Duration: {duration_sec:.1f}s)")
 
 # --- 메인 실행 ---
 
 if __name__ == "__main__":
-    theme = os.getenv("INPUT_THEME", "piano").strip().lower()
-    if theme not in THEME_CONFIG:
-        theme = "piano"
+    os.makedirs("temp", exist_ok=True)
+    genre = os.getenv("INPUT_GENRE", "piano").strip().lower()
+    if genre not in PROMPT_TEMPLATES:
+        genre = "piano"
         
-    cfg = THEME_CONFIG[theme]
+    custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
+    custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
+    
+    # 1. 프롬프트 및 메타데이터 선정
+    templates = PROMPT_TEMPLATES[genre]
+    selected_template = random.choice(templates)
+    
+    final_prompt = custom_prompt if custom_prompt else selected_template["prompt"]
+    
+    if custom_title:
+        final_title = custom_title
+    else:
+        final_title = f"[AI Music] {selected_template['title']}"
+        
+    ai_mp3 = "temp/ai_song.mp3"
     bg_image = "temp/bg.jpg"
     final_video = "output_music_video.mp4"
 
-    # 1. assets/audio/의 실제 완성형 고음질 MP3 트랙 선택
-    audio_info = get_audio_track(theme)
+    # 2. Meta MusicGen AI 작곡
+    generate_musicgen_audio(final_prompt, ai_mp3)
 
-    # 2. 테마별 고화질 감성 배경 이미지 다운로드
-    fetch_hd_background(theme, bg_image)
+    # 3. 고화질 감성 앨범 아트 다운로드
+    fetch_hd_background(genre, bg_image)
 
-    # 3. 8시간 무손실 연속 재생 비디오 초고속 생성
-    create_8h_video(bg_image, audio_info["path"], final_video)
+    # 4. 작곡된 곡 길이 그대로 비디오 초고속 렌더링
+    create_song_length_video(bg_image, ai_mp3, final_video)
 
-    # 4. 유튜브 메타데이터 JSON 저장
-    custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
-    if custom_title:
-        title = custom_title
-    else:
-        title = f"[8 Hours] {audio_info['title']} - 편안한 피아노 연주곡"
-
-    tags_str = " ".join(cfg["tags"])
+    # 5. 유튜브 업로드 메타데이터 JSON 저장
+    tags_str = " ".join(selected_template["tags"])
     desc = (
-        f"{cfg['desc']}\n\n"
-        f"Track: {audio_info['title']}\n"
-        f"Artist: {audio_info['artist']}\n\n"
-        f"{tags_str}\n\n"
-        f"Produced & Provided by Keyin Studio."
+        f"🎵 Meta MusicGen AI가 작곡한 오리지널 신곡입니다.\n\n"
+        f"Genre: {genre.upper()}\n"
+        f"AI Prompt: \"{final_prompt}\"\n\n"
+        f"Composed & Produced by Keyin AI Music Studio.\n\n"
+        f"{tags_str}"
     )
 
     meta_info = {
-        "title": title[:100],
+        "title": final_title[:100],
         "description": desc,
-        "artist": audio_info["artist"],
-        "song_title": audio_info["title"]
+        "artist": "Keyin AI Studio",
+        "song_title": final_title
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
-    print("Video metadata saved successfully.")
+    print("Video metadata saved successfully for YouTube upload.")

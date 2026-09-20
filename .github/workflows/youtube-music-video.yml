@@ -5,18 +5,24 @@ on:
     - cron: '*/30 * * * *' # 30분마다 자동 실행
   workflow_dispatch: # 수동 즉시 실행 가능
     inputs:
-      theme:
-        description: '음악 테마 선택'
+      genre:
+        description: 'AI 음악 장르 선택'
         required: true
         default: 'piano'
         type: choice
         options:
           - 'piano'
           - 'lofi'
-          - 'sleep'
-          - 'study'
+          - 'jazz'
+          - 'citypop'
+          - 'ambient'
+      custom_prompt:
+        description: '커스텀 AI 작곡 프롬프트 (비워두면 장르별 추천 프롬프트로 자동 작곡)'
+        required: false
+        default: ''
+        type: string
       custom_title:
-        description: '업로드할 유튜브 영상 제목 (비워두면 테마별 최적화 제목으로 자동 생성)'
+        description: '업로드할 유튜브 영상 제목 (비워두면 AI 곡명으로 자동 생성)'
         required: false
         default: ''
         type: string
@@ -43,10 +49,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install "requests==2.31.0" "pydub==0.25.1" "numpy==1.26.4" "scipy==1.13.0" "google-api-python-client==2.118.0" "google-auth-oauthlib==1.2.0" "google-auth-httplib2==0.2.0"
 
-      - name: Generate Music Video
+      - name: Generate AI Music Video
         env:
-          INPUT_THEME: ${{ inputs.theme || 'piano' }}
+          INPUT_GENRE: ${{ inputs.genre || 'piano' }}
+          INPUT_CUSTOM_PROMPT: ${{ inputs.custom_prompt }}
           INPUT_CUSTOM_TITLE: ${{ inputs.custom_title }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python scripts/generate_music_video.py
 
@@ -55,7 +63,5 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          VIDEO_TITLE: "잠잘 때나 공부할 때 듣기 좋은 편안한 피아노 연주곡 (Sleep & Study Piano)"
-          VIDEO_DESCRIPTION: "made by keyin."
         run: |
           python scripts/upload_to_youtube.py output_music_video.mp4
