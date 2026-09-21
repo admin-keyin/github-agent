@@ -6,11 +6,12 @@ on:
   workflow_dispatch: # 수동 즉시 실행 가능
     inputs:
       genre:
-        description: 'AI 음악 장르 선택'
-        required: true
-        default: 'piano'
+        description: 'AI 음악 장르 선택 (random 또는 비워두면 7개 장르 중 무작위 선택)'
+        required: false
+        default: 'random'
         type: choice
         options:
+          - 'random'
           - 'piano'
           - 'lofi'
           - 'jazz'
