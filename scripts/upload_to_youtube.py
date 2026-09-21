@@ -74,11 +74,11 @@ if __name__ == "__main__":
         title = title_part
         description = desc_part
     else:
-        title = os.getenv("VIDEO_TITLE", "[AI Music] 감성 힐링 연주곡 (Peaceful AI Music)")
-        description = os.getenv("VIDEO_DESCRIPTION", "Meta MusicGen AI가 작곡한 감성 음악입니다.")
+        title = os.getenv("VIDEO_TITLE", "[Inkey Music] 감성 힐링 연주곡 (Peaceful Music)")
+        description = os.getenv("VIDEO_DESCRIPTION", "Inkey Music Studio에서 제작된 감성 음악입니다.")
 
     # 태그 최적화
-    tags = ['AIMusic', 'MusicGen', 'AI음악', '피아노', '로파이', '힐링음악', '수면음악', 'Piano', 'LoFi', 'Relaxing']
+    tags = ['InkeyMusic', '음악', '피아노', '로파이', '힐링음악', '수면음악', 'Piano', 'LoFi', 'Relaxing', 'EDM']
 
     youtube_service = get_authenticated_service()
     

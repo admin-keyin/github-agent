@@ -404,7 +404,7 @@ if __name__ == "__main__":
     # 1. 동적 프롬프트 및 신박한 제목 생성
     auto_prompt, auto_title, bpm, key = build_dynamic_prompt_and_title(genre)
     final_prompt = custom_prompt if custom_prompt else auto_prompt
-    final_title = custom_title if custom_title else f"[AI Music] {auto_title}"
+    final_title = custom_title if custom_title else f"[Inkey Music] {auto_title}"
     
     ai_mp3 = "temp/ai_song.mp3"
     bg_image = "temp/bg.jpg"
@@ -427,15 +427,15 @@ if __name__ == "__main__":
     desc = (
         f"🎧 {final_title}\n\n"
         f"Genre: {genre.upper()} | Key: {key} | BPM: {bpm}\n"
-        f"AI Prompt: \"{final_prompt}\"\n\n"
-        f"Composed & Visualized by Keyin AI Music Studio.\n\n"
-        f"#{genre.upper()} #AIMusic #AI작곡 #감성음악 #이퀄라이저 #Visualizer"
+        f"Prompt: \"{final_prompt}\"\n\n"
+        f"Produced & Visualized by Inkey Music Studio.\n\n"
+        f"#{genre.upper()} #InkeyMusic #감성음악 #힐링음악 #이퀄라이저 #Visualizer"
     )
 
     meta_info = {
         "title": final_title[:100],
         "description": desc,
-        "artist": "Keyin AI Studio",
+        "artist": "Inkey Music Studio",
         "song_title": final_title
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
