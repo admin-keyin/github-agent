@@ -53,7 +53,7 @@ jobs:
 
       - name: Generate AI Music Video
         env:
-          INPUT_GENRE: ${{ inputs.genre || 'piano' }}
+          INPUT_GENRE: ${{ inputs.genre }}
           INPUT_CUSTOM_PROMPT: ${{ inputs.custom_prompt }}
           INPUT_CUSTOM_TITLE: ${{ inputs.custom_title }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
