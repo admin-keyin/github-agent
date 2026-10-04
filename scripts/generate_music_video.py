@@ -6,289 +6,121 @@ import subprocess
 import json
 import time
 import requests
+import unicodedata
+from pathlib import Path
 from pydub import AudioSegment
 from PIL import Image, ImageDraw, ImageFont
 
-# --- 1. 장르별 전용 사운드 & 비주얼 프로파일 마스터 설정 ---
+# --- 1. 전략 & 웅장한 감성 비주얼 & 비주얼라이저 테마 설정 ---
 
-GENRE_PROFILES = {
-    "piano": {
-        "title_genre": "감성 피아노",
-        "eq_colors": "white@0.95|white@0.4",
-        "title_color": (255, 255, 255, 245),
-        "box_color": (0, 0, 0, 150),
-        # 맑은 고음 배음 + 깊은 콘서트홀 리버브
-        "audio_filter": "treble=g=2.5:f=3800,aecho=0.8:0.88:45:0.28",
+# 3대 지정 음원 목록 (이 3개 이외에는 절대 사용하지 않음)
+ALLOWED_TRACKS = ["뇌룡격파", "용전", "화룡진군"]
+
+TITLE_TEMPLATES = [
+    "전략게임할 때 듣기 좋은 웅장한 음악 - {name}",
+    "마음이 벅차오르는 웅장한 판타지 BGM | {name}",
+    "가슴이 벅차오르는 전투 전략 테마곡 - {name}",
+    "전략 시뮬레이션 몰입용 웅장한 음악 | {name}",
+    "심장을 울리는 대서사시 웅장한 BGM - {name}",
+    "승리를 이끄는 가슴 벅찬 전략게임 OST - {name}"
+]
+
+EPIC_THEMES = {
+    "fire_gold": {
+        "title_genre": "화룡의 숨결 (골드 & 파이어)",
+        "eq_colors": "0xff4500@0.95|0xffd700@0.7",
+        "title_color": (255, 245, 210, 255),
+        "box_color": (15, 8, 5, 180),
         "images": [
-            "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&w=1280&h=720&q=90"
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&h=1080&q=90",
+            "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&h=1080&q=90",
+            "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&h=1080&q=90"
         ]
     },
-    "lofi": {
-        "title_genre": "새벽 로파이",
-        "eq_colors": "0xffd27f@0.95|0xff9933@0.45", # 따뜻한 앰버/오렌지 빛
-        "title_color": (255, 235, 200, 245),
-        "box_color": (20, 15, 10, 160),
-        # 빈티지 바이닐 테이프 웜톤 (따뜻한 로우패스 4800Hz + 포근한 808 서브 베이스)
-        "audio_filter": "lowpass=f=4800,bass=g=3:f=110,aecho=0.8:0.8:25:0.15",
+    "lightning_blue": {
+        "title_genre": "뇌룡의 번개 (일렉트릭 사이안 & 블루)",
+        "eq_colors": "0x00e5ff@0.95|0x7c4dff@0.7",
+        "title_color": (220, 245, 255, 255),
+        "box_color": (5, 12, 25, 180),
         "images": [
-            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1280&h=720&q=90"
+            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&h=1080&q=90",
+            "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1920&h=1080&q=90",
+            "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&h=1080&q=90"
         ]
     },
-    "jazz": {
-        "title_genre": "카페 재즈",
-        "eq_colors": "0xffdf80@0.95|0xd4af37@0.4", # 고급스러운 샴페인 골드
-        "title_color": (255, 240, 190, 245),
-        "box_color": (15, 10, 5, 160),
-        # 묵직한 콘트라베이스 + 감미로운 미드레인지(색소폰/피아노 강조)
-        "audio_filter": "bass=g=3.5:f=120,equalizer=f=1200:t=q:w=1.5:g=2.5,aecho=0.8:0.85:30:0.2",
+    "epic_battle": {
+        "title_genre": "전장의 기백 (크림슨 & 화이트)",
+        "eq_colors": "0xff1744@0.95|0xffffff@0.7",
+        "title_color": (255, 230, 230, 255),
+        "box_color": (20, 5, 5, 185),
         "images": [
-            "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "citypop": {
-        "title_genre": "시티팝",
-        "eq_colors": "0x00ffff@0.95|0xff00ff@0.6", # 네온 사이안 & 마젠타 핑크
-        "title_color": (210, 250, 255, 250),
-        "box_color": (10, 5, 20, 160),
-        # 80s 펑키 슬랩 베이스(100Hz) + 영롱한 신스 브라스 고음(5kHz)
-        "audio_filter": "bass=g=3.5:f=95,treble=g=3.0:f=4500,aecho=0.8:0.8:20:0.12",
-        "images": [
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "ambient": {
-        "title_genre": "수면 앰비언트",
-        "eq_colors": "0x80c0ff@0.9|0xa070ff@0.35", # 신비로운 오로라 블루/퍼플
-        "title_color": (220, 235, 255, 240),
-        "box_color": (5, 10, 25, 150),
-        # 초저주파 힐링 드론(432Hz) + 광활한 우주 무한 잔향
-        "audio_filter": "lowpass=f=3500,bass=g=2:f=80,aecho=0.85:0.92:60:0.4",
-        "images": [
-            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "edm": {
-        "title_genre": "EDM 페스티벌",
-        "eq_colors": "0x00ff88@0.95|0x00ccff@0.5", # 네온 일렉트릭 라임 & 사이안
-        "title_color": (200, 255, 230, 255),
-        "box_color": (0, 15, 10, 170),
-        # 묵직한 4-on-the-floor 펀치 킥(60Hz Boost) + 촵! 스네어 타격감 (리버브 최소화로 펀치감 극대화)
-        "audio_filter": "bass=g=4.5:f=65,treble=g=3.0:f=4000,aecho=0.8:0.75:10:0.06",
-        "images": [
-            "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1280&h=720&q=90"
-        ]
-    },
-    "jpop": {
-        "title_genre": "J-POP 애니메이션",
-        "eq_colors": "0x66ccff@0.95|white@0.55", # 청량한 스카이 블루 & 화이트
-        "title_color": (220, 245, 255, 250),
-        "box_color": (5, 15, 30, 160),
-        # 질주하는 140BPM 밴드 비트 + 쨍한 일렉기타 리프(3kHz) & 청량한 고음역대
-        "audio_filter": "bass=g=2.5:f=100,equalizer=f=2800:t=q:w=1.2:g=3.0,treble=g=2.5:f=5000,aecho=0.8:0.8:18:0.1",
-        "images": [
-            "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1280&h=720&q=90",
-            "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1280&h=720&q=90"
+            "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1920&h=1080&q=90",
+            "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1920&h=1080&q=90"
         ]
     }
 }
 
-INSTRUMENTS = {
-    "piano": ["acoustic grand piano solo", "warm upright piano with felt dampers", "cinematic piano with subtle strings"],
-    "lofi": ["warm Rhodes electric piano and boom bap drums", "mellow nylon guitar and vinyl chill beat"],
-    "citypop": ["80s Tokyo nighttime groove with slap bass and synth brass", "retro seaside city pop with funky guitar"],
-    "jazz": ["bossa nova acoustic guitar with shaker rhythm", "late-night jazz club trio with upright bass and sax"],
-    "ambient": ["serene cosmic synth pads with 432Hz deep drone", "ethereal ocean ambient with crystal harp"],
-    "edm": ["festival progressive house drop with punchy kicks and saw leads", "future bass with emotional vocal chops"],
-    "jpop": ["upbeat anime opening rock with electric guitar riffs", "Shibuya night pop with driving bass and strings"]
-}
 
-MOODS = [
-    "deeply emotional and nostalgic", "warm and cozy for deep relaxation",
-    "peaceful and calming for sleep", "focus and inspiring for study and coding",
-    "euphoric and full of festival energy", "breezy and refreshing youth vibe"
-]
+# --- 2. 3대 원곡 음원 100% 원음 복원 & 로드 엔진 ---
 
-KEYS = ["C Major", "A Minor", "D Major", "B Minor", "G Major", "E Minor", "F Major", "D Minor", "Ab Major", "Eb Major", "F# Minor"]
-TEMPOS = {
-    "piano": [60, 64, 68, 72],
-    "lofi": [70, 74, 78, 82],
-    "citypop": [108, 114, 120],
-    "jazz": [75, 80, 85, 90],
-    "ambient": [48, 52, 56, 60],
-    "edm": [126, 128, 130, 132],
-    "jpop": [135, 140, 145, 150]
-}
-
-POETIC_TITLE_PIECES = {
-    "piano": [
-        ("새벽 {h}시 {m}분", ["불 꺼진 방에서 너를 떠올리며", "나지막이 흐르는 피아노", "잊혀지지 않는 계절의 기억"]),
-        ("그때 너에게", ["하지 못했던 마지막 한마디", "전하지 못한 편지 한 장", "남겨둔 작은 온기"]),
-        ("비 내리는 {w}", ["창가에 맺힌 너의 얼굴", "작은 우산 아래의 우리", "흘러나오는 선율"])
-    ],
-    "lofi": [
-        ("퇴근길 지하철 막차", ["이어폰 너머로 번지는 위로", "창밖으로 스쳐가는 도심의 불빛", "나를 다독이는 따뜻한 비트"]),
-        ("새벽 2시", ["편의점 앞 흐린 가로등 아래", "어질러진 책상 위 식어버린 커피", "조용히 흘러가는 나만의 시간"])
-    ],
-    "citypop": [
-        ("자정이 넘은", ["한강 다리 위를 달리며", "네온사인 불빛 아래 너와 나만의 춤", "도심의 밤바람을 가르는 드라이브"]),
-        ("80년대 서울의 밤", ["반짝이는 빌딩 숲과 너의 실루엣", "레트로 카세트테이프에서 흘러나오는 노래"])
-    ],
-    "jazz": [
-        ("골목길 모퉁이", ["작은 재즈 카페의 온기", "비 내리는 밤의 색소폰", "따뜻한 와인 한 잔과 흐르는 음악"]),
-        ("늦은 밤 홀로 앉아", ["조용히 울리는 콘트라베이스", "피아노 건반 위로 흩어지는 생각들"])
-    ],
-    "ambient": [
-        ("우주 끝자락에", ["혼자 멈춰선 고요의 순간", "숨결조차 닿지 않는 평온함", "별들의 속삭임이 머무는 곳"]),
-        ("깊은 밤의 쉼표", ["모든 소음이 사라진 깊은 바닷속", "지친 마음을 감싸주는 고요한 숨결"])
-    ],
-    "edm": [
-        ("심장을 뛰게 하는", ["페스티벌의 뜨거운 밤", "네온 불빛 아래 터지는 에너지", "새벽까지 멈추지 않는 비트"]),
-        ("끝없는 질주", ["한계를 넘어 날아오르는 순간", "도시의 밤을 가르는 신스 사운드"])
-    ],
-    "jpop": [
-        ("푸른 하늘 아래", ["질주하는 청춘의 계절", "너와 함께 달렸던 언덕길", "끝나지 않을 우리들의 여름"]),
-        ("시부야의 저녁 노을", ["이어폰 속으로 터져 나오는 멜로디", "빛나는 내일을 향한 발걸음"])
-    ]
-}
-
-def build_dynamic_prompt_and_title(genre):
-    inst = random.choice(INSTRUMENTS.get(genre, INSTRUMENTS["piano"]))
-    mood = random.choice(MOODS)
-    key = random.choice(KEYS)
-    bpm = random.choice(TEMPOS.get(genre, [70]))
-    
-    prompt = f"{inst}, in {key} key, {mood}, beautiful emotional melody, rich harmonic climax drop, studio quality mastering, {bpm} bpm"
-    
-    pieces = POETIC_TITLE_PIECES.get(genre, POETIC_TITLE_PIECES["piano"])
-    prefix_template, suffixes = random.choice(pieces)
-    prefix = prefix_template.format(
-        h=random.choice([1, 2, 3, 4]),
-        m=random.choice([12, 25, 34, 42, 51]),
-        w=random.choice(["월요일", "수요일", "금요일", "주말 밤", "오후"])
-    )
-    suffix = random.choice(suffixes)
-    title = f"{prefix}, {suffix}"
-    
-    return prompt, title, bpm, key
-
-# --- 2. 장르별 특색 마스터링 & 3~4분 완성형 편곡 엔진 ---
-
-def arrange_full_structured_song(base_audio, target_duration_sec=210):
+def get_exclusive_music_track(selected_file=None, output_mp3_path="temp/ai_song.mp3"):
     """
-    원곡의 고유한 기승전결(인트로 -> 빌드업 -> 클라이맥스/드랍 -> 아웃트로)을
-    그대로 살리면서 목표 시간(3~4분) 동안 다이내믹한 곡 전개를 만드는 스마트 편곡기
+    오직 지정된 3개 곡(뇌룡격파, 용전, 화룡진군) 중 하나를 선택하여
+    100% 원음 그대로의 다이내믹 레인지와 음질을 보존하여 로드합니다.
     """
-    base_len = len(base_audio)
-    target_ms = target_duration_sec * 1000
-
-    # 원곡이 이미 목표 길이 이상이면 자연스러운 페이드아웃 적용
-    if base_len >= target_ms:
-        return base_audio[:target_ms].fade_out(4000)
-
-    # 원곡을 기승전결 4개 파트로 분석/분할
-    # 1. 인트로 (도입부)
-    intro_end = min(15000, int(base_len * 0.2))
-    intro_part = base_audio[:intro_end]
-
-    # 2. 메인 바디 (빌드업 + 클라이맥스)
-    outro_start = max(base_len - 15000, int(base_len * 0.8))
-    main_body = base_audio[intro_end:outro_start]
+    music_dir = "assets/audio/music"
+    all_files = glob.glob(f"{music_dir}/*.mp3") + glob.glob(f"{music_dir}/*.wav")
     
-    # 3. 아웃트로 (마무리)
-    outro_part = base_audio[outro_start:]
-
-    # 곡 구성: 인트로 -> 메인 파트 1 (Verse/Build) -> 클라이맥스 반복 및 발전 -> 아웃트로
-    arranged = intro_part
-    
-    # 메인 바디를 크로스페이드로 연결하여 기승전결의 흐름을 유지
-    while len(arranged) < (target_ms - len(outro_part) - 2000):
-        arranged = arranged.append(main_body, crossfade=min(3000, len(main_body)//3))
-
-    # 마무리 아웃트로 연결
-    arranged = arranged.append(outro_part, crossfade=min(2500, len(outro_part)//2))
-    
-    # 목표 길이 맞추기 & 볼륨 마스터링
-    arranged = arranged[:target_ms]
-    arranged = arranged.normalize(headroom=0.5).fade_out(3500)
-    return arranged
-
-def get_unique_audio_track(genre, prompt_text, output_mp3_path, target_duration_sec=210):
-    profile = GENRE_PROFILES.get(genre, GENRE_PROFILES["piano"])
-    random_seed = random.randint(100000, 999999999)
-    print(f"\n[Dynamic Structure Composer] '{genre.upper()}' 기승전결 풀 편곡 (Seed: {random_seed})")
-
-    genre_dir = f"assets/audio/{genre}"
-    genre_files = glob.glob(f"{genre_dir}/*.mp3")
-    if not genre_files:
-        genre_files = glob.glob("assets/audio/*/*.mp3")
-        
-    base_audio = None
-    random.shuffle(genre_files)
-    for fpath in genre_files:
-        try:
-            temp_a = AudioSegment.from_file(fpath)
-            if len(temp_a) > 5000:
-                base_audio = temp_a
-                chosen_file = fpath
+    # 3개 곡에 대해서만 필터링
+    valid_files = []
+    for f in all_files:
+        stem = unicodedata.normalize('NFC', Path(f).stem)
+        for allowed in ALLOWED_TRACKS:
+            if allowed in stem:
+                valid_files.append(f)
                 break
-        except Exception as e:
-            print(f"File load warning: {e}")
 
-    if base_audio is None:
-        fallback_files = glob.glob("assets/audio/*/*.mp3")
-        for fpath in fallback_files:
-            try:
-                base_audio = AudioSegment.from_file(fpath)
-                chosen_file = fpath
+    if not valid_files:
+        raise FileNotFoundError(f"지정된 3개 음원({ALLOWED_TRACKS})을 {music_dir} 에서 찾을 수 없습니다.")
+
+    chosen_file = None
+
+    if selected_file and selected_file.strip() and selected_file.strip().lower() != "random":
+        target = unicodedata.normalize('NFC', selected_file.strip())
+        for f in valid_files:
+            f_norm = unicodedata.normalize('NFC', f)
+            f_base = unicodedata.normalize('NFC', os.path.basename(f))
+            f_stem = unicodedata.normalize('NFC', Path(f).stem)
+            if target in (f_norm, f_base, f_stem) or target in f_stem:
+                chosen_file = f
                 break
-            except Exception:
-                pass
+        if not chosen_file:
+            print(f"[Notice] '{selected_file}' 대신 지정된 3개 음원 중 무작위 선택합니다.")
 
-    print(f"[Selected Master Track] {chosen_file} (원곡 길이: {len(base_audio)/1000:.1f}초)")
-    
-    # 1. 인트로 -> 빌드업 -> 클라이맥스 드랍 -> 아웃트로 기승전결 완벽 편곡
-    full_song = arrange_full_structured_song(base_audio, target_duration_sec=target_duration_sec)
-    
-    temp_arranged = "temp/arranged.wav"
-    full_song.export(temp_arranged, format="wav")
-    
-    # 2. 조성 변화 (-2 ~ +2 반음) 및 템포 미세 가변 (원곡 고유 질감 유지 범위)
-    semitone = random.choice([-2, -1, 1, 2])
-    pitch_factor = 2 ** (semitone / 12.0)
-    speed_factor = random.uniform(0.98, 1.02)
-    sample_rate = int(44100 * pitch_factor)
-    atempo = speed_factor / pitch_factor
+    if not chosen_file:
+        chosen_file = random.choice(valid_files)
 
-    # 3. 장르별 맞춤 DSP 사운드 마스터링 필터 적용
-    genre_dsp = profile["audio_filter"]
-    af = f"asetrate={sample_rate},aresample=44100,atempo={atempo:.4f},{genre_dsp}"
-    
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", temp_arranged,
-        "-af", af,
-        "-ar", "44100",
-        "-b:a", "320k",
-        output_mp3_path
-    ]
-    subprocess.run(cmd, check=True)
-    
-    final_audio = AudioSegment.from_file(output_mp3_path)
-    print(f"[Structured Track Complete] {output_mp3_path} (길이: {len(final_audio)/1000:.1f}초, 기승전결 완벽 적용)")
-    return True
+    song_name = unicodedata.normalize('NFC', Path(chosen_file).stem)
+    print(f"\n=======================================================")
+    print(f" [100% 원음 복원 연주] {chosen_file}")
+    print(f" [곡 명] {song_name}")
+    print(f"=======================================================")
 
-# --- 3. Pillow 기반 장르별 감성 컬러 타이틀 오버레이 생성기 ---
+    # 원곡 로드 (음원 왜곡, 템포 변경, 피치 변조 없이 100% 원음 보존)
+    audio = AudioSegment.from_file(chosen_file)
+    original_duration = len(audio) / 1000.0
+    print(f"[음원 재생 시간] {original_duration:.1f}초 ({int(original_duration//60)}분 {int(original_duration%60)}초)")
 
-def create_title_overlay_png(title_text, genre, output_png_path, width=1280, height=720):
-    profile = GENRE_PROFILES.get(genre, GENRE_PROFILES["piano"])
+    # 320kbps 하이파이 최고 음질로 마스터링 저장
+    audio.export(output_mp3_path, format="mp3", bitrate="320k", parameters=["-ar", "44100"])
+    print(f"[Mastering Complete] {output_mp3_path} (320kbps High-Fidelity)")
+
+    return song_name, chosen_file, original_duration
+
+
+# --- 3. Pillow 기반 감성/웅장 타이틀 오버레이 생성기 ---
+
+def create_title_overlay_png(title_text, theme_profile, output_png_path, width=1280, height=720):
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -319,25 +151,25 @@ def create_title_overlay_png(title_text, genre, output_png_path, width=1280, hei
 
     x = (width - text_w) // 2
     y = 65
-    pad_x = 20
-    pad_y = 12
+    pad_x = 24
+    pad_y = 14
 
-    # 장르별 반투명 라운드 박스
+    # 반투명 라운드 박스
     draw.rounded_rectangle(
         [x - pad_x, y - pad_y, x + text_w + pad_x, y + text_h + pad_y],
-        radius=12,
-        fill=profile["box_color"]
+        radius=14,
+        fill=theme_profile["box_color"]
     )
 
-    # 장르별 감성 텍스트 컬러
-    draw.text((x, y), title_text, font=font, fill=profile["title_color"])
+    # 감성 텍스트 컬러
+    draw.text((x, y), title_text, font=font, fill=theme_profile["title_color"])
     img.save(output_png_path, "PNG")
 
-# --- 4. 고화질 배경 다운로드 & 장르별 맞춤 비주얼라이저 비디오 합성 ---
 
-def fetch_hd_background(genre, filename):
-    profile = GENRE_PROFILES.get(genre, GENRE_PROFILES["piano"])
-    chosen_url = random.choice(profile["images"])
+# --- 4. 고화질 배경 다운로드 & 비주얼라이저 비디오 합성 ---
+
+def fetch_hd_background(theme_profile, filename):
+    chosen_url = random.choice(theme_profile["images"])
     try:
         resp = requests.get(chosen_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
         if resp.status_code == 200 and len(resp.content) > 1000:
@@ -346,19 +178,19 @@ def fetch_hd_background(genre, filename):
             return
     except Exception as e:
         print(f"Image fetch fallback: {e}")
-    subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x1a2130:s=1280x720:d=1", "-vframes", "1", filename], check=True)
+    subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x111625:s=1280x720:d=1", "-vframes", "1", filename], check=True)
 
-def create_equalizer_music_video(image_path, title_png_path, audio_path, genre, output_path):
-    profile = GENRE_PROFILES.get(genre, GENRE_PROFILES["piano"])
+
+def create_equalizer_music_video(image_path, title_png_path, audio_path, theme_profile, output_path):
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
 
-    eq_colors = profile["eq_colors"]
+    eq_colors = theme_profile["eq_colors"]
     filter_complex = (
         f"[0:v]scale=1280:720[bg];"
         f"[bg][1:v]overlay=0:0[bg_titled];"
-        f"[2:a]showfreqs=s=860x130:mode=bar:fscale=log:colors={eq_colors}:win_size=1024[eq];"
-        f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-180[v]"
+        f"[2:a]showfreqs=s=880x140:mode=bar:fscale=log:colors={eq_colors}:win_size=1024[eq];"
+        f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-185[v]"
     )
 
     cmd = [
@@ -370,7 +202,7 @@ def create_equalizer_music_video(image_path, title_png_path, audio_path, genre, 
         "-map", "[v]", "-map", "2:a",
         "-c:v", "libx264", "-t", str(duration_sec),
         "-pix_fmt", "yuv420p",
-        "-preset", "ultrafast", "-crf", "22",
+        "-preset", "ultrafast", "-crf", "20",
         "-c:a", "aac", "-b:a", "320k",
         "-shortest", output_path
     ]
@@ -383,61 +215,69 @@ def create_equalizer_music_video(image_path, title_png_path, audio_path, genre, 
         subprocess.run([
             "ffmpeg", "-y", "-loop", "1", "-i", image_path, "-i", audio_path,
             "-c:v", "libx264", "-t", str(duration_sec), "-pix_fmt", "yuv420p", "-vf", "scale=1280:720",
-            "-preset", "ultrafast", "-crf", "22", "-c:a", "aac", "-b:a", "320k", "-shortest", output_path
+            "-preset", "ultrafast", "-crf", "20", "-c:a", "aac", "-b:a", "320k", "-shortest", output_path
         ], check=True)
+
 
 # --- 메인 실행 ---
 
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
-    genre_input = os.getenv("INPUT_GENRE", "").strip().lower()
-    available_genres = ["piano", "lofi", "citypop", "jazz", "ambient", "edm", "jpop"]
-    
-    if genre_input not in available_genres:
-        genre = random.choice(available_genres)
-    else:
-        genre = genre_input
-        
-    custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
+
+    input_music_file = os.getenv("INPUT_MUSIC_FILE", "").strip()
     custom_title = os.getenv("INPUT_CUSTOM_TITLE", "").strip()
-    
-    # 1. 동적 프롬프트 및 신박한 제목 생성
-    auto_prompt, auto_title, bpm, key = build_dynamic_prompt_and_title(genre)
-    final_prompt = custom_prompt if custom_prompt else auto_prompt
-    final_title = custom_title if custom_title else f"[Inkey Music] {auto_title}"
-    
+
     ai_mp3 = "temp/ai_song.mp3"
     bg_image = "temp/bg.jpg"
     title_png = "temp/title_overlay.png"
     final_video = "output_music_video.mp4"
 
-    # 2. 장르별 맞춤 DSP 특색 마스터링 3~4분 음원 생성
-    get_unique_audio_track(genre, final_prompt, ai_mp3, target_duration_sec=210)
+    # 1. 오직 3개 음원(뇌룡격파, 용전, 화룡진군) 중 선택 및 100% 원음 로드
+    song_name, chosen_path, duration = get_exclusive_music_track(input_music_file, ai_mp3)
 
-    # 3. 장르별 감성 고화질 배경 이미지 다운로드
-    fetch_hd_background(genre, bg_image)
+    # 2. 곡 분위기에 맞는 테마 자동 매칭
+    if "뇌룡" in song_name:
+        theme_profile = EPIC_THEMES["lightning_blue"]
+    elif "화룡" in song_name:
+        theme_profile = EPIC_THEMES["fire_gold"]
+    else:
+        theme_profile = EPIC_THEMES["epic_battle"]
 
-    # 4. Pillow로 장르별 감성 컬러 타이틀 PNG 생성
-    create_title_overlay_png(final_title, genre, title_png)
+    # 3. 전략게임 & 마음이 벅차오르는 감성 제목 생성
+    if custom_title:
+        final_title = custom_title
+    else:
+        template = random.choice(TITLE_TEMPLATES)
+        final_title = template.format(name=song_name)
 
-    # 5. 장르별 맞춤 컬러 이퀄라이저 비디오 렌더링 (3~4분)
-    create_equalizer_music_video(bg_image, title_png, ai_mp3, genre, final_video)
+    print(f"\n[최종 비디오 제목] {final_title}")
+    print(f"[테마 스타일] {theme_profile['title_genre']}")
 
-    # 6. 유튜브 메타데이터 JSON 저장
+    # 4. 고화질 배경 이미지 준비
+    fetch_hd_background(theme_profile, bg_image)
+
+    # 5. Pillow로 감성 타이틀 PNG 오버레이 생성
+    create_title_overlay_png(final_title, theme_profile, title_png)
+
+    # 6. 하이파이 이퀄라이저 비주얼라이저 비디오 렌더링
+    create_equalizer_music_video(bg_image, title_png, ai_mp3, theme_profile, final_video)
+
+    # 7. 유튜브 업로드용 메타데이터 JSON 저장
     desc = (
         f"🎧 {final_title}\n\n"
-        f"Genre: {genre.upper()} | Key: {key} | BPM: {bpm}\n"
-        f"Prompt: \"{final_prompt}\"\n\n"
-        f"Produced & Visualized by Inkey Music Studio.\n\n"
-        f"#{genre.upper()} #InkeyMusic #감성음악 #힐링음악 #이퀄라이저 #Visualizer"
+        f"⚔️ 트랙명: {song_name}\n"
+        f"⏱️ 재생 시간: {int(duration // 60)}분 {int(duration % 60)}초\n"
+        f"✨ 테마: 전략게임할 때 듣기 좋은 음악 / 가슴이 벅차오르는 음악\n\n"
+        f"100% 오리지널 마스터 사운드로 복원 및 제작되었습니다.\n\n"
+        f"#{song_name} #전략게임음악 #마음이벅차오르는음악 #웅장한음악 #게임BGM #이퀄라이저 #InkeyMusic"
     )
 
     meta_info = {
         "title": final_title[:100],
         "description": desc,
         "artist": "Inkey Music Studio",
-        "song_title": final_title
+        "song_title": song_name
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
-    print(f"Video metadata saved successfully for [{genre.upper()}]: {final_title}")
+    print(f"\n[Video metadata saved successfully]: {final_title}")

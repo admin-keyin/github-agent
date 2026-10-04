@@ -1,31 +1,22 @@
-name: AI YouTube Music Video Generator
+name: Epic Strategy Game Music Video Generator
 
 on:
   schedule:
     - cron: '*/30 * * * *' # 30분마다 자동 실행
   workflow_dispatch: # 수동 즉시 실행 가능
     inputs:
-      genre:
-        description: 'AI 음악 장르 선택 (random 또는 비워두면 7개 장르 중 무작위 선택)'
+      music_file:
+        description: '재생할 웅장한 음악 선택 (3개 곡 전용: 뇌룡격파, 용전, 화룡진군)'
         required: false
         default: 'random'
         type: choice
         options:
           - 'random'
-          - 'piano'
-          - 'lofi'
-          - 'jazz'
-          - 'citypop'
-          - 'ambient'
-          - 'edm'
-          - 'jpop'
-      custom_prompt:
-        description: '커스텀 AI 작곡 프롬프트 (비워두면 장르별 추천 프롬프트로 자동 작곡)'
-        required: false
-        default: ''
-        type: string
+          - '뇌룡격파'
+          - '용전'
+          - '화룡진군'
       custom_title:
-        description: '업로드할 유튜브 영상 제목 (비워두면 AI 곡명으로 자동 생성)'
+        description: '업로드할 유튜브 영상 제목 (비워두면 전략게임/벅차오르는 감성 제목 자동 생성)'
         required: false
         default: ''
         type: string
@@ -52,12 +43,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install "requests==2.31.0" "pydub==0.25.1" "numpy==1.26.4" "scipy==1.13.0" "Pillow==10.3.0" "google-api-python-client==2.118.0" "google-auth-oauthlib==1.2.0" "google-auth-httplib2==0.2.0"
 
-      - name: Generate AI Music Video
+      - name: Generate Music Video
         env:
-          INPUT_GENRE: ${{ inputs.genre }}
-          INPUT_CUSTOM_PROMPT: ${{ inputs.custom_prompt }}
+          INPUT_MUSIC_FILE: ${{ inputs.music_file }}
+          INPUT_THEME: ${{ inputs.visual_theme }}
           INPUT_CUSTOM_TITLE: ${{ inputs.custom_title }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python scripts/generate_music_video.py
 
@@ -68,3 +58,4 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
           python scripts/upload_to_youtube.py output_music_video.mp4
+
