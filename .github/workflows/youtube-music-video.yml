@@ -1,4 +1,4 @@
-name: Epic Strategy Game Music Video Generator
+name: Inkey Multi-Style Music Video Generator
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # 수동 즉시 실행 가능
     inputs:
       music_file:
-        description: '재생할 웅장한 음악 선택 (3개 곡 전용: 뇌룡격파, 용전, 화룡진군)'
+        description: '원곡 선택 (3대 대표 명곡: 뇌룡격파, 용전, 화룡진군, random)'
         required: false
         default: 'random'
         type: choice
@@ -15,8 +15,23 @@ on:
           - '뇌룡격파'
           - '용전'
           - '화룡진군'
+      style:
+        description: '연주 스타일 (EDM / 댄스 / 클래식 / 피아노 / 리코더 / 기타 / 일렉 / 에픽)'
+        required: false
+        default: 'random'
+        type: choice
+        options:
+          - 'random'
+          - 'edm'
+          - 'dance'
+          - 'classic'
+          - 'piano'
+          - 'recorder'
+          - 'guitar'
+          - 'electric'
+          - 'epic'
       custom_title:
-        description: '업로드할 유튜브 영상 제목 (비워두면 전략게임/벅차오르는 감성 제목 자동 생성)'
+        description: '업로드할 유튜브 영상 제목 (비워두면 스타일별 맞춤 제목 자동 생성)'
         required: false
         default: ''
         type: string
@@ -46,7 +61,7 @@ jobs:
       - name: Generate Music Video
         env:
           INPUT_MUSIC_FILE: ${{ inputs.music_file }}
-          INPUT_THEME: ${{ inputs.visual_theme }}
+          INPUT_STYLE: ${{ inputs.style }}
           INPUT_CUSTOM_TITLE: ${{ inputs.custom_title }}
         run: |
           python scripts/generate_music_video.py
@@ -58,4 +73,5 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
           python scripts/upload_to_youtube.py output_music_video.mp4
+
 
