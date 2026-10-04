@@ -11,26 +11,28 @@ from pathlib import Path
 from pydub import AudioSegment
 from PIL import Image, ImageDraw, ImageFont
 
-# --- 1. 전략 & 웅장한 감성 비주얼 & 비주얼라이저 테마 설정 ---
+# --- 1. 전략 & 웅장한 라이브 연주 테마 설정 ---
 
 # 3대 지정 음원 목록 (이 3개 이외에는 절대 사용하지 않음)
 ALLOWED_TRACKS = ["뇌룡격파", "용전", "화룡진군"]
 
 TITLE_TEMPLATES = [
-    "전략게임할 때 듣기 좋은 웅장한 음악 - {name}",
-    "마음이 벅차오르는 웅장한 판타지 BGM | {name}",
-    "가슴이 벅차오르는 전투 전략 테마곡 - {name}",
-    "전략 시뮬레이션 몰입용 웅장한 음악 | {name}",
-    "심장을 울리는 대서사시 웅장한 BGM - {name}",
-    "승리를 이끄는 가슴 벅찬 전략게임 OST - {name}"
+    "[Inkey 연주] 전략게임할 때 듣기 좋은 웅장한 음악 - {name} (Live Ver.)",
+    "[Inkey 편곡] 마음이 벅차오르는 웅장한 판타지 BGM | {name}",
+    "[Inkey Studio] 가슴이 벅차오르는 전투 전략 테마곡 - {name}",
+    "전략 시뮬레이션 몰입용 웅장한 음악 | {name} (Inkey Re-master)",
+    "[Inkey 연주] 심장을 울리는 대서사시 웅장한 BGM - {name}",
+    "승리를 이끄는 가슴 벅찬 전략게임 OST - {name} [Inkey Studio]"
 ]
 
 EPIC_THEMES = {
     "fire_gold": {
-        "title_genre": "화룡의 숨결 (골드 & 파이어)",
+        "theme_name": "화룡의 숨결 (골드 & 파이어)",
         "eq_colors": "0xff4500@0.95|0xffd700@0.7",
         "title_color": (255, 245, 210, 255),
         "box_color": (15, 8, 5, 180),
+        # 타오르는 브라스 & 웅장한 타악기 타격감 + 풍부한 콘서트홀 라이브 잔향
+        "dsp_filter": "volume=-1.5dB,bass=g=3.0:f=90,equalizer=f=3200:t=q:w=1.2:g=2.2,aecho=0.8:0.85:35:0.2,stereotools=mlev=1.15,alimiter=limit=0.95",
         "images": [
             "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&h=1080&q=90",
             "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&h=1080&q=90",
@@ -38,10 +40,12 @@ EPIC_THEMES = {
         ]
     },
     "lightning_blue": {
-        "title_genre": "뇌룡의 번개 (일렉트릭 사이안 & 블루)",
+        "theme_name": "뇌룡의 번개 (일렉트릭 사이안 & 블루)",
         "eq_colors": "0x00e5ff@0.95|0x7c4dff@0.7",
         "title_color": (220, 245, 255, 255),
         "box_color": (5, 12, 25, 180),
+        # 질주하는 스트링/신스 선율 어택감 + 탄탄한 비트 + 입체 스테레오 필드
+        "dsp_filter": "volume=-1.5dB,bass=g=2.5:f=110,equalizer=f=4000:t=q:w=1.0:g=2.5,treble=g=1.8:f=6000,aecho=0.8:0.82:25:0.16,stereotools=mlev=1.15,alimiter=limit=0.95",
         "images": [
             "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&h=1080&q=90",
             "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1920&h=1080&q=90",
@@ -49,10 +53,12 @@ EPIC_THEMES = {
         ]
     },
     "epic_battle": {
-        "title_genre": "전장의 기백 (크림슨 & 화이트)",
+        "theme_name": "전장의 기백 (크림슨 & 화이트)",
         "eq_colors": "0xff1744@0.95|0xffffff@0.7",
         "title_color": (255, 230, 230, 255),
         "box_color": (20, 5, 5, 185),
+        # 대서사시 오케스트라의 묵직한 서브베이스 + 현악기 리버브와 감성 어쿠스틱 배음
+        "dsp_filter": "volume=-1.5dB,bass=g=3.2:f=80,equalizer=f=1800:t=q:w=1.5:g=2.0,aecho=0.85:0.88:40:0.22,stereotools=mlev=1.15,alimiter=limit=0.95",
         "images": [
             "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1920&h=1080&q=90",
             "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1920&h=1080&q=90"
@@ -61,17 +67,17 @@ EPIC_THEMES = {
 }
 
 
-# --- 2. 3대 원곡 음원 100% 원음 복원 & 로드 엔진 ---
+# --- 2. 3대 원곡 기반 Inkey Studio 라이브 연주 & 마스터링 엔진 ---
 
-def get_exclusive_music_track(selected_file=None, output_mp3_path="temp/ai_song.mp3"):
+def get_inkey_performance_track(selected_file=None, output_mp3_path="temp/ai_song.mp3"):
     """
-    오직 지정된 3개 곡(뇌룡격파, 용전, 화룡진군) 중 하나를 선택하여
-    100% 원음 그대로의 다이내믹 레인지와 음질을 보존하여 로드합니다.
+    지정된 3개 음원 중 하나를 선택하고, Inkey Music Studio 특유의
+    풍부한 공간감(리버브/스테레오 와이드닝)과 다이내믹한 펀치감을 가미하여
+    스튜디오 라이브 연주 트랙으로 리마스터링합니다.
     """
     music_dir = "assets/audio/music"
     all_files = glob.glob(f"{music_dir}/*.mp3") + glob.glob(f"{music_dir}/*.wav")
     
-    # 3개 곡에 대해서만 필터링
     valid_files = []
     for f in all_files:
         stem = unicodedata.normalize('NFC', Path(f).stem)
@@ -102,20 +108,41 @@ def get_exclusive_music_track(selected_file=None, output_mp3_path="temp/ai_song.
 
     song_name = unicodedata.normalize('NFC', Path(chosen_file).stem)
     print(f"\n=======================================================")
-    print(f" [100% 원음 복원 연주] {chosen_file}")
-    print(f" [곡 명] {song_name}")
+    print(f" [Inkey Studio Live Performance Session]")
+    print(f" [Track] {chosen_file}")
+    print(f" [Song Name] {song_name}")
     print(f"=======================================================")
 
-    # 원곡 로드 (음원 왜곡, 템포 변경, 피치 변조 없이 100% 원음 보존)
+    # 곡별 테마 및 DSP 필터 선택
+    if "뇌룡" in song_name:
+        theme_profile = EPIC_THEMES["lightning_blue"]
+    elif "화룡" in song_name:
+        theme_profile = EPIC_THEMES["fire_gold"]
+    else:
+        theme_profile = EPIC_THEMES["epic_battle"]
+
+    temp_raw = "temp/raw_source.wav"
     audio = AudioSegment.from_file(chosen_file)
     original_duration = len(audio) / 1000.0
-    print(f"[음원 재생 시간] {original_duration:.1f}초 ({int(original_duration//60)}분 {int(original_duration%60)}초)")
+    print(f"[트랙 길이] {original_duration:.1f}초 ({int(original_duration//60)}분 {int(original_duration%60)}초)")
 
-    # 320kbps 하이파이 최고 음질로 마스터링 저장
-    audio.export(output_mp3_path, format="mp3", bitrate="320k", parameters=["-ar", "44100"])
-    print(f"[Mastering Complete] {output_mp3_path} (320kbps High-Fidelity)")
+    # 볼륨 노멀라이즈 후 임시 WAV 저장
+    audio.normalize(headroom=0.8).export(temp_raw, format="wav")
 
-    return song_name, chosen_file, original_duration
+    # Inkey Studio 전용 라이브 어쿠스틱 DSP 필터 체인 적용
+    dsp = theme_profile["dsp_filter"]
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", temp_raw,
+        "-af", dsp,
+        "-ar", "44100",
+        "-b:a", "320k",
+        output_mp3_path
+    ]
+    subprocess.run(cmd, check=True)
+    print(f"[Live Remaster Complete] {output_mp3_path} (Inkey Studio Acoustics & 320kbps High-End Audio)")
+
+    return song_name, chosen_file, original_duration, theme_profile
 
 
 # --- 3. Pillow 기반 감성/웅장 타이틀 오버레이 생성기 ---
@@ -137,7 +164,7 @@ def create_title_overlay_png(title_text, theme_profile, output_png_path, width=1
     for p in font_paths:
         if os.path.exists(p):
             try:
-                font = ImageFont.truetype(p, 28)
+                font = ImageFont.truetype(p, 27)
                 break
             except Exception:
                 pass
@@ -232,18 +259,10 @@ if __name__ == "__main__":
     title_png = "temp/title_overlay.png"
     final_video = "output_music_video.mp4"
 
-    # 1. 오직 3개 음원(뇌룡격파, 용전, 화룡진군) 중 선택 및 100% 원음 로드
-    song_name, chosen_path, duration = get_exclusive_music_track(input_music_file, ai_mp3)
+    # 1. 오직 3개 음원 중 선택 및 Inkey Studio 라이브 연주 리마스터링
+    song_name, chosen_path, duration, theme_profile = get_inkey_performance_track(input_music_file, ai_mp3)
 
-    # 2. 곡 분위기에 맞는 테마 자동 매칭
-    if "뇌룡" in song_name:
-        theme_profile = EPIC_THEMES["lightning_blue"]
-    elif "화룡" in song_name:
-        theme_profile = EPIC_THEMES["fire_gold"]
-    else:
-        theme_profile = EPIC_THEMES["epic_battle"]
-
-    # 3. 전략게임 & 마음이 벅차오르는 감성 제목 생성
+    # 2. 전략게임 & 마음이 벅차오르는 Inkey 연주 감성 제목 생성
     if custom_title:
         final_title = custom_title
     else:
@@ -251,25 +270,26 @@ if __name__ == "__main__":
         final_title = template.format(name=song_name)
 
     print(f"\n[최종 비디오 제목] {final_title}")
-    print(f"[테마 스타일] {theme_profile['title_genre']}")
+    print(f"[테마 스타일] {theme_profile['theme_name']}")
 
-    # 4. 고화질 배경 이미지 준비
+    # 3. 고화질 배경 이미지 준비
     fetch_hd_background(theme_profile, bg_image)
 
-    # 5. Pillow로 감성 타이틀 PNG 오버레이 생성
+    # 4. Pillow로 감성 타이틀 PNG 오버레이 생성
     create_title_overlay_png(final_title, theme_profile, title_png)
 
-    # 6. 하이파이 이퀄라이저 비주얼라이저 비디오 렌더링
+    # 5. 하이파이 이퀄라이저 비주얼라이저 비디오 렌더링
     create_equalizer_music_video(bg_image, title_png, ai_mp3, theme_profile, final_video)
 
-    # 7. 유튜브 업로드용 메타데이터 JSON 저장
+    # 6. 유튜브 업로드용 메타데이터 JSON 저장
     desc = (
         f"🎧 {final_title}\n\n"
-        f"⚔️ 트랙명: {song_name}\n"
+        f"⚔️ 곡명: {song_name}\n"
         f"⏱️ 재생 시간: {int(duration // 60)}분 {int(duration % 60)}초\n"
-        f"✨ 테마: 전략게임할 때 듣기 좋은 음악 / 가슴이 벅차오르는 음악\n\n"
-        f"100% 오리지널 마스터 사운드로 복원 및 제작되었습니다.\n\n"
-        f"#{song_name} #전략게임음악 #마음이벅차오르는음악 #웅장한음악 #게임BGM #이퀄라이저 #InkeyMusic"
+        f"✨ 테마: 전략게임할 때 듣기 좋은 음악 / 마음이 벅차오르는 음악\n\n"
+        f"Produced, Re-arranged & Performed by Inkey Music Studio.\n"
+        f"라이브 콘서트홀 어쿠스틱과 웅장한 사운드스테이지로 완성된 버전입니다.\n\n"
+        f"#{song_name} #Inkey연주 #전략게임음악 #마음이벅차오르는음악 #웅장한음악 #게임BGM #InkeyMusic"
     )
 
     meta_info = {
@@ -281,3 +301,4 @@ if __name__ == "__main__":
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
     print(f"\n[Video metadata saved successfully]: {final_title}")
+
