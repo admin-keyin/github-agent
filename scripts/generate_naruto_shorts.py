@@ -282,16 +282,21 @@ def create_anime_hud_overlay(phase_name, title_text, sub_text, char_a, char_b, o
 
     img.save(output_png, "PNG")
 
-# --- 6. 실제 만화 애니메이션 전투씬 숏츠 렌더러 (From skill_list.mp4) ---
+# --- 6. 멀티 소스(skill_list.mp4 & skill_list2.mp4) 만화 애니메이션 전투씬 숏츠 렌더러 ---
 
 def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4="output_naruto_shorts.mp4"):
     """
-    assets/anime_clips/skill_list.mp4 원본 비디오에서 역동적인 전투 액션 컷들을 정밀 추출하고
-    시네마틱 9:16 모바일 풀스크린 만화영화 배틀 숏츠로 렌더링합니다.
+    assets/anime_clips/skill_list.mp4 및 skill_list2.mp4 두 원작 비디오 풀에서
+    풍부한 전투 액션 컷들을 정밀 추출하고 시네마틱 9:16 모바일 풀스크린 만화영화 배틀 숏츠로 렌더링합니다.
     """
-    src_video = "assets/anime_clips/skill_list.mp4"
-    if not os.path.exists(src_video):
-        print(f"[Error] {src_video} 파일이 존재하지 않습니다.")
+    video_sources = [
+        "assets/anime_clips/skill_list.mp4",
+        "assets/anime_clips/skill_list2.mp4"
+    ]
+    valid_sources = [v for v in video_sources if os.path.exists(v)]
+
+    if not valid_sources:
+        print(f"[Error] 비디오 소스 파일이 존재하지 않습니다: {video_sources}")
         return False
 
     os.makedirs("temp/battle_scenes", exist_ok=True)
@@ -299,17 +304,21 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
     skill_b = get_character_skill_info(char_b)
     phases = battle_data["phases"]
 
-    print("\n[Anime Movie Battle Engine] 만화 전투씬 비디오 시퀀스 추출 및 시네마틱 렌더링 시작...")
+    print(f"\n[Anime Movie Multi-Source Engine] 사용 가능한 비디오 소스: {len(valid_sources)}개 ({', '.join(valid_sources)})")
 
-    # 전투 씬별 타임스탬프 앵커 (skill_list.mp4에서 액션 밀도가 높은 구간들)
-    # 총 658초 영상에서 전투 페이즈에 맞는 다이내믹 컷 추출
+    # 6개 전투 페이즈 정의 (skill_list & skill_list2 교차 활용)
+    has_v2 = os.path.exists("assets/anime_clips/skill_list2.mp4")
+    v1_path = "assets/anime_clips/skill_list.mp4"
+    v2_path = "assets/anime_clips/skill_list2.mp4" if has_v2 else v1_path
+
     scene_defs = [
         {
             "id": "phase1",
             "phase_name": "PROLOGUE : CLASH OF DESTINY",
             "title": f"{char_a}  VS  {char_b}",
             "sub": "피할 수 없는 세기의 정상결전!",
-            "start_ss": random.randint(10, 40),
+            "src": v2_path if has_v2 else v1_path,
+            "start_ss": random.randint(20, 100) if has_v2 else random.randint(10, 40),
             "dur": max(3.5, durations.get("phase1_intro", 3.5))
         },
         {
@@ -317,7 +326,8 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
             "phase_name": "PHASE 1 : TAIJUTSU & SPEED",
             "title": "초고속 체술 & 수리검 공방전!",
             "sub": "눈으로 쫓을 수 없는 극한의 스피드 공방",
-            "start_ss": random.randint(70, 130),
+            "src": v1_path,
+            "start_ss": random.randint(70, 140),
             "dur": max(4.5, durations.get("phase2_taijutsu", 4.5))
         },
         {
@@ -325,7 +335,8 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
             "phase_name": "PHASE 2 : NINJUTSU BARRAGE",
             "title": "대지를 가르는 비전 인술 폭격!",
             "sub": "파괴적인 차크라와 인술의 연속 작렬",
-            "start_ss": random.randint(180, 260),
+            "src": v2_path if has_v2 else v1_path,
+            "start_ss": random.randint(250, 450) if has_v2 else random.randint(180, 260),
             "dur": max(5.0, durations.get("phase3_ninjutsu", 5.0))
         },
         {
@@ -333,6 +344,7 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
             "phase_name": "PHASE 3 : ULTIMATE JUTSU AWAKENING",
             "title": f"오의(奧義) 각성 : {skill_a['skill_name']}",
             "sub": f"{char_a} VS {char_b} 전력 개방!",
+            "src": v1_path,
             "start_ss": random.randint(320, 420),
             "dur": max(5.5, durations.get("phase4_awakening", 5.5))
         },
@@ -341,7 +353,8 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
             "phase_name": "FINAL PHASE : THE ULTIMATE CLASH",
             "title": "💥 전장을 집어삼키는 대폭발! 💥",
             "sub": "두 궁극기의 정면 충돌과 초토화",
-            "start_ss": random.randint(480, 560),
+            "src": v2_path if has_v2 else v1_path,
+            "start_ss": random.randint(600, 950) if has_v2 else random.randint(480, 560),
             "dur": max(6.0, durations.get("phase5_clash", 6.0))
         },
         {
@@ -349,7 +362,8 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
             "phase_name": "EPILOGUE : VICTORY & VERDICT",
             "title": f"🏆 {battle_data['winner_name']} WINS! 🏆",
             "sub": "💬 여러분의 의견은? 댓글로 남겨주세요!",
-            "start_ss": random.randint(580, 640),
+            "src": v2_path if has_v2 else v1_path,
+            "start_ss": random.randint(1050, 1350) if has_v2 else random.randint(580, 640),
             "dur": max(5.0, durations.get("phase6_verdict", 5.0))
         }
     ]
@@ -364,20 +378,18 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
 
         clip_mp4 = os.path.abspath(f"temp/battle_scenes/clip_{sc_id}.mp4")
 
-        # 9:16 세로형 시네마틱 애니메이션 필터:
-        # 배경: 화면 전체 블러 처리된 1080x1920 차크라 배경
-        # 전면: 1080p 중앙 액션 프레이밍 + 애니메이션 HUD 오버레이
+        # 9:16 세로형 시네마틱 만화영화 애니메이션 합성 필터
         filter_complex = (
             f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:5[bg];"
-            f"[0:v]scale=1080:720[fg];"
-            f"[bg][fg]overlay=0:(H-h)/2[base];"
+            f"[0:v]scale=1080:-2:force_original_aspect_ratio=decrease[fg];"
+            f"[bg][fg]overlay=(W-w)/2:(H-h)/2[base];"
             f"[base][1:v]overlay=0:0[vout]"
         )
 
         cmd = [
             "ffmpeg", "-y",
             "-ss", str(sc["start_ss"]),
-            "-i", src_video,
+            "-i", sc["src"],
             "-i", overlay_png,
             "-filter_complex", filter_complex,
             "-map", "[vout]",
@@ -426,7 +438,7 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
     subprocess.run(cmd_final, check=True)
     print(f"\n=======================================================")
     print(f" [Naruto Real Anime Battle Movie Shorts Rendered!]")
-    print(f" [Output File] {output_mp4} (100% Real Anime Movie Battle Scenes)")
+    print(f" [Output File] {output_mp4} (Multi-Source Anime Battle Footage)")
     print(f"=======================================================\n")
 
 # --- 7. 메인 실행 진입점 ---
@@ -451,7 +463,7 @@ if __name__ == "__main__":
     # 2. 한국어 TTS 내레이션 음성 생성
     durations, total_sec = generate_battle_voice_track(battle_data, "temp/naruto_battle_voice.mp3")
 
-    # 3. skill_list.mp4 기반 1080x1920 만화영화 전투씬 숏츠 렌더링
+    # 3. skill_list.mp4 & skill_list2.mp4 기반 1080x1920 만화영화 전투씬 숏츠 렌더링
     output_video = "output_naruto_shorts.mp4"
     render_anime_battle_movie(char_a, char_b, battle_data, durations, output_video)
 
