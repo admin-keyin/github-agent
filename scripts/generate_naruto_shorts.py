@@ -13,10 +13,14 @@ from pathlib import Path
 from pydub import AudioSegment
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-# --- 1. 나루토 대표 매치업 및 캐릭터 & 고유 스킬 데이터베이스 ---
+# --- 1. 나루토 공식 애니메이션 캐릭터 & 고유 술법(오의) 데이터베이스 ---
 
 CHARACTER_SKILLS = {
     "우치하 이타치": {
+        "fandom_char": "Itachi Uchiha",
+        "fandom_skill": "Amaterasu",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/e/e0/Amaterasu.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/e/e0/Amaterasu.png/revision/latest/scale-to-width-down/800",
         "skill_name": "츠쿠요미 & 아마테라스",
         "skill_sub": "Tsukuyomi & Amaterasu (만화경 사륜안 오의)",
         "theme_color": (255, 40, 40),
@@ -24,6 +28,10 @@ CHARACTER_SKILLS = {
         "quote": "꺼지지 않는 흑염과 정신을 파괴하는 절대 환술!"
     },
     "페인 (텐도)": {
+        "fandom_char": "Deva Path",
+        "fandom_skill": "Shinra Tensei",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/0/0d/ShinraTensei.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/0/0d/ShinraTensei.png/revision/latest/scale-to-width-down/800",
         "skill_name": "신라천정 & 지폭천성",
         "skill_sub": "Shinra Tensei & Chibaku Tensei (윤회안 신급 오의)",
         "theme_color": (180, 70, 255),
@@ -31,6 +39,10 @@ CHARACTER_SKILLS = {
         "quote": "세계에 고통을! 시공을 일그러뜨리는 척력과 만유인력!"
     },
     "나루토 (선인 모드)": {
+        "fandom_char": "Naruto Uzumaki",
+        "fandom_skill": "Wind Release: Rasenshuriken",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/5/52/F%C5%ABton_Rasenshuriken.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/5/52/F%C5%ABton_Rasenshuriken.png/revision/latest/scale-to-width-down/800",
         "skill_name": "선법 풍둔 나선수리검",
         "skill_sub": "Sage Art: Wind Style Rasenshuriken",
         "theme_color": (0, 230, 255),
@@ -38,6 +50,10 @@ CHARACTER_SKILLS = {
         "quote": "자연 차크라를 극한으로 융합한 세포 파괴 소용돌이!"
     },
     "나루토 (쿠라마 링크)": {
+        "fandom_char": "Nine-Tails Chakra Mode",
+        "fandom_skill": "Tailed Beast Ball",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/e/e0/Naruto_Biju_Dama.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/e/e0/Naruto_Biju_Dama.png/revision/latest/scale-to-width-down/800",
         "skill_name": "미수화 초대옥 나선연환",
         "skill_sub": "Kurama Chakra Tailed Beast Rasen-Barrage",
         "theme_color": (255, 190, 0),
@@ -45,6 +61,10 @@ CHARACTER_SKILLS = {
         "quote": "구미의 차크라와 황금빛 선술이 빚어내는 궁극의 탄막!"
     },
     "우치하 사스케 (윤회안)": {
+        "fandom_char": "Sasuke Uchiha",
+        "fandom_skill": "Indra's Arrow",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/a/a1/Indra%27s_Arrow.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/a/a1/Indra%27s_Arrow.png/revision/latest/scale-to-width-down/800",
         "skill_name": "스사노오 치도리 & 인드라의 화살",
         "skill_sub": "Susanoo Chidori & Indra's Arrow",
         "theme_color": (90, 150, 255),
@@ -52,6 +72,10 @@ CHARACTER_SKILLS = {
         "quote": "천동을 가르는 뇌둔과 미수의 차크라를 실은 벼락 화살!"
     },
     "우치하 마다라": {
+        "fandom_char": "Madara Uchiha",
+        "fandom_skill": "Tengai Shinsei",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/2/2e/Tengai_Shinsei.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/2/2e/Tengai_Shinsei.png/revision/latest/scale-to-width-down/800",
         "skill_name": "완성체 스사노오 & 천애진성",
         "skill_sub": "Perfect Susanoo & Tengai Shinsei",
         "theme_color": (50, 120, 255),
@@ -59,6 +83,10 @@ CHARACTER_SKILLS = {
         "quote": "산맥을 가르는 거신참과 하늘에서 떨어지는 거대 운석!"
     },
     "센주 하시라마": {
+        "fandom_char": "Hashirama Senju",
+        "fandom_skill": "Sage Art Wood Release: True Several Thousand Hands",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/a/a7/Shin_S%C5%ABsenju.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/a/a7/Shin_S%C5%ABsenju.png/revision/latest/scale-to-width-down/800",
         "skill_name": "선법 목둔 진수천수 정상화불",
         "skill_sub": "Sage Art Wood Style: True Several Thousand Hands",
         "theme_color": (50, 230, 120),
@@ -66,6 +94,10 @@ CHARACTER_SKILLS = {
         "quote": "수천 개의 주먹으로 전장을 초토화하는 닌자의 신의 위엄!"
     },
     "나미카제 미나토": {
+        "fandom_char": "Minato Namikaze",
+        "fandom_skill": "Flying Thunder God Technique",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/f/f6/Flying_Thunder_God_Level_2.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/f/f6/Flying_Thunder_God_Level_2.png/revision/latest/scale-to-width-down/800",
         "skill_name": "비뢰신의 술 2의 단 & 나선환",
         "skill_sub": "Flying Raijin Level 2 & Massive Rasengan",
         "theme_color": (255, 230, 40),
@@ -73,6 +105,10 @@ CHARACTER_SKILLS = {
         "quote": "눈 깜짝할 사이에 배후를 찌르는 금빛 섬광의 일격!"
     },
     "마이트 가이 (8문 둔갑)": {
+        "fandom_char": "Might Guy",
+        "fandom_skill": "Night Guy",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/b/bd/Night_Guy_Silhouette.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/b/bd/Night_Guy_Silhouette.png/revision/latest/scale-to-width-down/800",
         "skill_name": "사문 개방 궁극오의 밤 가이",
         "skill_sub": "Night Guy (Eight Inner Gates Released)",
         "theme_color": (255, 30, 70),
@@ -80,27 +116,21 @@ CHARACTER_SKILLS = {
         "quote": "공간마저 일그러뜨리는 핏빛 붉은 용의 궁극의 킥!"
     },
     "하타케 카카시 (카무이)": {
+        "fandom_char": "Kakashi Hatake",
+        "fandom_skill": "Kamui Lightning Cutter",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/6/6a/Obito%27s_kamui.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/6/6a/Obito%27s_kamui.png/revision/latest/scale-to-width-down/800",
         "skill_name": "카무이 뇌절 & 쌍신 카무이 수리검",
         "skill_sub": "Kamui Lightning Blade & Kamui Shuriken",
         "theme_color": (120, 210, 255),
         "aura_color": (170, 90, 255),
         "quote": "이공간으로 왜곡해 모든 방어를 무시하는 신속의 참격!"
     },
-    "우치하 오비토 (육도)": {
-        "skill_name": "구도옥 참격 & 천소모포의 검",
-        "skill_sub": "Truth-Seeking Orbs & Sword of Nunoboko",
-        "theme_color": (200, 200, 220),
-        "aura_color": (130, 50, 200),
-        "quote": "모든 인술을 무효화하는 창세의 영혼검 일격!"
-    },
-    "지라이야 (선인 모드)": {
-        "skill_name": "선법 초대옥 나선환 & 두꺼비 유염탄",
-        "skill_sub": "Sage Art: Ultra-Big Ball Rasengan & Toad Flame Bomb",
-        "theme_color": (255, 130, 30),
-        "aura_color": (180, 40, 20),
-        "quote": "대지를 녹이는 두꺼비 화염과 거대 나선 차크라 폭풍!"
-    },
     "사소리": {
+        "fandom_char": "Sasori",
+        "fandom_skill": "Red Secret Technique: Performance of a Hundred Puppets",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/5/52/Performance_of_a_Hundred_Puppets.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/5/52/Performance_of_a_Hundred_Puppets.png/revision/latest/scale-to-width-down/800",
         "skill_name": "적비진 백기의 연무 & 사철계법",
         "skill_sub": "Red Secret Technique: Performance of a Hundred Puppets",
         "theme_color": (200, 50, 80),
@@ -108,25 +138,15 @@ CHARACTER_SKILLS = {
         "quote": "전장을 가득 메우는 100기의 꼭두각시와 맹독 사철 가시!"
     },
     "데이다라": {
+        "fandom_char": "Deidara",
+        "fandom_skill": "C0",
+        "char_img_url": "https://static.wikia.nocookie.net/naruto/images/4/4c/C0.png/revision/latest/scale-to-width-down/800",
+        "skill_img_url": "https://static.wikia.nocookie.net/naruto/images/4/4c/C0.png/revision/latest/scale-to-width-down/800",
         "skill_name": "C4 카루라 & 궁극예술 C0 자폭",
         "skill_sub": "C4 Karura & Ultimate Art C0 Detonation",
         "theme_color": (255, 210, 40),
         "aura_color": (255, 60, 20),
         "quote": "예술은 폭발이다! 초미세 나노 폭탄과 10km 소멸 섬광!"
-    },
-    "센주 토비라마": {
-        "skill_name": "수둔 수룡교자 & 비뢰신 참격",
-        "skill_sub": "Water Style: Water Dragon & Flying Raijin Slash",
-        "theme_color": (40, 160, 255),
-        "aura_color": (255, 255, 255),
-        "quote": "물 없는 전장에서 소환하는 거대 수룡과 즉사 시공간 베기!"
-    },
-    "오로치마루": {
-        "skill_name": "초재생 팔기지술 & 초지검 난무",
-        "skill_sub": "Eight Branches Technique & Kusanagi Blade",
-        "theme_color": (160, 80, 220),
-        "aura_color": (80, 200, 100),
-        "quote": "신화의 8두 백사와 불사의 재생력을 지닌 궁극의 변신술!"
     }
 }
 
@@ -141,8 +161,7 @@ CURATED_MATCHUPS = [
     ("마이트 가이 (8문 둔갑)", "우치하 마다라"),
     ("하타케 카카시 (카무이)", "우치하 오비토 (육도)"),
     ("우치하 사스케 (윤회안)", "나루토 (쿠라마 링크)"),
-    ("센주 토비라마", "나미카제 미나토"),
-    ("오로치마루", "지라이야 (선인 모드)")
+    ("센주 토비라마", "나미카제 미나토")
 ]
 
 def get_character_skill_info(char_name):
@@ -151,6 +170,10 @@ def get_character_skill_info(char_name):
         if char_name in k or clean in k or k in char_name:
             return v
     return {
+        "fandom_char": char_name,
+        "fandom_skill": "Jutsu",
+        "char_img_url": "",
+        "skill_img_url": "",
         "skill_name": "비전 오의 필살일격",
         "skill_sub": "Ultimate Ninja Secret Technique",
         "theme_color": (255, 100, 50),
@@ -158,7 +181,134 @@ def get_character_skill_info(char_name):
         "quote": "전력을 다한 영혼의 궁극 비오의 격돌!"
     }
 
-# --- 2. Gemini API를 통한 나루토 스탯 & 필살기 격돌 대본 생성 ---
+# --- 2. 나루토 공식 애니메이션 이미지 / 스킬 스크린샷 다운로더 ---
+
+def fetch_fandom_image(title, output_path):
+    """
+    Naruto Fandom Wiki API를 통해 공식 애니메이션 스크린샷/일러스트를 실시간 다운로드합니다.
+    """
+    try:
+        search_url = f"https://naruto.fandom.com/api.php?action=opensearch&search={requests.utils.quote(title)}&limit=5&format=json"
+        r = requests.get(search_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10).json()
+        titles = r[1]
+        for t in titles:
+            img_url = f"https://naruto.fandom.com/api.php?action=query&titles={requests.utils.quote(t)}&prop=pageimages&format=json&pithumbsize=1080"
+            res = requests.get(img_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10).json()
+            pages = res.get('query', {}).get('pages', {})
+            for _, v in pages.items():
+                if 'thumbnail' in v and v['thumbnail']['source']:
+                    src = v['thumbnail']['source']
+                    img_resp = requests.get(src, headers={'User-Agent': 'Mozilla/5.0'}, timeout=15)
+                    if img_resp.status_code == 200 and len(img_resp.content) > 2000:
+                        with open(output_path, "wb") as f:
+                            f.write(img_resp.content)
+                        print(f"[Official Anime Asset Downloaded] {title} ({t}) -> {output_path}")
+                        return True
+    except Exception as e:
+        print(f"[Fandom Fetch Notice]: {e}")
+    return False
+
+def get_character_image(char_name, size=(520, 600), is_top=True):
+    """
+    캐릭터 공식 애니메이션 원작 이미지를 로드하거나 Fandom에서 다운로드하여 세련된 카드로 가공합니다.
+    """
+    os.makedirs("assets/characters", exist_ok=True)
+    clean_name = char_name.split()[0].replace("(", "").replace(")", "")
+    cached_path = f"assets/characters/{clean_name}_anime.png"
+
+    skill_info = get_character_skill_info(char_name)
+    
+    if not os.path.exists(cached_path) or os.path.getsize(cached_path) < 2000:
+        downloaded = False
+        if skill_info.get("char_img_url"):
+            try:
+                resp = requests.get(skill_info["char_img_url"], headers={'User-Agent': 'Mozilla/5.0'}, timeout=15)
+                if resp.status_code == 200 and len(resp.content) > 2000:
+                    with open(cached_path, "wb") as f:
+                        f.write(resp.content)
+                    downloaded = True
+            except Exception:
+                pass
+        if not downloaded:
+            fandom_term = skill_info.get("fandom_char", clean_name)
+            fetch_fandom_image(fandom_term, cached_path)
+
+    if os.path.exists(cached_path) and os.path.getsize(cached_path) > 1000:
+        try:
+            base_img = Image.open(cached_path).convert("RGBA")
+            base_img.thumbnail((size[0]*2, size[1]*2), Image.Resampling.LANCZOS)
+            w, h = base_img.size
+            left = (w - size[0]) // 2 if w > size[0] else 0
+            top = (h - size[1]) // 2 if h > size[1] else 0
+            cropped = base_img.crop((left, top, left + size[0], top + size[1])).resize(size, Image.Resampling.LANCZOS)
+
+            card = Image.new("RGBA", size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(card)
+            border_color = (255, 60, 60, 240) if is_top else (60, 140, 255, 240)
+            mask = Image.new("L", size, 0)
+            draw_mask = ImageDraw.Draw(mask)
+            draw_mask.rounded_rectangle([0, 0, size[0], size[1]], radius=28, fill=255)
+            card.paste(cropped, (0, 0), mask)
+            draw.rounded_rectangle([2, 2, size[0]-2, size[1]-2], radius=28, outline=border_color, width=6)
+            return card
+        except Exception as e:
+            print(f"[Card Processing Error]: {e}")
+
+    card = Image.new("RGBA", size, (25, 25, 35, 255))
+    draw = ImageDraw.Draw(card)
+    bg_color = (180, 40, 30) if is_top else (30, 70, 180)
+    draw.rounded_rectangle([10, 10, size[0]-10, size[1]-10], radius=24, fill=bg_color, outline=(255, 215, 0), width=4)
+    font_char = get_font(size=44, bold=True)
+    draw.text((size[0]//2, size[1]//2), char_name, font=font_char, fill=(255, 255, 255), anchor="mm")
+    return card
+
+def get_skill_anime_image(char_name, size=(800, 600)):
+    """
+    공식 애니메이션 스킬 시전 장면 스크린샷을 로드하거나 다운로드합니다.
+    """
+    os.makedirs("assets/skills", exist_ok=True)
+    clean_name = char_name.split()[0].replace("(", "").replace(")", "")
+    skill_info = get_character_skill_info(char_name)
+    cached_path = f"assets/skills/{clean_name}_skill.png"
+
+    if not os.path.exists(cached_path) or os.path.getsize(cached_path) < 2000:
+        downloaded = False
+        if skill_info.get("skill_img_url"):
+            try:
+                resp = requests.get(skill_info["skill_img_url"], headers={'User-Agent': 'Mozilla/5.0'}, timeout=15)
+                if resp.status_code == 200 and len(resp.content) > 2000:
+                    with open(cached_path, "wb") as f:
+                        f.write(resp.content)
+                    downloaded = True
+            except Exception:
+                pass
+        if not downloaded:
+            fandom_term = skill_info.get("fandom_skill", skill_info["skill_name"])
+            fetch_fandom_image(fandom_term, cached_path)
+
+    if os.path.exists(cached_path) and os.path.getsize(cached_path) > 1000:
+        try:
+            base_img = Image.open(cached_path).convert("RGBA")
+            base_img.thumbnail((size[0]*2, size[1]*2), Image.Resampling.LANCZOS)
+            w, h = base_img.size
+            left = (w - size[0]) // 2 if w > size[0] else 0
+            top = (h - size[1]) // 2 if h > size[1] else 0
+            cropped = base_img.crop((left, top, left + size[0], top + size[1])).resize(size, Image.Resampling.LANCZOS)
+
+            card = Image.new("RGBA", size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(card)
+            mask = Image.new("L", size, 0)
+            draw_mask = ImageDraw.Draw(mask)
+            draw_mask.rounded_rectangle([0, 0, size[0], size[1]], radius=32, fill=255)
+            card.paste(cropped, (0, 0), mask)
+            draw.rounded_rectangle([2, 2, size[0]-2, size[1]-2], radius=32, outline=skill_info["theme_color"], width=8)
+            return card
+        except Exception:
+            pass
+
+    return get_character_image(char_name, size=size, is_top=True)
+
+# --- 3. Gemini API를 통한 나루토 스탯 & 필살기 대본 생성 ---
 
 def get_gemini_matchup_data(char_a, char_b, gemini_api_key=None):
     api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
@@ -167,7 +317,7 @@ def get_gemini_matchup_data(char_a, char_b, gemini_api_key=None):
 
     prompt = f"""
 당신은 나루토 공식 파워밸런스 전문 분석가입니다.
-아래 두 나루토 캐릭터의 1:1 진검승부 및 '필살기 정면 격돌'을 분석하여 반드시 아래 JSON 형식으로만 응답하세요.
+아래 두 나루토 캐릭터의 1:1 진검승부 및 '고유 필살기 정면 격돌'을 분석하여 반드시 아래 JSON 형식으로만 응답하세요.
 
 캐릭터 A: {char_a} (필살기: {skill_a['skill_name']})
 캐릭터 B: {char_b} (필살기: {skill_b['skill_name']})
@@ -290,7 +440,7 @@ JSON 응답 스키마:
         }
     }
 
-# --- 3. Edge-TTS & gTTS 음성 합성 트랙 생성 ---
+# --- 4. Edge-TTS & gTTS 음성 합성 트랙 생성 ---
 
 def generate_single_tts(text, output_file, voice="ko-KR-InJoonNeural"):
     try:
@@ -331,7 +481,7 @@ def generate_voice_track(matchup_data, output_audio_path="temp/naruto_narration.
         generate_single_tts(stat_text, stat_path)
         combined_audio += AudioSegment.from_file(stat_path) + AudioSegment.silent(duration=250)
 
-    # 3. 필살기 격돌 (Skill Clash)
+    # 3. 필살기 격돌
     clash_text = matchup_data["clash"]["narration"]
     clash_path = "temp/tts/clash.mp3"
     generate_single_tts(clash_text, clash_path)
@@ -347,7 +497,7 @@ def generate_voice_track(matchup_data, output_audio_path="temp/naruto_narration.
     print(f"[TTS Complete] {output_audio_path} (총 길이: {len(combined_audio)/1000:.1f}초)")
     return len(combined_audio) / 1000.0
 
-# --- 4. 그래픽 & 폰트 & 캐릭터 에셋 엔진 ---
+# --- 5. 폰트 로더 ---
 
 def get_font(size=40, bold=False):
     font_paths = [
@@ -365,85 +515,7 @@ def get_font(size=40, bold=False):
                 pass
     return ImageFont.load_default()
 
-ANIME_CHARACTER_IMAGES = {
-    "우치하 이타치": ["https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"],
-    "페인 (텐도)": ["https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80"],
-    "지라이야 (선인 모드)": ["https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"],
-    "나루토 (선인 모드)": ["https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"],
-    "나루토 (쿠라마 링크)": ["https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"],
-    "나미카제 미나토": ["https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"],
-    "우치하 마다라": ["https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80"],
-    "센주 하시라마": ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"],
-    "우치하 사스케 (윤회안)": ["https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80"],
-    "하타케 카카시 (카무이)": ["https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80"],
-    "마이트 가이 (8문 둔갑)": ["https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=800&q=80"]
-}
-
-def fetch_character_anime_image(char_name, output_path):
-    clean = char_name.split()[0].replace("(", "").replace(")", "")
-    urls = ANIME_CHARACTER_IMAGES.get(char_name, ANIME_CHARACTER_IMAGES.get(clean, [
-        "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
-    ]))
-    url = random.choice(urls)
-    try:
-        resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=15)
-        if resp.status_code == 200 and len(resp.content) > 1000:
-            with open(output_path, "wb") as f:
-                f.write(resp.content)
-            return True
-    except Exception:
-        pass
-    return False
-
-def get_character_image(char_name, size=(500, 600), is_top=True):
-    os.makedirs("assets/characters", exist_ok=True)
-    clean_name = char_name.split()[0].replace("(", "").replace(")", "")
-    possible_paths = [
-        f"assets/characters/{char_name}.png",
-        f"assets/characters/{clean_name}.png",
-        f"assets/characters/{char_name}.jpg",
-        f"assets/characters/{clean_name}.jpg"
-    ]
-    found_path = None
-    for p in possible_paths:
-        if os.path.exists(p) and os.path.getsize(p) > 1000:
-            found_path = p
-            break
-    if not found_path:
-        target_path = f"assets/characters/{clean_name}.jpg"
-        if fetch_character_anime_image(char_name, target_path):
-            found_path = target_path
-
-    if found_path and os.path.exists(found_path):
-        try:
-            base_img = Image.open(found_path).convert("RGBA")
-            base_img.thumbnail((size[0]*2, size[1]*2), Image.Resampling.LANCZOS)
-            w, h = base_img.size
-            left = (w - size[0]) // 2 if w > size[0] else 0
-            top = (h - size[1]) // 2 if h > size[1] else 0
-            cropped = base_img.crop((left, top, left + size[0], top + size[1])).resize(size, Image.Resampling.LANCZOS)
-
-            card = Image.new("RGBA", size, (0, 0, 0, 0))
-            draw = ImageDraw.Draw(card)
-            border_color = (255, 60, 60, 240) if is_top else (60, 140, 255, 240)
-            mask = Image.new("L", size, 0)
-            draw_mask = ImageDraw.Draw(mask)
-            draw_mask.rounded_rectangle([0, 0, size[0], size[1]], radius=28, fill=255)
-            card.paste(cropped, (0, 0), mask)
-            draw.rounded_rectangle([2, 2, size[0]-2, size[1]-2], radius=28, outline=border_color, width=6)
-            return card
-        except Exception:
-            pass
-
-    card = Image.new("RGBA", size, (25, 25, 35, 255))
-    draw = ImageDraw.Draw(card)
-    bg_color = (180, 40, 30) if is_top else (30, 70, 180)
-    draw.rounded_rectangle([10, 10, size[0]-10, size[1]-10], radius=24, fill=bg_color, outline=(255, 215, 0), width=4)
-    font_char = get_font(size=44, bold=True)
-    draw.text((size[0]//2, size[1]//2), char_name, font=font_char, fill=(255, 255, 255), anchor="mm")
-    return card
-
-# --- 5. 씬 카드 렌더러 (스탯 씬 + 필살기 시전 씬 + 격돌 씬 + 피날레 씬) ---
+# --- 6. 씬 카드 렌더러 (실제 공식 애니메이션 스킬 씬 탑재) ---
 
 def create_stat_scene_card(matchup_data, step_idx, output_png_path, width=1080, height=1920):
     char_a = matchup_data["matchup"]["character_a"]
@@ -451,13 +523,13 @@ def create_stat_scene_card(matchup_data, step_idx, output_png_path, width=1080, 
     img = Image.new("RGBA", (width, height), (12, 14, 22, 255))
     draw = ImageDraw.Draw(img)
 
-    # 상단 캐릭터 A
+    # 상단 캐릭터 A 공식 애니메이션 카드
     avatar_a = get_character_image(char_a, size=(520, 580), is_top=True)
     img.paste(avatar_a, ((width - 520)//2, 130), avatar_a)
     font_title = get_font(52, bold=True)
     draw.text((width//2, 75), char_a, font=font_title, fill=(255, 225, 100), anchor="mm")
 
-    # 하단 캐릭터 B
+    # 하단 캐릭터 B 공식 애니메이션 카드
     avatar_b = get_character_image(char_b, size=(520, 580), is_top=False)
     img.paste(avatar_b, ((width - 520)//2, 1210), avatar_b)
     draw.text((width//2, 1845), char_b, font=font_title, fill=(100, 220, 255), anchor="mm")
@@ -478,7 +550,7 @@ def create_stat_scene_card(matchup_data, step_idx, output_png_path, width=1080, 
 
 def create_skill_charge_card(char_name, is_character_a, output_png_path, width=1080, height=1920):
     """
-    캐릭터가 고유 필살기를 시전하며 차크라를 끌어올리는 역동적인 컷인 카드 생성
+    공식 애니메이션 스킬 시전 장면 스크린샷과 에너지 오라가 결합된 박진감 넘치는 컷인 카드
     """
     skill_info = get_character_skill_info(char_name)
     theme_col = skill_info["theme_color"]
@@ -487,37 +559,37 @@ def create_skill_charge_card(char_name, is_character_a, output_png_path, width=1
     img = Image.new("RGBA", (width, height), (8, 8, 14, 255))
     draw = ImageDraw.Draw(img)
 
-    # 차크라 방사형 광선 배경
-    center_y = 750 if is_character_a else 1150
+    # 방사형 차크라 광선
+    center_y = 800
     for angle in range(0, 360, 15):
         rad = math.radians(angle)
         ex = int(width/2 + 1200 * math.cos(rad))
         ey = int(center_y + 1200 * math.sin(rad))
-        draw.line([(width//2, center_y), (ex, ey)], fill=(*aura_col, 40), width=6)
+        draw.line([(width//2, center_y), (ex, ey)], fill=(*aura_col, 50), width=6)
 
-    # 캐릭터 초대형 클로즈업 카드
-    avatar = get_character_image(char_name, size=(700, 800), is_top=is_character_a)
-    img.paste(avatar, ((width - 700)//2, center_y - 400), avatar)
+    # 공식 애니메이션 술법 시전 장면 (850x700)
+    skill_scene_img = get_skill_anime_image(char_name, size=(880, 720))
+    img.paste(skill_scene_img, ((width - 880)//2, center_y - 360), skill_scene_img)
 
-    # 스킬 시전 헤더 배너
-    banner_y = 180 if is_character_a else 1500
-    draw.rectangle([0, banner_y, width, banner_y + 220], fill=(0, 0, 0, 230))
-    draw.line([(0, banner_y), (width, banner_y)], fill=theme_col, width=6)
-    draw.line([(0, banner_y + 220), (width, banner_y + 220)], fill=theme_col, width=6)
+    # 상단/하단 헤더 배너
+    banner_y = 160 if is_character_a else 1460
+    draw.rectangle([0, banner_y, width, banner_y + 240], fill=(0, 0, 0, 235))
+    draw.line([(0, banner_y), (width, banner_y)], fill=theme_col, width=8)
+    draw.line([(0, banner_y + 240), (width, banner_y + 240)], fill=theme_col, width=8)
 
-    font_lead = get_font(38, bold=True)
-    font_skill = get_font(56, bold=True)
-    font_sub = get_font(28, bold=False)
+    font_lead = get_font(42, bold=True)
+    font_skill = get_font(58, bold=True)
+    font_sub = get_font(30, bold=False)
 
-    draw.text((width//2, banner_y + 40), f"🔥 {char_name} 오의(奧義) 발동! 🔥", font=font_lead, fill=(255, 230, 100), anchor="mm")
-    draw.text((width//2, banner_y + 115), skill_info["skill_name"], font=font_skill, fill=theme_col, anchor="mm")
-    draw.text((width//2, banner_y + 175), skill_info["skill_sub"], font=font_sub, fill=(220, 220, 220), anchor="mm")
+    draw.text((width//2, banner_y + 45), f"🔥 {char_name} 오의(奧義) 발동! 🔥", font=font_lead, fill=(255, 230, 100), anchor="mm")
+    draw.text((width//2, banner_y + 125), skill_info["skill_name"], font=font_skill, fill=theme_col, anchor="mm")
+    draw.text((width//2, banner_y + 190), skill_info["skill_sub"], font=font_sub, fill=(220, 220, 220), anchor="mm")
 
     img.save(output_png_path, "PNG")
 
 def create_clash_impact_card(char_a, char_b, output_png_path, width=1080, height=1920):
     """
-    두 고유 필살기가 중앙에서 맹렬하게 충돌하는 궁극의 오의 격돌 카드 생성 (에너지 파티클 & 충격파)
+    두 캐릭터의 실제 술법 애니메이션 장면이 마주보며 충돌하는 정면 격돌 카드
     """
     skill_a = get_character_skill_info(char_a)
     skill_b = get_character_skill_info(char_b)
@@ -525,31 +597,21 @@ def create_clash_impact_card(char_a, char_b, output_png_path, width=1080, height
     img = Image.new("RGBA", (width, height), (5, 5, 10, 255))
     draw = ImageDraw.Draw(img)
 
-    # 상단 A 에너지 영역 (Red/Yellow/Purple)
-    col_a = skill_a["theme_color"]
-    for y in range(0, height//2, 8):
-        alpha = int(180 * (1.0 - y / (height/2)))
-        draw.line([(0, y), (width, y)], fill=(*col_a, alpha), width=8)
+    # 상단 A 술법 스크린샷 카드 (780x520)
+    skill_img_a = get_skill_anime_image(char_a, size=(820, 520))
+    img.paste(skill_img_a, ((width - 820)//2, 100), skill_img_a)
 
-    # 하단 B 에너지 영역 (Blue/Cyan/Green)
-    col_b = skill_b["theme_color"]
-    for y in range(height//2, height, 8):
-        alpha = int(180 * ((y - height/2) / (height/2)))
-        draw.line([(0, y), (width, y)], fill=(*col_b, alpha), width=8)
-
-    # 양 캐릭터 상하 배치 (격돌 돌진 모션)
-    avatar_a = get_character_image(char_a, size=(460, 520), is_top=True)
-    img.paste(avatar_a, ((width - 460)//2, 100), avatar_a)
-
-    avatar_b = get_character_image(char_b, size=(460, 520), is_top=False)
-    img.paste(avatar_b, ((width - 460)//2, 1300), avatar_b)
+    # 하단 B 술법 스크린샷 카드 (780x520)
+    skill_img_b = get_skill_anime_image(char_b, size=(820, 520))
+    img.paste(skill_img_b, ((width - 820)//2, 1260), skill_img_b)
 
     # 중앙 충돌 충격파 (Shockwave Rings & Flash)
     center_x, center_y = width//2, height//2
     for r in [280, 220, 160, 100, 50]:
-        draw.ellipse([center_x - r, center_y - r, center_x + r, center_y + r], outline=(255, 255, 255, 240), width=10)
+        draw.ellipse([center_x - r, center_y - r, center_x + r, center_y + r], outline=(255, 255, 255, 240), width=12)
     
-    # 에너지 스파크 광선
+    col_a = skill_a["theme_color"]
+    col_b = skill_b["theme_color"]
     random.seed(42)
     for _ in range(40):
         rad = random.uniform(0, 2*math.pi)
@@ -557,11 +619,11 @@ def create_clash_impact_card(char_a, char_b, output_png_path, width=1080, height
         ex = int(center_x + length * math.cos(rad))
         ey = int(center_y + length * math.sin(rad))
         spark_col = random.choice([col_a, col_b, (255, 255, 255), (255, 220, 0)])
-        draw.line([(center_x, center_y), (ex, ey)], fill=spark_col, width=random.randint(3, 8))
+        draw.line([(center_x, center_y), (ex, ey)], fill=spark_col, width=random.randint(4, 9))
 
     # 중앙 CLASH 엠블럼
-    draw.rectangle([60, center_y - 120, width - 60, center_y + 120], fill=(0, 0, 0, 245), outline=(255, 215, 0), width=6)
-    font_clash = get_font(58, bold=True)
+    draw.rectangle([40, center_y - 130, width - 40, center_y + 130], fill=(0, 0, 0, 245), outline=(255, 215, 0), width=7)
+    font_clash = get_font(60, bold=True)
     font_vs = get_font(34, bold=True)
 
     draw.text((center_x, center_y - 45), "💥 ULTIMATE SKILL CLASH 💥", font=font_clash, fill=(255, 230, 50), anchor="mm")
@@ -578,18 +640,18 @@ def create_verdict_card(matchup_data, output_png_path, width=1080, height=1920):
     img = Image.new("RGBA", (width, height), (10, 10, 18, 255))
     draw = ImageDraw.Draw(img)
 
-    # 승자 캐릭터 특대형 헌정 카드
-    avatar_win = get_character_image(winner_name, size=(650, 750), is_top=(verdict["winner"] == "character_a"))
-    img.paste(avatar_win, ((width - 650)//2, 380), avatar_win)
+    # 승자 캐릭터 공식 원작 애니메이션 일러스트 카드
+    avatar_win = get_character_image(winner_name, size=(680, 780), is_top=(verdict["winner"] == "character_a"))
+    img.paste(avatar_win, ((width - 680)//2, 360), avatar_win)
 
     # 상단 승리 타이틀
     font_top = get_font(60, bold=True)
     font_subtop = get_font(42, bold=True)
-    draw.text((width//2, 160), "🏆 FINAL WINNER 🏆", font=font_top, fill=(255, 215, 0), anchor="mm")
-    draw.text((width//2, 260), verdict["final_score"], font=font_subtop, fill=(255, 80, 80), anchor="mm")
+    draw.text((width//2, 150), "🏆 FINAL WINNER 🏆", font=font_top, fill=(255, 215, 0), anchor="mm")
+    draw.text((width//2, 250), verdict["final_score"], font=font_subtop, fill=(255, 80, 80), anchor="mm")
 
     # 하단 판정 설명 및 댓글창 유도 보드
-    draw.rounded_rectangle([60, 1220, width-60, 1750], radius=32, fill=(0, 0, 0, 240), outline=(255, 215, 0), width=5)
+    draw.rounded_rectangle([60, 1220, width-60, 1760], radius=32, fill=(0, 0, 0, 240), outline=(255, 215, 0), width=5)
     font_winner = get_font(52, bold=True)
     font_desc = get_font(32, bold=False)
     font_call = get_font(36, bold=True)
@@ -599,11 +661,11 @@ def create_verdict_card(matchup_data, output_png_path, width=1080, height=1920):
     if len(verdict["narration"]) > 38:
         draw.text((width//2, 1475), verdict["narration"][38:76] + "...", font=font_desc, fill=(240, 240, 240), anchor="mm")
     
-    draw.text((width//2, 1630), "💬 여러분의 생각은? 댓글로 토론해보세요!", font=font_call, fill=(80, 220, 255), anchor="mm")
+    draw.text((width//2, 1635), "💬 여러분의 생각은? 댓글로 토론해보세요!", font=font_call, fill=(80, 220, 255), anchor="mm")
 
     img.save(output_png_path, "PNG")
 
-# --- 6. FFmpeg 역동적인 모션 애니메이션 숏츠 비디오 합성 엔진 ---
+# --- 7. FFmpeg 역동적인 모션 애니메이션 숏츠 비디오 합성 엔진 ---
 
 def render_naruto_shorts_video(matchup_data, voice_track, output_mp4="output_naruto_shorts.mp4"):
     os.makedirs("temp/scenes", exist_ok=True)
@@ -613,7 +675,7 @@ def render_naruto_shorts_video(matchup_data, voice_track, output_mp4="output_nar
     
     voice_audio = AudioSegment.from_file(voice_track)
     total_voice_sec = len(voice_audio) / 1000.0
-    print(f"\n[Motion Animation Engine] 총 {total_voice_sec:.1f}초 분량의 고유 스킬 격돌 숏츠 애니메이션 생성 시작...")
+    print(f"\n[Motion Animation Engine] 총 {total_voice_sec:.1f}초 분량의 공식 애니메이션 스킬 격돌 숏츠 렌더링 시작...")
 
     fps = 30
     scene_clips = []
@@ -639,12 +701,12 @@ def render_naruto_shorts_video(matchup_data, voice_track, output_mp4="output_nar
         subprocess.run(cmd, check=True)
         scene_clips.append(clip_mp4)
 
-    # 2. 스킬 시전 씬 A (캐릭터 A 고유 필살기 충전)
+    # 2. 스킬 시전 씬 A (실제 공식 술법 애니메이션 스크린샷 컷인)
     charge_a_duration = 2.0
     charge_a_png = os.path.abspath("temp/scenes/charge_a.png")
     create_skill_charge_card(char_a, True, charge_a_png)
     clip_charge_a = os.path.abspath("temp/scenes/clip_charge_a.mp4")
-    zoom_charge_a = f"zoompan=z='min(zoom+0.003,1.25)':x='iw/2-(iw/zoom/2)':y='ih/3-(ih/zoom/3)':d={int(charge_a_duration*fps)}:s=1080x1920:fps={fps}"
+    zoom_charge_a = f"zoompan=z='min(zoom+0.003,1.25)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={int(charge_a_duration*fps)}:s=1080x1920:fps={fps}"
     subprocess.run([
         "ffmpeg", "-y", "-loop", "1", "-i", charge_a_png,
         "-vf", zoom_charge_a, "-t", str(charge_a_duration),
@@ -653,12 +715,12 @@ def render_naruto_shorts_video(matchup_data, voice_track, output_mp4="output_nar
     ], check=True)
     scene_clips.append(clip_charge_a)
 
-    # 3. 스킬 시전 씬 B (캐릭터 B 고유 필살기 충전)
+    # 3. 스킬 시전 씬 B (실제 공식 술법 애니메이션 스크린샷 컷인)
     charge_b_duration = 2.0
     charge_b_png = os.path.abspath("temp/scenes/charge_b.png")
     create_skill_charge_card(char_b, False, charge_b_png)
     clip_charge_b = os.path.abspath("temp/scenes/clip_charge_b.mp4")
-    zoom_charge_b = f"zoompan=z='min(zoom+0.003,1.25)':x='iw/2-(iw/zoom/2)':y='2*ih/3-(2*ih/zoom/3)':d={int(charge_b_duration*fps)}:s=1080x1920:fps={fps}"
+    zoom_charge_b = f"zoompan=z='min(zoom+0.003,1.25)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={int(charge_b_duration*fps)}:s=1080x1920:fps={fps}"
     subprocess.run([
         "ffmpeg", "-y", "-loop", "1", "-i", charge_b_png,
         "-vf", zoom_charge_b, "-t", str(charge_b_duration),
@@ -672,7 +734,6 @@ def render_naruto_shorts_video(matchup_data, voice_track, output_mp4="output_nar
     clash_png = os.path.abspath("temp/scenes/clash.png")
     create_clash_impact_card(char_a, char_b, clash_png)
     clip_clash = os.path.abspath("temp/scenes/clip_clash.mp4")
-    # 카메라 진동(Tremor / Shake)과 초고속 줌인 복합 필터
     shake_filter = f"zoompan=z='min(zoom+0.004,1.35)':x='iw/2-(iw/zoom/2)+15*sin(in*3)':y='ih/2-(ih/zoom/2)+15*cos(in*3)':d={int(clash_duration*fps)}:s=1080x1920:fps={fps}"
     subprocess.run([
         "ffmpeg", "-y", "-loop", "1", "-i", clash_png,
@@ -732,11 +793,11 @@ def render_naruto_shorts_video(matchup_data, voice_track, output_mp4="output_nar
 
     subprocess.run(cmd_final, check=True)
     print(f"\n=======================================================")
-    print(f" [Naruto Skill Clash Anime Shorts Rendered Successfully!]")
-    print(f" [Output File] {output_mp4} (1080x1920 30fps with Dynamic Skill Clash & Camera Shake)")
+    print(f" [Naruto Official Anime Skill Clash Shorts Rendered!]")
+    print(f" [Output File] {output_mp4}")
     print(f"=======================================================\n")
 
-# --- 7. 메인 실행 진입점 ---
+# --- 8. 메인 실행 진입점 ---
 
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
