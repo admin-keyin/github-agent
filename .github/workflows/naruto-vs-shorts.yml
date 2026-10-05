@@ -1,0 +1,97 @@
+name: Naruto VS Shorts Generator
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # 6시간마다 자동 생성 및 업로드
+  workflow_dispatch: # 수동 즉시 실행
+    inputs:
+      character_a:
+        description: '캐릭터 A 선택 (비워두면 random)'
+        required: false
+        default: 'random'
+        type: choice
+        options:
+          - 'random'
+          - '우치하 이타치'
+          - '페인 (텐도)'
+          - '지라이야 (선인 모드)'
+          - '나루토 (선인 모드)'
+          - '나루토 (쿠라마 링크)'
+          - '나미카제 미나토'
+          - '우치하 마다라'
+          - '센주 하시라마'
+          - '우치하 사스케 (윤회안)'
+          - '하타케 카카시 (카무이)'
+          - '마이트 가이 (8문 둔갑)'
+          - '우치하 오비토 (육도)'
+          - '사소리'
+          - '데이다라'
+          - '센주 토비라마'
+          - '오로치마루'
+          - '츠나데'
+          - '가아라'
+          - '킬러 비'
+      character_b:
+        description: '캐릭터 B 선택 (비워두면 random)'
+        required: false
+        default: 'random'
+        type: choice
+        options:
+          - 'random'
+          - '우치하 이타치'
+          - '페인 (텐도)'
+          - '지라이야 (선인 모드)'
+          - '나루토 (선인 모드)'
+          - '나루토 (쿠라마 링크)'
+          - '나미카제 미나토'
+          - '우치하 마다라'
+          - '센주 하시라마'
+          - '우치하 사스케 (윤회안)'
+          - '하타케 카카시 (카무이)'
+          - '마이트 가이 (8문 둔갑)'
+          - '우치하 오비토 (육도)'
+          - '사소리'
+          - '데이다라'
+          - '센주 토비라마'
+          - '오로치마루'
+          - '츠나데'
+          - '가아라'
+          - '킬러 비'
+
+jobs:
+  create-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-nanum
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "requests==2.31.0" "pydub==0.25.1" "numpy==1.26.4" "scipy==1.13.0" "Pillow==10.3.0" "edge-tts==6.1.12" "gTTS==2.5.1" "google-api-python-client==2.118.0" "google-auth-oauthlib==1.2.0" "google-auth-httplib2==0.2.0"
+
+      - name: Generate Naruto VS Shorts Video
+        env:
+          INPUT_CHAR_A: ${{ inputs.character_a }}
+          INPUT_CHAR_B: ${{ inputs.character_b }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/generate_naruto_shorts.py
+
+      - name: Upload to YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python scripts/upload_to_youtube.py output_naruto_shorts.mp4
