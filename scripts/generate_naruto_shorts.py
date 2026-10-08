@@ -115,7 +115,7 @@ def get_character_skill_info(char_name):
         "quote": "전력을 다한 영혼의 궁극 비오의 격돌!"
     }
 
-# --- 2. Gemini Pro 대본 생성 (만화 전투씬 내레이션) ---
+# --- 2. Gemini Pro 대본 생성 (승자 명확 판정 & 만화 전투씬 내레이션) ---
 
 def get_gemini_battle_script(char_a, char_b, gemini_api_key=None):
     api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
@@ -124,25 +124,25 @@ def get_gemini_battle_script(char_a, char_b, gemini_api_key=None):
 
     prompt = f"""
 당신은 나루토 공식 애니메이션 액션 연출가입니다.
-아래 두 나루토 캐릭터의 '풀 모션 만화 전투씬 숏츠'의 내레이션 대본과 최종 승자를 JSON으로 작성하세요.
+아래 두 나루토 캐릭터의 '풀 모션 만화 전투씬 숏츠'의 내레이션 대본과 '명확한 최종 승자(Winner)'를 반드시 판정하여 JSON으로 작성하세요.
 
 캐릭터 A: {char_a} (오의: {skill_a['skill_name']})
 캐릭터 B: {char_b} (오의: {skill_b['skill_name']})
 
 JSON 응답 형식:
 {{
-  "title": "{char_a} VS {char_b}, 숨막히는 혈투!",
+  "title": "{char_a} VS {char_b}, 승자는 누구인가?!",
+  "winner": "character_a 또는 character_b",
+  "winner_name": "{char_a}",
+  "reason": "승리 이유 1줄 요약 (예: 압도적인 차크라와 시공간 인술의 완벽한 승리)",
   "phases": {{
     "phase1_intro": "{char_a} 대 {char_b}! 피할 수 없는 정상결전이 시작됩니다!",
     "phase2_taijutsu": "폭발적인 스피드로 맞붙는 초반 체술 공방전!",
     "phase3_ninjutsu": "치명적인 비전 인술이 연이어 폭발하며 전장을 뒤흔듭니다!",
     "phase4_awakening": "마침내 발동하는 궁극의 오의! {char_a}의 {skill_a['skill_name']} 대 {char_b}의 {skill_b['skill_name']}!",
     "phase5_clash": "두 거대한 차크라가 정면 충돌하며 대폭발을 일으킵니다!",
-    "phase6_verdict": "치열한 격돌 끝에 전장을 지배한 승자는 {char_a}입니다! 여러분의 생각은 어떠신가요?"
-  }},
-  "winner": "character_a 또는 character_b",
-  "winner_name": "{char_a}",
-  "score": "HIGH-DIFF VICTORY"
+    "phase6_verdict": "치열한 격돌 끝에 최종 승자는 {char_a}입니다! {char_a}의 승리! 여러분의 생각은 어떠신가요?"
+  }}
 }}
 """
 
@@ -160,26 +160,30 @@ JSON 응답 형식:
             resp = requests.post(url, headers=headers, json=payload, timeout=20)
             if resp.status_code == 200:
                 data = json.loads(resp.json()['candidates'][0]['content']['parts'][0]['text'])
+                win_key = data.get("winner", "character_a")
+                winner_name = char_a if win_key == "character_a" else char_b
+                data["winner_name"] = winner_name
+                data["phases"]["phase6_verdict"] = f"치열한 혈투 끝에 최종 승자는 바로 {winner_name}입니다! {winner_name}의 승리! 여러분의 생각은 어떠신가요?"
                 return data
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[Gemini API Notice]: {e}")
 
-    # Fallback 대본
+    # Fallback 대본 (명확한 승자 확정)
     winner_key = random.choice(["character_a", "character_b"])
     winner_name = char_a if winner_key == "character_a" else char_b
     return {
         "title": f"{char_a} VS {char_b}, 세기의 오의 대격돌!",
+        "winner": winner_key,
+        "winner_name": winner_name,
+        "reason": f"압도적인 파괴력과 전투 센스로 {winner_name} 승리!",
         "phases": {
             "phase1_intro": f"{char_a} 대 {char_b}! 물러설 수 없는 정상결전이 시작됩니다!",
             "phase2_taijutsu": "초고속으로 전개되는 치열한 체술과 수리검 공방!",
             "phase3_ninjutsu": "대지를 가르는 강력한 인술 폭격이 연이어 터져나옵니다!",
             "phase4_awakening": f"마침내 폭발하는 궁극의 오의! {char_a}의 {skill_a['skill_name']} 대 {char_b}의 {skill_b['skill_name']}!",
             "phase5_clash": "두 차크라가 정면으로 충돌하며 거대한 섬광과 폭풍을 일으킵니다!",
-            "phase6_verdict": f"치열한 혈투 끝에 승리를 거머쥔 {winner_name}! 여러분의 생각은 어떠신가요?"
-        },
-        "winner": winner_key,
-        "winner_name": winner_name,
-        "score": f"{winner_name} WINS (HIGH-DIFF)"
+            "phase6_verdict": f"치열한 혈투 끝에 최종 승자는 바로 {winner_name}입니다! {winner_name}의 승리! 여러분의 생각은 어떠신가요?"
+        }
     }
 
 # --- 3. Edge-TTS & gTTS 음성 합성 트랙 생성 ---
@@ -243,52 +247,70 @@ def get_font(size=40, bold=False):
                 pass
     return ImageFont.load_default()
 
-# --- 5. 시네마틱 애니메이션 HUD 오버레이 생성기 ---
+# --- 5. 시네마틱 애니메이션 HUD 오버레이 생성기 (명확한 승자 배너 포함) ---
 
-def create_anime_hud_overlay(phase_name, title_text, sub_text, char_a, char_b, output_png, width=1080, height=1920):
+def create_anime_hud_overlay(phase_id, phase_name, title_text, sub_text, char_a, char_b, winner_name, output_png, width=1080, height=1920):
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    # 1. 상단 체력바 및 대결 헤더 (VS Header)
-    draw.rectangle([0, 0, width, 180], fill=(0, 0, 0, 220))
-    font_head = get_font(38, bold=True)
-    font_vs = get_font(44, bold=True)
-    
-    # 캐릭터 A 체력바 (Left Blue)
-    draw.text((60, 45), char_a, font=font_head, fill=(255, 225, 80), anchor="lt")
-    draw.rounded_rectangle([60, 100, 480, 135], radius=10, fill=(30, 30, 40), outline=(255, 215, 0), width=3)
-    draw.rounded_rectangle([63, 103, 440, 132], radius=8, fill=(255, 60, 60))
+    if phase_id == "phase6":
+        # === 최종 승자 피날레 특별 HUD (누가 승리했는지 확실하게 노출) ===
+        # 1. 상단 초대형 골드 승자 배너
+        draw.rectangle([0, 0, width, 320], fill=(0, 0, 0, 240))
+        draw.line([(0, 320), (width, 320)], fill=(255, 215, 0), width=8)
 
-    # VS 마크 (Center)
-    draw.text((width//2, 90), "VS", font=font_vs, fill=(255, 255, 255), anchor="mm")
+        font_win_lead = get_font(46, bold=True)
+        font_win_huge = get_font(68, bold=True)
+        draw.text((width//2, 80), "🏆 FINAL WINNER (최종 승리) 🏆", font=font_win_lead, fill=(255, 230, 80), anchor="mm")
+        draw.text((width//2, 190), f"🔥 {winner_name} 승리! 🔥", font=font_win_huge, fill=(255, 60, 60), anchor="mm")
 
-    # 캐릭터 B 체력바 (Right Red)
-    draw.text((width-60, 45), char_b, font=font_head, fill=(100, 220, 255), anchor="rt")
-    draw.rounded_rectangle([width-480, 100, width-60, 135], radius=10, fill=(30, 30, 40), outline=(255, 215, 0), width=3)
-    draw.rounded_rectangle([width-440, 103, width-63, 132], radius=8, fill=(60, 140, 255))
+        # 2. 하단 승리 판정 및 댓글 토론 보드
+        draw.rectangle([0, height-280, width, height], fill=(0, 0, 0, 240))
+        draw.line([(0, height-280), (width, height-280)], fill=(255, 215, 0), width=6)
 
-    # 2. 하단 시네마틱 자막 배너 (Bottom Action Subtitle)
-    draw.rectangle([0, height-260, width, height], fill=(0, 0, 0, 230))
-    draw.line([(0, height-260), (width, height-260)], fill=(255, 215, 0), width=6)
+        font_bot_lead = get_font(52, bold=True)
+        font_bot_sub = get_font(34, bold=False)
+        draw.text((width//2, height-190), f"승자: {winner_name}", font=font_bot_lead, fill=(255, 230, 80), anchor="mm")
+        draw.text((width//2, height-90), "💬 결과에 동의하시나요? 댓글로 토론해보세요!", font=font_bot_sub, fill=(100, 220, 255), anchor="mm")
 
-    font_phase = get_font(36, bold=True)
-    font_title = get_font(52, bold=True)
-    font_sub = get_font(32, bold=False)
+    else:
+        # === 전투 진행 중 HUD ===
+        # 1. 상단 체력바 및 대결 헤더 (VS Header)
+        draw.rectangle([0, 0, width, 180], fill=(0, 0, 0, 220))
+        font_head = get_font(38, bold=True)
+        font_vs = get_font(44, bold=True)
+        
+        # 캐릭터 A 체력바 (Left Red)
+        draw.text((60, 45), char_a, font=font_head, fill=(255, 225, 80), anchor="lt")
+        draw.rounded_rectangle([60, 100, 480, 135], radius=10, fill=(30, 30, 40), outline=(255, 215, 0), width=3)
+        draw.rounded_rectangle([63, 103, 440, 132], radius=8, fill=(255, 60, 60))
 
-    draw.text((width//2, height-210), f"⚔️ {phase_name} ⚔️", font=font_phase, fill=(255, 230, 80), anchor="mm")
-    draw.text((width//2, height-140), title_text, font=font_title, fill=(255, 255, 255), anchor="mm")
-    if sub_text:
-        draw.text((width//2, height-75), sub_text, font=font_sub, fill=(200, 200, 200), anchor="mm")
+        # VS 마크 (Center)
+        draw.text((width//2, 90), "VS", font=font_vs, fill=(255, 255, 255), anchor="mm")
+
+        # 캐릭터 B 체력바 (Right Blue)
+        draw.text((width-60, 45), char_b, font=font_head, fill=(100, 220, 255), anchor="rt")
+        draw.rounded_rectangle([width-480, 100, width-60, 135], radius=10, fill=(30, 30, 40), outline=(255, 215, 0), width=3)
+        draw.rounded_rectangle([width-440, 103, width-63, 132], radius=8, fill=(60, 140, 255))
+
+        # 2. 하단 시네마틱 자막 배너
+        draw.rectangle([0, height-260, width, height], fill=(0, 0, 0, 230))
+        draw.line([(0, height-260), (width, height-260)], fill=(255, 215, 0), width=6)
+
+        font_phase = get_font(36, bold=True)
+        font_title = get_font(52, bold=True)
+        font_sub = get_font(32, bold=False)
+
+        draw.text((width//2, height-210), f"⚔️ {phase_name} ⚔️", font=font_phase, fill=(255, 230, 80), anchor="mm")
+        draw.text((width//2, height-140), title_text, font=font_title, fill=(255, 255, 255), anchor="mm")
+        if sub_text:
+            draw.text((width//2, height-75), sub_text, font=font_sub, fill=(200, 200, 200), anchor="mm")
 
     img.save(output_png, "PNG")
 
 # --- 6. 멀티 소스(skill_list.mp4 & skill_list2.mp4) 만화 애니메이션 전투씬 숏츠 렌더러 ---
 
 def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4="output_naruto_shorts.mp4"):
-    """
-    assets/anime_clips/skill_list.mp4 및 skill_list2.mp4 두 원작 비디오 풀에서
-    풍부한 전투 액션 컷들을 정밀 추출하고 시네마틱 9:16 모바일 풀스크린 만화영화 배틀 숏츠로 렌더링합니다.
-    """
     video_sources = [
         "assets/anime_clips/skill_list.mp4",
         "assets/anime_clips/skill_list2.mp4"
@@ -302,11 +324,11 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
     os.makedirs("temp/battle_scenes", exist_ok=True)
     skill_a = get_character_skill_info(char_a)
     skill_b = get_character_skill_info(char_b)
-    phases = battle_data["phases"]
+    winner_name = battle_data.get("winner_name", char_a)
 
     print(f"\n[Anime Movie Multi-Source Engine] 사용 가능한 비디오 소스: {len(valid_sources)}개 ({', '.join(valid_sources)})")
+    print(f"[Battle Winner Decision] 승자: {winner_name}")
 
-    # 6개 전투 페이즈 정의 (skill_list & skill_list2 교차 활용)
     has_v2 = os.path.exists("assets/anime_clips/skill_list2.mp4")
     v1_path = "assets/anime_clips/skill_list.mp4"
     v2_path = "assets/anime_clips/skill_list2.mp4" if has_v2 else v1_path
@@ -354,27 +376,26 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
             "title": "💥 전장을 집어삼키는 대폭발! 💥",
             "sub": "두 궁극기의 정면 충돌과 초토화",
             "src": v2_path if has_v2 else v1_path,
-            "start_ss": random.randint(600, 950) if has_v2 else random.randint(480, 560),
+            "start_ss": random.randint(480, 560),
             "dur": max(6.0, durations.get("phase5_clash", 6.0))
         },
         {
             "id": "phase6",
-            "phase_name": "EPILOGUE : VICTORY & VERDICT",
-            "title": f"🏆 {battle_data['winner_name']} WINS! 🏆",
-            "sub": "💬 여러분의 의견은? 댓글로 남겨주세요!",
+            "phase_name": "FINAL WINNER (최종 승리)",
+            "title": f"🏆 {winner_name} 승리! 🏆",
+            "sub": "💬 결과에 동의하시나요? 댓글로 토론해보세요!",
             "src": v2_path if has_v2 else v1_path,
-            "start_ss": random.randint(1050, 1350) if has_v2 else random.randint(580, 640),
-            "dur": max(5.0, durations.get("phase6_verdict", 5.0))
+            "start_ss": random.randint(520, 580),
+            "dur": max(5.5, durations.get("phase6_verdict", 5.5))
         }
     ]
 
     scene_clips = []
-    fps = 30
 
     for idx, sc in enumerate(scene_defs):
         sc_id = sc["id"]
         overlay_png = os.path.abspath(f"temp/battle_scenes/hud_{sc_id}.png")
-        create_anime_hud_overlay(sc["phase_name"], sc["title"], sc["sub"], char_a, char_b, overlay_png)
+        create_anime_hud_overlay(sc_id, sc["phase_name"], sc["title"], sc["sub"], char_a, char_b, winner_name, overlay_png)
 
         clip_mp4 = os.path.abspath(f"temp/battle_scenes/clip_{sc_id}.mp4")
 
@@ -415,7 +436,7 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
     bgm_path = random.choice(bgm_files) if bgm_files else None
 
     if bgm_path and os.path.exists(bgm_path):
-        filter_audio = "[1:a]volume=1.1[v_voice];[2:a]volume=0.25,aloop=loop=-1:size=2e+09[v_bgm];[v_voice][v_bgm]amix=inputs=2:duration=first[aout]"
+        filter_audio = "[1:a]volume=1.15[v_voice];[2:a]volume=0.22,aloop=loop=-1:size=2e+09[v_bgm];[v_voice][v_bgm]amix=inputs=2:duration=first[aout]"
         cmd_final = [
             "ffmpeg", "-y",
             "-i", temp_video,
@@ -438,7 +459,8 @@ def render_anime_battle_movie(char_a, char_b, battle_data, durations, output_mp4
     subprocess.run(cmd_final, check=True)
     print(f"\n=======================================================")
     print(f" [Naruto Real Anime Battle Movie Shorts Rendered!]")
-    print(f" [Output File] {output_mp4} (Multi-Source Anime Battle Footage)")
+    print(f" [Winner Declared] {winner_name}")
+    print(f" [Output File] {output_mp4}")
     print(f"=======================================================\n")
 
 # --- 7. 메인 실행 진입점 ---
@@ -457,7 +479,7 @@ if __name__ == "__main__":
 
     print(f"\n[Naruto Real Anime Battle Selected] '{char_a}' VS '{char_b}'")
 
-    # 1. Gemini Pro 만화 전투 대본 생성
+    # 1. Gemini Pro 만화 전투 대본 생성 (명확한 승자 판정)
     battle_data = get_gemini_battle_script(char_a, char_b)
 
     # 2. 한국어 TTS 내레이션 음성 생성
@@ -468,12 +490,14 @@ if __name__ == "__main__":
     render_anime_battle_movie(char_a, char_b, battle_data, durations, output_video)
 
     # 4. 유튜브 메타데이터 생성
-    final_title = f"{battle_data['title']} #Shorts"
+    winner_name = battle_data.get("winner_name", char_a)
+    final_title = f"{char_a} VS {char_b}, 최종 승자는 {winner_name}?! #Shorts"
     desc = (
         f"🔥 {char_a} VS {char_b} 나루토 세기의 진검승부!\n\n"
-        f"체술부터 궁극의 오의 격돌까지, 전장을 뒤흔든 승자는 누구일까요?\n"
-        f"여러분의 생각을 댓글로 남겨주세요!\n\n"
-        f"#{char_a.replace(' ', '')} #{char_b.replace(' ', '')} #나루토 #만화전투씬 #나루토쇼츠 #가상대결 #Shorts #Naruto"
+        f"최종 승자: 🏆 {winner_name} 🏆\n"
+        f"{battle_data.get('reason', '')}\n\n"
+        f"여러분의 생각은 어떠신가요? 결과에 대한 의견을 댓글로 남겨주세요!\n\n"
+        f"#{char_a.replace(' ', '')} #{char_b.replace(' ', '')} #{winner_name.replace(' ', '')} #나루토 #만화전투씬 #나루토쇼츠 #가상대결 #Shorts #Naruto"
     )
 
     meta_info = {
