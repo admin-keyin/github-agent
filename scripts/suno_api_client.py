@@ -114,15 +114,17 @@ class SunoMusicGenerator:
         if not task_id:
             raise ValueError(f"Kie.ai taskId를 발급받지 못했습니다: {data}")
 
-        print(f"[Kie.ai] Task ID: {task_id} - 음원 생성 대기 중 (최대 180초)...")
+        print(f"[Kie.ai] Task ID: {task_id} - 음원 생성 대기 중 (최대 360초)...")
         record_url = f"https://api.kie.ai/api/v1/jobs/recordInfo?taskId={task_id}"
 
-        for _ in range(45): # 45 * 4초 = 180초
-            time.sleep(4)
+        for i in range(72): # 72 * 5초 = 360초 (6분 대기)
+            time.sleep(5)
             r = requests.get(record_url, headers=headers, timeout=20)
             if r.status_code == 200:
                 rec_data = r.json().get("data", {})
                 status = rec_data.get("status")
+                if i % 6 == 0:
+                    print(f"[Kie.ai Progress] 경과 시간: {(i+1)*5}초, 현재 상태: {status}")
                 if status == "success":
                     result_json = rec_data.get("resultJson", {})
                     audio_urls = result_json.get("resultUrls", [])
@@ -139,7 +141,7 @@ class SunoMusicGenerator:
                 elif status in ["fail", "error"]:
                     raise RuntimeError(f"Kie.ai 작업 실패: {rec_data}")
 
-        raise TimeoutError("Kie.ai 음원 생성 시간 초과 (180초)")
+        raise TimeoutError("Kie.ai 음원 생성 시간 초과 (360초)")
 
     # --- SunoApi.org 구현체 ---
     def _generate_via_sunoapi(self, title: str, style: str, lyrics: str, instrumental: bool) -> Dict[str, Any]:
