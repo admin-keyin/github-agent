@@ -1,0 +1,70 @@
+name: Suno AI Story Music Video Generator (Ghostagram / Grown-Up)
+
+on:
+  schedule:
+    - cron: '0 */3 * * *' # 3시간마다 새로운 AI 스토리 노래 자동 생성 & 업로드
+  workflow_dispatch:
+    inputs:
+      song_type:
+        description: '노래 테마 (ghostagram: 고스타그램 / grown_up: 꿈꾸던 어른이 되었나요 / cyber_warrior: 전장의 그림자 / random)'
+        required: false
+        default: 'random'
+        type: choice
+        options:
+          - 'random'
+          - 'ghostagram'
+          - 'grown_up'
+          - 'cyber_warrior'
+      custom_prompt:
+        description: '맞춤 작사/작곡 주제 (비워두면 테마별 프리셋/Gemini 자동 작사)'
+        required: false
+        default: ''
+        type: string
+      instrumental:
+        description: '보컬 없는 연주곡(MR) 생성 여부'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  create-and-upload-suno-song:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-nanum
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "requests==2.31.0" "pydub==0.25.1" "numpy==1.26.4" "scipy==1.13.0" "Pillow==10.3.0" "gTTS==2.5.1" "google-api-python-client==2.118.0" "google-auth-oauthlib==1.2.0" "google-auth-httplib2==0.2.0"
+
+      - name: Generate Suno AI Music & Video
+        env:
+          INPUT_SONG_TYPE: ${{ inputs.song_type }}
+          INPUT_CUSTOM_PROMPT: ${{ inputs.custom_prompt }}
+          INPUT_INSTRUMENTAL: ${{ inputs.instrumental }}
+          KIE_API_KEY: ${{ secrets.KIE_API_KEY }}
+          SUNO_API_KEY: ${{ secrets.SUNO_API_KEY }}
+          APIFRAME_KEY: ${{ secrets.APIFRAME_KEY }}
+          SUNO_COOKIE: ${{ secrets.SUNO_COOKIE }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/generate_suno_story_song.py
+
+      - name: Upload to YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python scripts/upload_to_youtube.py output_music_video.mp4
