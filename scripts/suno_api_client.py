@@ -49,7 +49,9 @@ class SunoMusicGenerator:
                     result["saved_path"] = output_audio_path
                     return result
             except Exception as e:
-                print(f"[Suno Engine Warn] Kie.ai 생성 중 오류: {e}")
+                import traceback
+                print(f"\n[Suno Engine Error] Kie.ai 오류 발생: {e}")
+                print(traceback.format_exc())
 
         # 2. SunoApi.org 시도
         if self.suno_api_key:
@@ -119,13 +121,20 @@ class SunoMusicGenerator:
 
         for i in range(72): # 72 * 5초 = 360초 (6분 대기)
             time.sleep(5)
-            r = requests.get(record_url, headers=headers, timeout=20)
+            try:
+                r = requests.get(record_url, headers=headers, timeout=20)
+            except Exception as req_err:
+                print(f"[Kie.ai Polling Warn] 요청 일시적 오류: {req_err}")
+                continue
+
             if r.status_code == 200:
-                rec_data = r.json().get("data", {})
-                # Kie.ai는 state 또는 status 필드로 반환됨
+                body = r.json()
+                rec_data = body.get("data", {})
                 current_state = rec_data.get("state") or rec_data.get("status")
-                if i % 6 == 0:
+
+                if i % 4 == 0:
                     print(f"[Kie.ai Progress] 경과 시간: {(i+1)*5}초, 현재 상태: {current_state}")
+
                 if current_state in ["success", "SUCCESS"]:
                     result_json_raw = rec_data.get("resultJson", {})
                     if isinstance(result_json_raw, str):
@@ -134,20 +143,38 @@ class SunoMusicGenerator:
                         except Exception:
                             result_json = {}
                     else:
-                        result_json = result_json_raw
+                        result_json = result_json_raw or {}
 
+                    # 다중 키 탐색 (resultUrls, resultObject, audio, url, all_urls_json)
                     audio_urls = result_json.get("resultUrls", [])
                     audio_url = audio_urls[0] if audio_urls else None
+
                     if not audio_url:
-                        audio_url = result_json.get("audio_url") or result_json.get("audioUrl")
+                        res_obj = result_json.get("resultObject", {})
+                        if isinstance(res_obj, dict):
+                            audio_url = res_obj.get("audio") or res_obj.get("url") or res_obj.get("audio_url")
+                        elif isinstance(res_obj, list) and res_obj:
+                            audio_url = res_obj[0].get("audio") or res_obj[0].get("url")
+
+                    if not audio_url:
+                        audio_url = result_json.get("audio_url") or result_json.get("audioUrl") or result_json.get("url")
+
+                    if not audio_url:
+                        print(f"[Kie.ai Parse Warn] 응답 내용: {rec_data}")
+                        raise ValueError(f"Kie.ai 생성 완료되었으나 audio_url을 찾지 못했습니다: {result_json}")
+
+                    image_url = result_json.get("image_url") or result_json.get("imageUrl")
                     return {
                         "provider": "kie.ai",
                         "task_id": task_id,
                         "audio_url": audio_url,
-                        "image_url": result_json.get("image_url") or result_json.get("imageUrl")
+                        "image_url": image_url
                     }
+
                 elif current_state in ["fail", "error", "FAIL"]:
-                    raise RuntimeError(f"Kie.ai 작업 실패: {rec_data}")
+                    fail_code = rec_data.get("failCode")
+                    fail_msg = rec_data.get("failMsg")
+                    raise RuntimeError(f"Kie.ai 작업 실패 (Code: {fail_code}, Msg: {fail_msg}): {rec_data}")
 
         raise TimeoutError("Kie.ai 음원 생성 시간 초과 (360초)")
 
