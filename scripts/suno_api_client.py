@@ -145,9 +145,20 @@ class SunoMusicGenerator:
                     else:
                         result_json = result_json_raw or {}
 
-                    # 다중 키 탐색 (resultUrls, resultObject, audio, url, all_urls_json)
-                    audio_urls = result_json.get("resultUrls", [])
-                    audio_url = audio_urls[0] if audio_urls else None
+                    # Kie.ai 실데이터 포맷: result_json = {'code': 200, 'data': [{'audio_url': '...', 'image_url': '...'}, ...]}
+                    kie_items = result_json.get("data", [])
+                    if isinstance(kie_items, list) and kie_items:
+                        first_item = kie_items[0]
+                        audio_url = first_item.get("audio_url") or first_item.get("stream_audio_url")
+                        image_url = first_item.get("image_url")
+                    else:
+                        audio_url = None
+                        image_url = None
+
+                    # 보조 필드 탐색 (resultUrls, resultObject, audio, url 등)
+                    if not audio_url:
+                        audio_urls = result_json.get("resultUrls", [])
+                        audio_url = audio_urls[0] if audio_urls else None
 
                     if not audio_url:
                         res_obj = result_json.get("resultObject", {})
@@ -163,7 +174,9 @@ class SunoMusicGenerator:
                         print(f"[Kie.ai Parse Warn] 응답 내용: {rec_data}")
                         raise ValueError(f"Kie.ai 생성 완료되었으나 audio_url을 찾지 못했습니다: {result_json}")
 
-                    image_url = result_json.get("image_url") or result_json.get("imageUrl")
+                    if not image_url:
+                        image_url = result_json.get("image_url") or result_json.get("imageUrl")
+
                     return {
                         "provider": "kie.ai",
                         "task_id": task_id,
