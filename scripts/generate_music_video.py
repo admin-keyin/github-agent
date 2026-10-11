@@ -131,12 +131,118 @@ PERFORMANCE_STYLES = {
 }
 
 
-# --- 3. 75% 원곡 충실도 + 스튜디오 마스터링 생성 엔진 ---
+# --- 3. 다이내믹 튜닝 & 리믹스 변형 엔진 (중간중간 피치/템포/스터터/필터 변형) ---
+
+def apply_dynamic_remix_tuning(input_audio, style_key):
+    """
+    곡 중간중간에 자연스러운 튜닝과 변주를 적용합니다:
+    1. 전체 튜닝: 스타일별 미세 피치/키 트랜스포즈 (+1~+2키 또는 -1키 미세 시프트)로 새로운 톤 부여
+    2. 파트별 템포 & 피치 모듈레이션: 빌드업 구간 살짝 가속, 브레이크 구간 변주
+    3. 중간중간 드롭 및 변형 효과:
+       - 16분음표 비트 스터터/롤 (Stutter/Beat roll)
+       - 테이프 스톱 / 피치 벤드 글라이드
+       - 로우패스 필터 스윕 브레이크다운 (Filter breakdown)
+    """
+    sample_rate = input_audio.frame_rate
+    channels = input_audio.channels
+    sample_width = input_audio.sample_width
+
+    # 스타일별 기본 튜닝 피치 팩터 (반음 0.5~1.5 수준 미세 튜닝)
+    style_pitch_shift = {
+        "edm": 1.05946,       # +1 반음 UP (신나고 에너제틱하게)
+        "dance": 1.05946,     # +1 반음 UP
+        "classic": 0.94387,   # -1 반음 DOWN (더 묵직하고 장엄하게)
+        "piano": 1.0293,      # 약 +0.5 반음 미세 튜닝 (감성적인 맑은 톤)
+        "recorder": 1.05946,  # +1 반음 UP (경쾌하고 맑은 고음)
+        "guitar": 0.9715,     # 약 -0.5 반음 (어쿠스틱 온기 & 깊이)
+        "electric": 1.05946,  # +1 반음 UP (날카로운 일렉 드라이브)
+        "epic": 0.94387       # -1 반음 DOWN (거대한 오케스트라)
+    }.get(style_key, 1.0)
+
+    # 1. 스타일에 따른 전체 기본 키 튜닝 적용
+    if style_pitch_shift != 1.0:
+        new_sr = int(sample_rate * style_pitch_shift)
+        base_tuned = input_audio._spawn(input_audio.raw_data, overrides={"frame_rate": new_sr}).set_frame_rate(sample_rate)
+    else:
+        base_tuned = input_audio
+
+    total_len = len(base_tuned)
+    # 곡 길이가 너무 짧으면 그대로 반환
+    if total_len < 15000:
+        return base_tuned
+
+    # 2. 곡 중간중간 (15초~25초 간격) 변주 및 튜닝 효과 포인트 계산
+    section_interval = 18000 # 18초 단위
+    segments = []
+    current_pos = 0
+    mod_index = 0
+
+    while current_pos < total_len:
+        next_pos = min(current_pos + section_interval, total_len)
+        chunk = base_tuned[current_pos:next_pos]
+
+        # 섹션 끝 무렵 (마지막 1.5초~2.5초)에 튜닝 변형 효과 삽입 (마지막 곡 끝부분 제외)
+        if len(chunk) > 6000 and (next_pos < total_len - 5000):
+            main_part = chunk[:-2000]
+            transition_part = chunk[-2000:]
+            
+            # 패턴별 변형 효과
+            effect_type = mod_index % 4
+
+            if effect_type == 0:
+                # [변형 1: 스터터 비트 롤 (Stutter Loop)] - 신나는 8비트/16비트 반복 글리치
+                stutter_slice = transition_part[:250]
+                stutters = stutter_slice * 8
+                # 후반부에 가벼운 피치업 글라이드
+                stutters = stutters.high_pass_filter(500)
+                modified_trans = stutters[:len(transition_part)].fade_in(50).fade_out(100)
+
+            elif effect_type == 1:
+                # [변형 2: 로우패스 필터 스윕 브레이크다운] - 클럽/페스티벌 먹먹해지는 빌드업
+                modified_trans = transition_part.low_pass_filter(800) + 2.0
+                modified_trans = modified_trans.fade_in(100).fade_out(100)
+
+            elif effect_type == 2:
+                # [변형 3: 순간적인 피치 튜닝 모듈레이션 (+2 반음 살짝 점프 후 복귀)]
+                sr_up = int(sample_rate * 1.12246) # +2 semitones
+                pitch_up = transition_part._spawn(transition_part.raw_data, overrides={"frame_rate": sr_up}).set_frame_rate(sample_rate)
+                if len(pitch_up) < len(transition_part):
+                    pitch_up = pitch_up + AudioSegment.silent(duration=len(transition_part) - len(pitch_up), frame_rate=sample_rate)
+                else:
+                    pitch_up = pitch_up[:len(transition_part)]
+                modified_trans = pitch_up.fade_in(150).fade_out(150)
+
+            else:
+                # [변형 4: 테이프 텐션 변주 / 테이프 슬로우 & 필터]
+                sr_down = int(sample_rate * 0.90) # 살짝 다운
+                pitch_down = transition_part._spawn(transition_part.raw_data, overrides={"frame_rate": sr_down}).set_frame_rate(sample_rate)
+                if len(pitch_down) < len(transition_part):
+                    pitch_down = pitch_down + AudioSegment.silent(duration=len(transition_part) - len(pitch_down), frame_rate=sample_rate)
+                else:
+                    pitch_down = pitch_down[:len(transition_part)]
+                modified_trans = pitch_down.fade_in(100).fade_out(100)
+
+            segments.append(main_part + modified_trans)
+            mod_index += 1
+        else:
+            segments.append(chunk)
+
+        current_pos = next_pos
+
+    # 조각 연결
+    remixed_audio = segments[0]
+    for seg in segments[1:]:
+        remixed_audio = remixed_audio + seg
+
+    return remixed_audio
+
+
+# --- 4. 75% 원곡 충실도 + 다이내믹 튜닝 변형 + 스튜디오 마스터링 생성 엔진 ---
 
 def get_inkey_performance_track(selected_file=None, selected_style=None, output_mp3_path="temp/ai_song.mp3"):
     """
     지정된 3개 음원 중 하나를 선택하고, 원본 음색의 75% 충실도를 완벽하게 보존하면서
-    선택된 스타일에 맞추어 깨끗한 고음질 320kbps 스튜디오 마스터링을 적용합니다.
+    선택된 스타일에 맞추어 곡 중간중간 튜닝/스터터/변조 및 고음질 320kbps 스튜디오 마스터링을 적용합니다.
     """
     music_dir = "assets/audio/music"
     all_files = glob.glob(f"{music_dir}/*.mp3") + glob.glob(f"{music_dir}/*.wav")
@@ -181,7 +287,7 @@ def get_inkey_performance_track(selected_file=None, selected_style=None, output_
     style_profile = PERFORMANCE_STYLES[style_key]
 
     print(f"\n=======================================================")
-    print(f" [Inkey Studio 75% Master Fidelity Sound Engine]")
+    print(f" [Inkey Studio Dynamic Tuned Sound Engine]")
     print(f" [Original Track] {chosen_file}")
     print(f" [Song Name] {song_name}")
     print(f" [Performance Style] {style_profile['style_name']} ({style_key.upper()})")
@@ -191,11 +297,14 @@ def get_inkey_performance_track(selected_file=None, selected_style=None, output_
     original_duration = len(raw_audio) / 1000.0
     print(f"[원곡 길이] {original_duration:.1f}초 ({int(original_duration//60)}분 {int(original_duration%60)}초)")
 
-    # 1. 75% 원곡 선명도 보존 + 스튜디오 마스터링 리마스터
-    temp_raw_wav = "temp/raw_source.wav"
-    raw_audio.normalize(headroom=0.5).export(temp_raw_wav, format="wav")
+    # 1. 곡 중간중간 다이내믹 튜닝 변형 (피치 튜닝, 비트 롤/스터터, 필터 브레이크) 적용
+    tuned_audio = apply_dynamic_remix_tuning(raw_audio, style_key)
 
-    # 2. 선택된 스타일 전용 어쿠스틱 DSP 필터 체인 적용 (클리핑 방지 및 최고 음질 320k 출력)
+    # 2. 임시 무손실 WAV 저장
+    temp_raw_wav = "temp/raw_source.wav"
+    tuned_audio.normalize(headroom=0.5).export(temp_raw_wav, format="wav")
+
+    # 3. 선택된 스타일 전용 어쿠스틱 DSP 필터 체인 적용 (클리핑 방지 및 최고 음질 320k 출력)
     dsp = style_profile["dsp_filter"]
     cmd = [
         "ffmpeg", "-y",
@@ -209,7 +318,7 @@ def get_inkey_performance_track(selected_file=None, selected_style=None, output_
 
     remastered_audio = AudioSegment.from_file(output_mp3_path)
     final_duration = len(remastered_audio) / 1000.0
-    print(f"[Mastering Complete] {output_mp3_path} (원본 75% 충실도 + {style_profile['style_name']}, 재생 시간: {final_duration:.1f}초)")
+    print(f"[Mastering Complete] {output_mp3_path} (다이내믹 튜닝 변주 + {style_profile['style_name']}, 재생 시간: {final_duration:.1f}초)")
 
     return song_name, chosen_file, final_duration, style_profile, style_key
 
