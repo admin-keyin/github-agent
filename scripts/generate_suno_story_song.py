@@ -174,7 +174,7 @@ def main():
 
     # 3. 비주얼 배경 및 타이포그래피 생성
     fetch_background_image(bg_image)
-    subtitle = f"AI Storytelling Track | Style: {style_tags[:45]}..."
+    subtitle = f"Inkey Story Track | Style: {style_tags[:45]}..."
     create_lyric_title_overlay(title, subtitle, title_png)
 
     # 4. 비디오 렌더링
@@ -184,26 +184,26 @@ def main():
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
 
-    youtube_title = f"{title} - Inkey Studio (Original AI Track)"
+    youtube_title = f"{title} - Inkey Studio"
     desc = (
         f"🎧 {youtube_title}\n\n"
         f"🎼 트랙 정보\n"
         f"• 곡명: {title}\n"
         f"• 스타일: {style_tags}\n"
-        f"• 프로듀싱: Inkey AI Music Studio\n"
+        f"• 프로듀싱: Inkey Studio\n"
         f"• 재생 시간: {int(duration_sec // 60)}분 {int(duration_sec % 60)}초\n\n"
         f"📝 가사 (Lyrics)\n"
         f"----------------------------------------\n"
         f"{lyrics}\n"
         f"----------------------------------------\n\n"
-        f"일상 속 따뜻한 위로와 새벽 감성을 담은 100% 오리지널 AI 창작 음악입니다.\n\n"
-        f"#InkeyMusic #AI음악 #인디발라드 #새벽감성 #KPOP #오리지널트랙 #SunoAI"
+        f"일상 속 따뜻한 위로와 새벽 감성을 전하는 Inkey Studio의 오리지널 음악입니다.\n\n"
+        f"#InkeyMusic #InkeyStudio #인디발라드 #새벽감성 #KPOP #오리지널트랙 #힐링음악"
     )
 
     meta_info = {
         "title": youtube_title[:100],
         "description": desc,
-        "artist": "Inkey AI Studio",
+        "artist": "Inkey Studio",
         "song_title": title
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:

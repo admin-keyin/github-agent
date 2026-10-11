@@ -1,8 +1,8 @@
-name: Suno AI Story Music Video Generator (Ghostagram / Grown-Up)
+name: Inkey Studio Story Music Video Generator
 
 on:
   schedule:
-    - cron: '0 */3 * * *' # 3시간마다 새로운 AI 스토리 노래 자동 생성 & 업로드
+    - cron: '0 */3 * * *' # 3시간마다 새로운 스토리 노래 자동 생성 & 업로드
   workflow_dispatch:
     inputs:
       song_type:
