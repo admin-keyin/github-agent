@@ -112,9 +112,18 @@ class SunoMusicGenerator:
         res = requests.post(create_url, headers=headers, json=payload, timeout=30)
         res.raise_for_status()
         data = res.json()
-        task_id = data.get("data", {}).get("taskId") or data.get("taskId")
+        print(f"[Kie.ai createTask Response] {data}")
+        data_field = data.get("data")
+        if isinstance(data_field, dict):
+            task_id = data_field.get("taskId") or data_field.get("task_id")
+        elif isinstance(data_field, str):
+            task_id = data_field
+        else:
+            task_id = data.get("taskId") or data.get("task_id")
+
         if not task_id:
-            raise ValueError(f"Kie.ai taskId를 발급받지 못했습니다: {data}")
+            msg = data.get("msg") or data.get("message")
+            raise ValueError(f"Kie.ai taskId 발급 실패: {msg} (전체 응답: {data})")
 
         print(f"[Kie.ai] Task ID: {task_id} - 음원 생성 대기 중 (최대 360초)...")
         record_url = f"https://api.kie.ai/api/v1/jobs/recordInfo?taskId={task_id}"
