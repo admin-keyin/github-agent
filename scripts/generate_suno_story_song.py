@@ -107,7 +107,7 @@ def render_music_video(image_path: str, overlay_png: str, audio_path: str, outpu
     audio = AudioSegment.from_file(audio_path)
     duration = len(audio) / 1000.0
 
-    # 파스텔 시안 & 핑크 감성 이퀄라이저 비주얼라이저
+    # 파스텔 시안 & 핑크 감성 이퀄라이저 비주얼라이저 (16:9 가로형 풀버전)
     filter_complex = (
         f"[0:v]scale=1280:720[bg];"
         f"[bg][1:v]overlay=0:0[bg_titled];"
@@ -129,7 +129,107 @@ def render_music_video(image_path: str, overlay_png: str, audio_path: str, outpu
         "-shortest", output_path
     ]
     subprocess.run(cmd, check=True)
-    print(f"[Render Success] {output_path} (길이: {duration:.1f}초)")
+    print(f"[Render Success] 풀버전 영상 완료: {output_path} (길이: {duration:.1f}초)")
+
+
+def render_shorts_video(image_path: str, title: str, audio_path: str, output_path: str, shorts_duration=45.0):
+    """
+    곡의 가장 에너지 넘치는 하이라이트(싸비/클라이맥스) 45초를 자동 추출하여
+    9:16 (1080x1920) 세로형 유튜브 쇼츠(Shorts) 영상을 렌더링합니다.
+    """
+    audio = AudioSegment.from_file(audio_path)
+    total_sec = len(audio) / 1000.0
+
+    # 하이라이트 구간 시작점 계산 (보통 1분 지점부터 하이라이트)
+    if total_sec > shorts_duration + 20:
+        start_sec = 40.0 # 40초~85초 하이라이트
+    elif total_sec > shorts_duration:
+        start_sec = max(0.0, (total_sec - shorts_duration) / 2.0)
+    else:
+        start_sec = 0.0
+        shorts_duration = total_sec
+
+    # 하이라이트 오디오 슬라이스 및 페이드 인/아웃
+    highlight_audio = audio[int(start_sec * 1000):int((start_sec + shorts_duration) * 1000)]
+    highlight_audio = highlight_audio.fade_in(1000).fade_out(1500)
+    temp_shorts_audio = "temp/shorts_highlight.mp3"
+    highlight_audio.export(temp_shorts_audio, format="mp3", bitrate="320k")
+
+    # 9:16 쇼츠용 세로 타이틀 카드 생성 (1080x1920)
+    shorts_overlay_png = "temp/shorts_overlay.png"
+    img = Image.new('RGBA', (1080, 1920), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    font_paths = [
+        "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
+        "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+        "/usr/share/fonts/nanum/NanumGothic.ttf",
+        "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
+        "/System/Library/Fonts/AppleSDGothicNeo.ttc",
+        "/Library/Fonts/AppleSDGothicNeo.ttc"
+    ]
+    font_main = None
+    font_sub = None
+    for p in font_paths:
+        if os.path.exists(p):
+            try:
+                font_main = ImageFont.truetype(p, 48)
+                font_sub = ImageFont.truetype(p, 28)
+                break
+            except Exception:
+                pass
+
+    if not font_main:
+        font_main = ImageFont.load_default()
+        font_sub = ImageFont.load_default()
+
+    sub_text = "Inkey Studio Highlight #Shorts"
+    bbox_m = draw.textbbox((0, 0), title, font=font_main)
+    w_m = bbox_m[2] - bbox_m[0]
+    h_m = bbox_m[3] - bbox_m[1]
+
+    bbox_s = draw.textbbox((0, 0), sub_text, font=font_sub)
+    w_s = bbox_s[2] - bbox_s[0]
+
+    max_w = max(w_m, w_s)
+    x = (1080 - max_w) // 2
+    y = 380
+
+    # 세로형 반투명 카드
+    draw.rounded_rectangle(
+        [x - 40, y - 20, x + max_w + 40, y + h_m + 60],
+        radius=20,
+        fill=(10, 15, 25, 210),
+        outline=(255, 255, 255, 60),
+        width=2
+    )
+    draw.text(((1080 - w_m) // 2, y), title, font=font_main, fill=(255, 255, 255, 255))
+    draw.text(((1080 - w_s) // 2, y + h_m + 16), sub_text, font=font_sub, fill=(180, 220, 255, 240))
+    img.save(shorts_overlay_png, "PNG")
+
+    # 9:16 세로 렌더링 + 중앙 센터 비주얼라이저
+    filter_complex = (
+        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[bg];"
+        f"[bg][1:v]overlay=0:0[bg_titled];"
+        f"[2:a]showfreqs=s=880x200:mode=bar:fscale=log:colors=0x00ffee@0.95|0xff66cc@0.75:win_size=1024[eq];"
+        f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-450[v]"
+    )
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-loop", "1", "-i", image_path,
+        "-loop", "1", "-i", shorts_overlay_png,
+        "-i", temp_shorts_audio,
+        "-filter_complex", filter_complex,
+        "-map", "[v]", "-map", "2:a",
+        "-c:v", "libx264", "-t", str(shorts_duration),
+        "-pix_fmt", "yuv420p",
+        "-preset", "ultrafast", "-crf", "20",
+        "-c:a", "aac", "-b:a", "320k",
+        "-shortest", output_path
+    ]
+    subprocess.run(cmd, check=True)
+    print(f"[Shorts Render Success] 9:16 쇼츠 하이라이트 영상 완료: {output_path} ({shorts_duration:.1f}초)")
 
 
 def main():
@@ -177,10 +277,14 @@ def main():
     subtitle = f"Inkey Story Track | Style: {style_tags[:45]}..."
     create_lyric_title_overlay(title, subtitle, title_png)
 
-    # 4. 비디오 렌더링
+    # 4. 풀버전 16:9 비디오 렌더링
     render_music_video(bg_image, title_png, audio_path, output_video)
 
-    # 5. 유튜브 업로드용 메타데이터 저장
+    # 4-2. 9:16 세로형 쇼츠 하이라이트 영상 렌더링 (45초)
+    output_shorts = "output_shorts_video.mp4"
+    render_shorts_video(bg_image, title, audio_path, output_shorts, shorts_duration=45.0)
+
+    # 5. 유튜브 업로드용 메타데이터 저장 (풀버전용)
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
 
@@ -209,7 +313,23 @@ def main():
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
 
-    print("\n[Complete] 모든 음악 영상 생성 및 메타데이터 저장이 완료되었습니다!")
+    # 5-2. 유튜브 쇼츠용 메타데이터 저장
+    shorts_title = f"{title} (Highlight) #Shorts"
+    shorts_desc = (
+        f"🎧 {title} - Inkey Studio Highlight\n\n"
+        f"풀버전 음원은 채널에서 감상하실 수 있습니다.\n\n"
+        f"#Shorts #InkeyStudio #InkeyMusic #하이라이트 #신곡 #노래추천 #킬링파트"
+    )
+    shorts_meta_info = {
+        "title": shorts_title[:100],
+        "description": shorts_desc,
+        "artist": "Inkey Studio",
+        "song_title": title
+    }
+    with open("temp/video_info_shorts.json", "w", encoding="utf-8") as f:
+        json.dump(shorts_meta_info, f, ensure_ascii=False, indent=2)
+
+    print("\n[Complete] 풀버전 영상 및 9:16 쇼츠 하이라이트 영상 제작이 모두 완료되었습니다!")
 
 
 if __name__ == "__main__":

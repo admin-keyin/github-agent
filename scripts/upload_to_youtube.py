@@ -42,14 +42,19 @@ if __name__ == "__main__":
         sys.exit(1)
 
     video_file = sys.argv[1]
-    
-    # 생성 스크립트에서 저장한 곡 메타데이터 읽기
-    json_path = "temp/video_info.json"
+    # 메타데이터 JSON 경로 지정 지원 (예: python upload_to_youtube.py output_shorts_video.mp4 temp/video_info_shorts.json)
+    if len(sys.argv) >= 3 and os.path.exists(sys.argv[2]):
+        json_path = sys.argv[2]
+    elif "shorts" in video_file.lower() and os.path.exists("temp/video_info_shorts.json"):
+        json_path = "temp/video_info_shorts.json"
+    else:
+        json_path = "temp/video_info.json"
+
     txt_path = "temp/video_info.txt"
     title_part = ""
     desc_part = ""
-    artist_name = "K-Pop Piano"
-    song_title = "멜론 인기곡"
+    artist_name = "Inkey Studio"
+    song_title = "Inkey Music"
 
     if os.path.exists(json_path):
         import json

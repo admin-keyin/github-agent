@@ -61,10 +61,20 @@ jobs:
         run: |
           python scripts/generate_suno_story_song.py
 
-      - name: Upload to YouTube
+      - name: Upload Full Video to YouTube
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
-          python scripts/upload_to_youtube.py output_music_video.mp4
+          python scripts/upload_to_youtube.py output_music_video.mp4 temp/video_info.json
+
+      - name: Upload Highlight Shorts to YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          if [ -f "output_shorts_video.mp4" ]; then
+            python scripts/upload_to_youtube.py output_shorts_video.mp4 temp/video_info_shorts.json
+          fi
