@@ -191,21 +191,20 @@ def main():
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
 
-    youtube_title = f"[AI 작곡] {title} (Official Audio)"
+    youtube_title = f"{title} - Inkey Studio (Original AI Track)"
     desc = (
         f"🎧 {youtube_title}\n\n"
         f"🎼 트랙 정보\n"
         f"• 곡명: {title}\n"
         f"• 스타일: {style_tags}\n"
-        f"• 제작: Inkey Music Studio (Suno AI Engine)\n"
+        f"• 프로듀싱: Inkey AI Music Studio\n"
         f"• 재생 시간: {int(duration_sec // 60)}분 {int(duration_sec % 60)}초\n\n"
         f"📝 가사 (Lyrics)\n"
         f"----------------------------------------\n"
         f"{lyrics}\n"
         f"----------------------------------------\n\n"
-        f"유튜버 심통봇('고스타그램'), 머무르('꿈꾸던 어른이 되었나요') 감성의\n"
-        f"스토리텔링과 공감을 담은 AI 음악입니다.\n\n"
-        f"#고스타그램 #머무르 #SunoAI #AI음악 #심통봇 #꿈꾸던어른이되었나요 #InkeyMusic"
+        f"일상 속 따뜻한 위로와 새벽 감성을 담은 100% 오리지널 AI 창작 음악입니다.\n\n"
+        f"#InkeyMusic #AI음악 #인디발라드 #새벽감성 #KPOP #오리지널트랙 #SunoAI"
     )
 
     meta_info = {

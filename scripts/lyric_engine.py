@@ -1,6 +1,7 @@
 """
-고스타그램(GHOSTagram), 꿈꾸던 어른이 되었나요 스타일의
-스토리텔링 가사 & 음악 프롬프트 생성기 (Gemini 연동 및 프리셋 지원)
+100% 독창적(Original) 창작 스토리텔링 가사 & 음악 프롬프트 생성기.
+기존 아티스트(심통봇, 머무르 등)의 곡명 및 고유 가사를 절대 복제하지 않고,
+감성 힙합 듀엣 / 힐링 어쿠스틱 발라드 / 에픽 애니 락 장르의 순수 창작곡을 제작합니다.
 """
 
 import os
@@ -8,131 +9,125 @@ import json
 import random
 import requests
 
-PRESET_TRACKS = {
-    "ghostagram": {
-        "title": "고스타그램 (GHOSTagram - Remake Vibe)",
-        "theme": "성불하기 싫은 MZ 귀신의 이야기와 이를 잡으러 온 저승사자",
-        "style_tags": "2010s k-pop hiphop, melodic rap, catchy duet, bright boom bap, nostalgic melody, piano intro, playful synth, male rapper and sweet female vocals, 96 bpm",
-        "vocal_gender": "m/f",
-        "keywords": ["성불", "저승사자", "MBTI", "인생네컷", "인스타그램", "야식", "새벽"],
-        "lyrics": """[Intro: Female Vocal & Soft Piano]
-거울 속에 비친 내 모습은 흐릿하지만
-아직 세상엔 하고 싶은 게 너무 많은걸
-(Wait, hold on, 누구세요?)
+# 100% 고유한 창작 스토리텔링 테마 및 독창적 가사
+ORIGINAL_THEMES = {
+    "ghost_duet": {
+        "title_pool": [
+            "새벽 세 시의 유령 친구 (Ghost in the Feed)",
+            "성불 보류 중 (Pending Spirit)",
+            "이승에 남긴 메모 (Midnight Note)",
+            "밤하늘 네컷 사진 (Polaroid with You)"
+        ],
+        "style_tags": "2010s sentimental melodic k-rap, sweet acoustic piano, boom bap beat, emotional male rap with airy female vocals, nostalgic chorus, 94 bpm",
+        "lyrics": """[Intro: Soft Piano & Vinyl Crackle]
+희미한 가로등 아래 그림자 하나
+아직 세상은 잠들지 못했나 봐
+(저기... 누구세요?)
 
-[Verse 1: Male Rap - Grim Reaper]
-Yo, Time's UP, 모래시계는 다 됐어
-이승에서의 너의 미련 이제 그만 내려놓고
-서천 꽃밭행 특급열차 출발할 시간
-영수증 챙겨, 이제 갈 준비 해
+[Verse 1: Male Rap]
+시간은 벌써 새벽 세 시 반
+달빛이 내려앉은 편의점 앞
+떠나야 할 시간이 찾아왔지만
+이 거리를 걷는 발걸음이 무거워
+다들 바쁘게 앞만 보며 살아갈 때
+우린 남겨진 온기를 이야기해
 
-[Verse 2: Female Vocal & Rap - MZ Ghost]
-잠깐만요 사자님, 저 아직 MBTI도 모른단 말예요
-인생네컷 프레임도 다 못 찍어봤는데
-내 피드에 올릴 성불 챌린지 하나만 하고 가면 안 돼요?
-새벽 한강 라면 맛도 아직 잊지 못했단 말야
+[Verse 2: Female Vocal]
+아직 읽지 않은 메시지들이 마음에 맴돌아요
+밤하늘 별빛은 왜 이리 따뜻한 건가요
+조금만 더 이 바람을 느끼고 싶어
+하루만 더 머물면 안 될까요
 
-[Pre-Chorus: Female Vocal]
-밤하늘 별빛 아래 반짝이는 이 거리
-나만 두고 떠나긴 너무 눈부시잖아
-조금만 더 머물고 싶어
+[Chorus: Duet]
+흐려지는 시간의 경계 속에서
+우리 함께 나눈 작은 웃음들
+달빛이 구름 뒤로 숨기 전까지
+마지막 춤을 추듯 걸어가요
+이 밤이 끝나지 않기를 기도하며
 
-[Chorus: Duet - Ghost & Reaper]
-Don't send me away, 오늘 밤만은 나를 놓아줘
-고스타그램 피드 속 우리들의 기억처럼
-새벽달빛이 저물 때까지만
-우리 조금만 더 이 밤을 춤추자
-(성불은 내일 아침에 할게요, 진짜로!)
-
-[Bridge: Playful Acoustic & Beat Drop]
-"야, 너 저번 주에도 그 말 했잖아!"
-"에이, 사자님도 탕후루 한 입 드셔보실래요?"
-
-[Outro: Duet & Fade Out]
-희미해지는 불빛 사이로
-내일도 여기서 만나요, 안녕."""
+[Outro: Soft Piano Solo]
+조용히 울리는 새벽 종소리
+내일도 기억해 줄래요."""
     },
-    "grown_up": {
-        "title": "꿈꾸던 어른이 되었나요? (Acoustic Ballad Ver.)",
-        "theme": "어린 시절의 나와 마주하며 건네는 담담하고 벅찬 위로",
-        "style_tags": "emotional k-ballad, soft acoustic guitar, warm grand piano, melancholy cello, sentimental female vocal, cinematic orchestral build-up, 72 bpm, 2020s indie pop",
-        "vocal_gender": "f",
-        "keywords": ["어른", "위로", "어릴적", "눈물", "거울", "새벽", "꿈"],
-        "lyrics": """[Intro: Grand Piano & Warm Cello]
-거울에 비춘 나는 잘 지내는 척해요
-말은 점점 줄고 한숨만 길어져요
-소란한 하룰 지나 집으로 돌아올 때면
-참았던 마음들이 문 앞에 서 있어요
+    "healing_ballad": {
+        "title_pool": [
+            "어린 날의 나에게 띄우는 편지 (To My Younger Self)",
+            "새벽을 걷는 너에게 (Walking Through Dawn)",
+            "그 시절 우리가 꿈꾼 계절 (The Season We Dreamed)",
+            "다정했던 소년의 눈빛 (Warm Memories)"
+        ],
+        "style_tags": "heartfelt korean indie ballad, warm grand piano, expressive cello, gentle female acoustic vocal, cinematic emotional build-up, 70 bpm",
+        "lyrics": """[Intro: Warm Grand Piano]
+오랜만에 꺼내본 낡은 서랍 속
+작은 일기장엔 서툰 글씨들
+세상이 전부 다 찬란할 줄 알았던
+그 시절 내가 묻고 있네요
 
 [Verse 1]
-어린 나는 더 멀리 갈 줄 알았죠
-울지 않는 얼굴로 커갈 줄 알았죠
-그런데 아직도 난 작은 말에 흔들려요
-그래도 무너지진 않으려 깊은 숨을 쉬어요
+넘어질 때마다 아파서 울던 아이는
+어느덧 남몰래 눈물을 훔치는 법을 배웠죠
+모든 게 뜻대로 되지 않는 오늘이어도
+버텨낸 하루가 헛되지 않음을
 
-[Chorus: Emotional & Orchestral Surge]
-꿈꾸던 어른이 되었나요?
-어릴 적 몰랐던 고민들이 하나 둘씩
-어깨에 조용히 내려앉아 나를 짓누르네요
-꿈꾸던 어른이 된 걸까요?
-가끔은 무너지는 새벽 밤에도
-겨우 겨우 버티는 작은 나를
-어른이라 부를 수 있을까요?
+[Chorus: Emotional Strings Surge]
+어린 날의 나에게 전하고 싶어
+넌 충분히 잘 해내고 있다고
+차가운 밤하늘 길을 잃어도
+네 안의 따뜻한 빛을 잃지 마
+내가 널 안아줄 테니
 
-[Bridge: Strings Swell]
-넘어지고 헤매어도
-그 시절 내가 꿈꿨던 다정함만은
-잃지 않기를
-
-[Outro: Soft Piano & Whisper]
-오늘 밤도 수고했어요
-어린 날의 내가 나를 안아주네요."""
+[Outro: Gentle Piano & Whisper]
+수고 많았어, 오늘 밤도
+편히 잠들기를."""
     },
-    "cyber_warrior": {
-        "title": "전장의 그림자 (Ninja Battle Epic)",
-        "theme": "닌자 대전과 나루토 풍의 비장한 전투와 신념",
-        "style_tags": "oriental cinematic rock, heavy shamisen, taiko drum roll, electric guitar distortion, epic male vocal, aggressive breakdown, anime opening style, 155 bpm",
-        "vocal_gender": "m",
-        "keywords": ["닌자", "전장", "오의", "불꽃", "차크라", "운명"],
-        "lyrics": """[Intro: Shamisen Solo & Taiko Drums]
-어둠을 가르는 푸른 뇌광의 섬광
-피할 수 없는 전장의 붉은 운명
+    "battle_epic": {
+        "title_pool": [
+            "푸른 번개의 맹세 (Oath of Blue Lightning)",
+            "바람의 궤적 (Trajectory of the Wind)",
+            "전설의 갈림길 (Path of Destiny)"
+        ],
+        "style_tags": "epic oriental rock anime opening, heavy distorted guitar, fast taiko drum roll, soaring male vocals, high energy breakdown, 160 bpm",
+        "lyrics": """[Intro: Shamisen Solo & Heavy Drums]
+칠흑 같은 어둠을 가르는 불꽃
+결코 물러서지 않을 나의 길
 
 [Verse 1]
-바람을 가르며 달리는 그림자
-눈동자에 맺힌 차가운 결의
-물러설 곳 없는 벼랑 끝에서도
-나의 신념은 결코 꺾이지 않아
+휘몰아치는 비바람 속에서도
+눈동자에 맺힌 차가운 신념
+운명이 나를 시험한다 해도
+꺾이지 않는 칼날처럼 나아가리
 
 [Chorus: Explosive Rock Drop]
-불타오르는 영혼의 나선환
-운명을 넘어선 전설의 격돌
-끝나지 않는 싸움의 끝에서
-내 이름을 세상에 새겨라!
+하늘을 뒤흔드는 푸른 섬광
+끝없는 전장 위를 질주해
+모든 시련을 넘어선 순간
+새로운 새벽이 밝아오리라!
 
 [Outro]
-바람이 잠들고 남은 승자의 침묵."""
+바람만이 기억할 우리들의 승리."""
     }
 }
 
-def generate_lyric_and_style(preset_key: str = "ghostagram", custom_prompt: str = ""):
+def generate_lyric_and_style(song_type: str = "ghost_duet", custom_prompt: str = ""):
     """
-    선택된 프리셋 또는 사용자 지정 프롬프트에 맞춰 가사와 스타일 태그를 반환합니다.
-    Gemini API 키가 있으면 Gemini를 통해 완전히 새로운 가사와 스타일을 생성합니다.
+    100% 독창적인 가사와 제목을 생성합니다.
+    기존 상용곡 제목/가사를 모방하지 않고 순수 창작물로 출력합니다.
     """
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
 
     if custom_prompt and gemini_key:
         try:
-            print(f"[Lyric Engine] Gemini AI로 맞춤 가사 & 음악 스타일 작사/작곡 프롬프트 생성 중...")
+            print(f"[Lyric Engine] Gemini AI로 100% 독창적인 순수 창작 가사 및 스타일 생성 중...")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
             sys_instruction = (
-                "당신은 '고스타그램'이나 '꿈꾸던 어른이 되었나요' 같은 감성적이고 트렌디한 히트곡을 만드는 천재 AI 작사가 및 음악 프로듀서입니다.\n"
-                "사용자의 주제를 바탕으로 Suno AI에 최적화된 형식으로 다음 JSON을 출력하세요:\n"
+                "당신은 감성적이고 트렌디한 K-POP/인디 발라드를 작사/작곡하는 전문 AI 프로듀서입니다.\n"
+                "주의사항: 기존 가수(심통봇, 머무르 등)의 노래 제목('고스타그램', '꿈꾸던 어른이 되었나요' 등)이나 고유 가사를 절대 사용하거나 복제하지 마세요.\n"
+                "완전히 새롭고 시적인 100% 독창적인 오리지널 제목과 가사를 작성하세요.\n"
+                "다음 JSON 형식으로만 출력하세요:\n"
                 "{\n"
-                '  "title": "곡 제목",\n'
-                '  "style_tags": "Suno 스타일 프롬프트 (영문 태그 조합: 장르, 악기, 분위기, BPM, 보컬 특징)",\n'
-                '  "lyrics": "[Intro]...[Verse 1]...[Chorus]...[Bridge]...[Outro] 형태의 서사적이고 감동적인 한글 가사"\n'
+                '  "title": "완전히 독창적이고 매력적인 순수 창작 곡 제목 (영문 부제 포함 가능)",\n'
+                '  "style_tags": "Suno V6용 영문 스타일 태그 (장르, 악기, 분위기, 템포, 보컬 특징)",\n'
+                '  "lyrics": "[Intro]...[Verse 1]...[Chorus]...[Outro] 구조의 100% 순수 창작 감성 가사"\n'
                 "}\n"
                 "반드시 마크다운 없이 순수 JSON만 반환하세요."
             )
@@ -151,11 +146,18 @@ def generate_lyric_and_style(preset_key: str = "ghostagram", custom_prompt: str 
                 parsed = json.loads(text.strip())
                 return parsed["title"], parsed["style_tags"], parsed["lyrics"]
         except Exception as e:
-            print(f"[Lyric Engine Warn] Gemini 생성 실패 ({e}), 프리셋으로 전환합니다.")
+            print(f"[Lyric Engine Warn] Gemini 자동 작사 오류 ({e}), 독창적 프리셋으로 전환합니다.")
 
-    # 프리셋 반환
-    if preset_key not in PRESET_TRACKS:
-        preset_key = random.choice(list(PRESET_TRACKS.keys()))
+    # 매핑 호환성 처리 (이전 키 지원)
+    key_map = {
+        "ghostagram": "ghost_duet",
+        "grown_up": "healing_ballad",
+        "cyber_warrior": "battle_epic"
+    }
+    target_key = key_map.get(song_type, song_type)
+    if target_key not in ORIGINAL_THEMES:
+        target_key = random.choice(list(ORIGINAL_THEMES.keys()))
 
-    preset = PRESET_TRACKS[preset_key]
-    return preset["title"], preset["style_tags"], preset["lyrics"]
+    preset = ORIGINAL_THEMES[target_key]
+    title = random.choice(preset["title_pool"])
+    return title, preset["style_tags"], preset["lyrics"]
