@@ -122,15 +122,23 @@ class SunoMusicGenerator:
             r = requests.get(record_url, headers=headers, timeout=20)
             if r.status_code == 200:
                 rec_data = r.json().get("data", {})
-                status = rec_data.get("status")
+                # Kie.ai는 state 또는 status 필드로 반환됨
+                current_state = rec_data.get("state") or rec_data.get("status")
                 if i % 6 == 0:
-                    print(f"[Kie.ai Progress] 경과 시간: {(i+1)*5}초, 현재 상태: {status}")
-                if status == "success":
-                    result_json = rec_data.get("resultJson", {})
+                    print(f"[Kie.ai Progress] 경과 시간: {(i+1)*5}초, 현재 상태: {current_state}")
+                if current_state in ["success", "SUCCESS"]:
+                    result_json_raw = rec_data.get("resultJson", {})
+                    if isinstance(result_json_raw, str):
+                        try:
+                            result_json = json.loads(result_json_raw)
+                        except Exception:
+                            result_json = {}
+                    else:
+                        result_json = result_json_raw
+
                     audio_urls = result_json.get("resultUrls", [])
                     audio_url = audio_urls[0] if audio_urls else None
                     if not audio_url:
-                        # 구조가 객체일 경우
                         audio_url = result_json.get("audio_url") or result_json.get("audioUrl")
                     return {
                         "provider": "kie.ai",
@@ -138,7 +146,7 @@ class SunoMusicGenerator:
                         "audio_url": audio_url,
                         "image_url": result_json.get("image_url") or result_json.get("imageUrl")
                     }
-                elif status in ["fail", "error"]:
+                elif current_state in ["fail", "error", "FAIL"]:
                     raise RuntimeError(f"Kie.ai 작업 실패: {rec_data}")
 
         raise TimeoutError("Kie.ai 음원 생성 시간 초과 (360초)")

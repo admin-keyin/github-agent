@@ -156,28 +156,21 @@ def main():
     title_png = "temp/title_overlay.png"
     output_video = "output_music_video.mp4"
 
-    # 2. 음원 생성 (Suno API 우선 -> 없을 시 스튜디오 로컬 합성)
+    # 2. 음원 생성 (Kie.ai Suno V6 클라우드 AI 엔진 호출)
     suno_client = SunoMusicGenerator()
-    generated_via_suno = False
 
-    if suno_client.has_any_api_key():
-        try:
-            print("[INFO] 등록된 Suno API 토큰/키를 감지했습니다. 클라우드에서 Suno 음원 생성을 시도합니다.")
-            result = suno_client.generate_music(
-                title=title,
-                style=style_tags,
-                lyrics=lyrics,
-                output_audio_path=audio_path,
-                instrumental=instrumental
-            )
-            print(f"[Suno Complete] {result['provider']} 로부터 고음질 생성 성공!")
-            generated_via_suno = True
-        except Exception as e:
-            print(f"[Suno API Error] {e} -> 로컬 고음질 스튜디오 믹싱 엔진으로 자동 폴백합니다.")
+    if not suno_client.has_any_api_key():
+        raise RuntimeError("KIE_API_KEY 또는 SUNO_API_KEY 가 설정되지 않았습니다. Suno AI 음원을 생성할 수 없습니다.")
 
-    if not generated_via_suno:
-        print("[INFO] 로컬 스튜디오 오디오 엔진으로 감성 편곡 및 보컬 하모니를 합성합니다.")
-        create_standalone_studio_track(style_tags, lyrics, audio_path)
+    print("[INFO] 등록된 Suno API 토큰으로 100% 순수 AI 신곡 음원 생성을 시작합니다...")
+    result = suno_client.generate_music(
+        title=title,
+        style=style_tags,
+        lyrics=lyrics,
+        output_audio_path=audio_path,
+        instrumental=instrumental
+    )
+    print(f"[Suno Complete] {result['provider']} 로부터 고음질 AI 오리지널 트랙 생성 완료!")
 
     # 3. 비주얼 배경 및 타이포그래피 생성
     fetch_background_image(bg_image)
