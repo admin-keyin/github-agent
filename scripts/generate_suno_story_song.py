@@ -235,7 +235,9 @@ def render_shorts_video(image_path: str, title: str, audio_path: str, output_pat
 def main():
     os.makedirs("temp", exist_ok=True)
 
-    song_type = os.getenv("INPUT_SONG_TYPE", "ghostagram").strip().lower() # ghostagram / grown_up / cyber_warrior / custom
+    song_type = os.getenv("INPUT_SONG_TYPE", "random").strip().lower()
+    if not song_type or song_type == "":
+        song_type = "random"
     custom_prompt = os.getenv("INPUT_CUSTOM_PROMPT", "").strip()
     instrumental = os.getenv("INPUT_INSTRUMENTAL", "false").lower() == "true"
 
@@ -300,8 +302,11 @@ def main():
         f"----------------------------------------\n"
         f"{lyrics}\n"
         f"----------------------------------------\n\n"
-        f"일상 속 따뜻한 위로와 새벽 감성을 전하는 Inkey Studio의 오리지널 음악입니다.\n\n"
-        f"#InkeyMusic #InkeyStudio #인디발라드 #새벽감성 #KPOP #오리지널트랙 #힐링음악"
+        f"✨ Collaboration:\n"
+        f"본 음원은 음악 협업도구 KIE와 함께 제작되었습니다.\n"
+        f"🔗 KIE 바로가기: https://kie.ai?ref=a75838b6fecc53ef2774b5279d142d11\n\n"
+        f"일상 속 따뜻한 위로와 감성을 전하는 Inkey Studio의 오리지널 음악입니다.\n\n"
+        f"#InkeyMusic #InkeyStudio #인디발라드 #새벽감성 #KPOP #오리지널트랙 #힐링음악 #KIE"
     )
 
     meta_info = {
@@ -318,7 +323,8 @@ def main():
     shorts_desc = (
         f"🎧 {title} - Inkey Studio Highlight\n\n"
         f"풀버전 음원은 채널에서 감상하실 수 있습니다.\n\n"
-        f"#Shorts #InkeyStudio #InkeyMusic #하이라이트 #신곡 #노래추천 #킬링파트"
+        f"✨ 음악 협업도구 KIE: https://kie.ai?ref=a75838b6fecc53ef2774b5279d142d11\n\n"
+        f"#Shorts #InkeyStudio #InkeyMusic #하이라이트 #신곡 #노래추천 #킬링파트 #KIE"
     )
     shorts_meta_info = {
         "title": shorts_title[:100],

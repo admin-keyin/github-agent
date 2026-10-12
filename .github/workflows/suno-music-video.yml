@@ -6,14 +6,15 @@ on:
   workflow_dispatch:
     inputs:
       song_type:
-        description: '노래 테마 (ghost_duet: 새벽 감성 듀엣 랩 / healing_ballad: 위로의 감성 발라드 / battle_epic: 에픽 오리엔탈 락 / random)'
+        description: '노래 테마 (indie_band: 감성 인디밴드/모던록 / healing_ballad: 위로 감성 발라드 / ghost_duet: 새벽 듀엣 랩 / random: 발라드&인디밴드 다채로운 랜덤)'
         required: false
         default: 'random'
         type: choice
         options:
           - 'random'
-          - 'ghost_duet'
+          - 'indie_band'
           - 'healing_ballad'
+          - 'ghost_duet'
           - 'battle_epic'
       custom_prompt:
         description: '맞춤 작사/작곡 주제 (비워두면 테마별 프리셋/Gemini 자동 작사)'
