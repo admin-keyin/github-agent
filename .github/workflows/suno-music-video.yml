@@ -6,12 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       song_type:
-        description: '노래 테마 (indie_band: 감성 인디밴드/모던록 / healing_ballad: 위로 감성 발라드 / ghost_duet: 새벽 듀엣 랩 / random: 발라드&인디밴드 다채로운 랜덤)'
+        description: '노래 테마 (changpop: 창팝·질주 팝록 / indie_band: 감성 인디밴드 / healing_ballad: 위로 감성 발라드 / random: 매번 다채로운 랜덤)'
         required: false
         default: 'random'
         type: choice
         options:
           - 'random'
+          - 'changpop'
           - 'indie_band'
           - 'healing_ballad'
           - 'ghost_duet'
