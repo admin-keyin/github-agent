@@ -23,14 +23,14 @@ GENRE_POOLS = {
         "Korean J-Pop Style Anime Opening Rock",
         "Fast-paced Korean Modern Pop Rock, High Energy Anime OP",
         "Korean Funk Pop Rock with Driving Bassline, Catchy Dance-Rock",
-        "Catchy 2020s K-Pop Band Anime Rock (DAY6, QWER Style)",
+        "Catchy 2020s K-Pop Band Anime Rock",
         "Piano Rock with Fast Driving Drum Beats and Slap Bass"
     ],
     "indie_band": [
         "Korean Britpop-influenced Melancholic Indie Rock",
         "Korean Dream Pop, Atmospheric Shoegaze Indie Band",
         "Uplifting Korean Youth Indie Pop Rock",
-        "Jangly Acoustic-Electric Indie Rock (Jannabi, The Black Skirts Style)",
+        "Jangly Acoustic-Electric Indie Rock",
         "Melodic Indie Modern Rock with Soaring Guitar Hooks"
     ],
     "healing_ballad": [
@@ -203,15 +203,15 @@ def build_dynamic_music_spec(song_type: str):
     texture = random.choice(TEXTURE_POOLS)
 
     if category == "changpop":
-        name = "창팝 / 질주형 애니메이션 팝록 (DAY6·QWER·Anime OP Style)"
+        name = "질주형 팝록"
         bpm = random.randint(132, 146)
         vibe = "강렬한 비트와 펑키한 슬랩 베이스, 가슴 뻥 뚫리는 사이다 후렴구와 시원한 질주감"
     elif category == "indie_band":
-        name = "감성 모던록 & 인디밴드 (잔나비·넬·검정치마 Style)"
+        name = "감성 모던록 & 인디밴드"
         bpm = random.randint(86, 124)
         vibe = "청춘의 낭만과 서정성이 깃든 독창적인 밴드 사운드, 여운 넘치는 기타 리프"
     else: # healing_ballad
-        name = "위로의 어쿠스틱 & 시네마틱 발라드"
+        name = "어쿠스틱 & 시네마틱 발라드"
         bpm = random.randint(64, 82)
         vibe = "새벽 공기처럼 담담하게 스며드는 눈물과 따뜻한 위로, 서서히 벅차오르는 스트링"
 
@@ -269,7 +269,8 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 
 [★ 2. 중독적인 가사 (lyrics) 작사 규칙]
 1. 곡 제목(title)은 온전한 한국어 곡명으로 짓고, 절대 '#1', '#91' 같은 해시태그나 임의의 숫자 번호를 붙이지 마세요.
-2. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
+2. 가사 본문이나 대괄호 섹션 태그에 특정 가수명이나 밴드명(예: 잔나비, 넬, DAY6 등)을 절대 언급하거나 포함하지 마세요. 순수 음악적 연주 지시어만 영문으로 작성하세요.
+3. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
 2. 장르가 창팝/질주록인 경우, 시원시원한 라임과 통쾌한 딕션, 따라 부르기 쉬운 킬링 파트를 만드세요.
 3. 장르가 발라드/인디인 경우, 문학적이고 시적인 서사와 먹먹한 여운을 담으세요.
 4. 섹션별로 Suno가 연주 다이내믹스를 극대화할 수 있도록 연주 지시 큐를 반드시 대괄호에 표기하세요:
@@ -321,9 +322,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
         title = f"{random.choice(prefixes)} {random.choice(subjects)}"
         
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
-        lyrics = f"""[Intro: Fast Punchy Drums & Slap Bass Riff]
-(질주하는 드럼 비트와 함께 화려한 기타 리프가 폭발하며 시작)
-
+        lyrics = f"""[Intro: Driving Drums & Bass Riff]
 [Verse 1: Fast Rhythmic Delivery]
 어둠 속에 멈춰있던 시계태엽을 감아
 답답했던 한숨 따윈 전부 뒤로 던져
@@ -366,9 +365,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
         title = f"{random.choice(prefixes)} {random.choice(subjects)}"
         
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
-        lyrics = f"""[Intro: {spec['name']} - Delicate Melody Lead]
-(고요한 선율과 함께 아련하게 시작되는 전주)
-
+        lyrics = f"""[Intro: Acoustic & Piano Melody Lead]
 [Verse 1: Whispering Intimate Voice]
 어스름한 가로등 아래를 천천히 걸어가
 마음속 깊이 접어두었던 서랍을 조용히 열어

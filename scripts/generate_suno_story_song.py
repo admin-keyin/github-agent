@@ -272,9 +272,20 @@ def main():
         output_audio_path=audio_path,
         instrumental=instrumental
     )
-    # 곡명에서 #이나 번호가 포함되어 있다면 깔끔하게 제거
+    # 곡명 및 가사 클렌징
     import re
     title = re.sub(r'\s*#\d+', '', title).strip()
+
+    # 가사에서 가수명 언급이나 괄호 속 설명 문구 제거
+    clean_lyrics_lines = []
+    for line in lyrics.splitlines():
+        # (고요한 선율과 함께...) 같은 한글 연주 설명 괄호줄 제거
+        if re.match(r'^\s*\([가-힣\s\.,!\?]+\)\s*$', line):
+            continue
+        # 태그 내 가수명/스타일 잔여 문구 정리 (예: (잔나비·넬·검정치마 Style), (DAY6·QWER 등))
+        cleaned_line = re.sub(r'\s*\([^\)]*(?:잔나비|넬|검정치마|day6|qwer|style|가수)[^\)]*\)', '', line, flags=re.IGNORECASE)
+        clean_lyrics_lines.append(cleaned_line)
+    display_lyrics = "\n".join(clean_lyrics_lines).strip()
 
     # 3. 비주얼 배경 및 타이포그래피 생성
     fetch_background_image(bg_image)
@@ -301,7 +312,7 @@ def main():
         f"• 재생 시간: {int(duration_sec // 60)}분 {int(duration_sec % 60)}초\n\n"
         f"📝 가사 (Lyrics)\n"
         f"----------------------------------------\n"
-        f"{lyrics}\n"
+        f"{display_lyrics}\n"
         f"----------------------------------------\n\n"
         f"✨ Collaboration:\n"
         f"본 음원은 음악 협업도구 KIE와 함께 제작되었습니다.\n"
