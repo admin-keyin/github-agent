@@ -272,11 +272,13 @@ def main():
         output_audio_path=audio_path,
         instrumental=instrumental
     )
-    print(f"[Suno Complete] {result['provider']} 로부터 고음질 AI 오리지널 트랙 생성 완료!")
+    # 곡명에서 #이나 번호가 포함되어 있다면 깔끔하게 제거
+    import re
+    title = re.sub(r'\s*#\d+', '', title).strip()
 
     # 3. 비주얼 배경 및 타이포그래피 생성
     fetch_background_image(bg_image)
-    subtitle = f"Inkey Story Track | Style: {style_tags[:45]}..."
+    subtitle = "Inkey Studio Original Track"
     create_lyric_title_overlay(title, subtitle, title_png)
 
     # 4. 풀버전 16:9 비디오 렌더링
@@ -295,7 +297,6 @@ def main():
         f"🎧 {youtube_title}\n\n"
         f"🎼 트랙 정보\n"
         f"• 곡명: {title}\n"
-        f"• 스타일: {style_tags}\n"
         f"• 프로듀싱: Inkey Studio\n"
         f"• 재생 시간: {int(duration_sec // 60)}분 {int(duration_sec % 60)}초\n\n"
         f"📝 가사 (Lyrics)\n"

@@ -268,7 +268,8 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 (주의: 추상적인 미사여구 대신 Suno 엔진이 바로 오디오 신디사이징으로 해석할 수 있는 구체적 음악 용어 위주로 작성)
 
 [★ 2. 중독적인 가사 (lyrics) 작사 규칙]
-1. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
+1. 곡 제목(title)은 온전한 한국어 곡명으로 짓고, 절대 '#1', '#91' 같은 해시태그나 임의의 숫자 번호를 붙이지 마세요.
+2. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
 2. 장르가 창팝/질주록인 경우, 시원시원한 라임과 통쾌한 딕션, 따라 부르기 쉬운 킬링 파트를 만드세요.
 3. 장르가 발라드/인디인 경우, 문학적이고 시적인 서사와 먹먹한 여운을 담으세요.
 4. 섹션별로 Suno가 연주 다이내믹스를 극대화할 수 있도록 연주 지시 큐를 반드시 대괄호에 표기하세요:
@@ -317,7 +318,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
     if spec["category"] == "changpop":
         prefixes = ["모두가 잠든 밤의", "거침없는", "멈추지 않는", "새로운 질서의", "통쾌한", "푸른 불꽃의", "전력질주", "마침내 찾아온", "한계를 부수는"]
         subjects = ["정상화", "카운터어택", "질주", "스파크", "돌파구", "오버드라이브", "시그널", "리셋", "플레이리스트"]
-        title = f"{random.choice(prefixes)} {random.choice(subjects)} #{seed % 99 + 1}"
+        title = f"{random.choice(prefixes)} {random.choice(subjects)}"
         
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
         lyrics = f"""[Intro: Fast Punchy Drums & Slap Bass Riff]
@@ -362,7 +363,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
     else:
         prefixes = ["우리가 머물던", "어느 늦은 밤의", "푸른 새벽의", "바람이 머무는", "달빛 스케치", "비 내리는 오후", "기억의 파도", "너에게 닿는", "계절의 끝자락", "소란한 밤의", "마지막 정거장의"]
         subjects = ["정거장", "노랫소리", "고백", "온기", "발자국", "그림자", "풍경", "기억", "바람", "빛", "계절", "여름밤", "일기장"]
-        title = f"{random.choice(prefixes)} {random.choice(subjects)} #{seed % 99 + 1}"
+        title = f"{random.choice(prefixes)} {random.choice(subjects)}"
         
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
         lyrics = f"""[Intro: {spec['name']} - Delicate Melody Lead]
