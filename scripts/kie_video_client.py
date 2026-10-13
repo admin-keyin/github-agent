@@ -6,6 +6,7 @@ Kie.ai Wan 3.0 / Wan 2.6 기반 지브리풍 감성 비디오 생성 클라이�
 
 import os
 import time
+import json
 import requests
 from typing import Optional, Dict, Any, List
 
@@ -129,20 +130,46 @@ class KieVideoGenerator:
                     print(f"[Kie Video Progress] 대기 {attempt * 5}초... 상태: {state or 'processing'}")
 
                 if state in ["success", "succeed", "completed", "finish"]:
-                    # 결과 URL 추출
+                    # 결과 URL 추출 (Kie.ai의 resultJson, info.resultUrls, response.video_url 등 모든 규격 지원)
                     result_urls = []
+                    
+                    # 1. resultJson (직렬화된 JSON 문자열 형태인 경우)
+                    if bdata.get("resultJson"):
+                        try:
+                            rj = json.loads(bdata["resultJson"]) if isinstance(bdata["resultJson"], str) else bdata["resultJson"]
+                            if isinstance(rj, dict) and rj.get("resultUrls"):
+                                result_urls.extend(rj["resultUrls"])
+                            elif isinstance(rj, list):
+                                result_urls.extend(rj)
+                        except Exception as parse_err:
+                            print(f"[Kie Video Warn] resultJson 파싱 실패: {parse_err}")
+
+                    # 2. info dict 내부
                     info = bdata.get("info") or {}
                     if isinstance(info, dict) and info.get("resultUrls"):
-                        result_urls = info.get("resultUrls")
-                    elif bdata.get("resultUrls"):
-                        result_urls = bdata.get("resultUrls")
-                    elif bdata.get("video_url"):
-                        result_urls = [bdata.get("video_url")]
-                    elif bdata.get("url"):
-                        result_urls = [bdata.get("url")]
+                        result_urls.extend(info.get("resultUrls"))
 
-                    if result_urls and len(result_urls) > 0:
-                        video_url = result_urls[0]
+                    # 3. response dict 내부
+                    resp_dict = bdata.get("response") or {}
+                    if isinstance(resp_dict, dict):
+                        if resp_dict.get("video_url"):
+                            result_urls.append(resp_dict["video_url"])
+                        if resp_dict.get("resultUrls"):
+                            result_urls.extend(resp_dict["resultUrls"])
+
+                    # 4. 최상위 필드들
+                    for k in ["resultUrls", "video_url", "videoUrl", "url", "download_url"]:
+                        val = bdata.get(k)
+                        if isinstance(val, list):
+                            result_urls.extend(val)
+                        elif isinstance(val, str) and val.startswith("http"):
+                            result_urls.append(val)
+
+                    # 중복 제거 및 유효 url 필터링
+                    valid_urls = [u for u in result_urls if isinstance(u, str) and u.startswith("http")]
+
+                    if valid_urls:
+                        video_url = valid_urls[0]
                         print(f"[Kie Video Success] 비디오 생성 완료! 다운로드 중: {video_url}")
                         v_res = requests.get(video_url, stream=True, timeout=60)
                         if v_res.status_code == 200:
@@ -152,8 +179,10 @@ class KieVideoGenerator:
                                     f.write(chunk)
                             print(f"[Kie Video Saved] 저장 완료: {output_path}")
                             return output_path
-
-                elif state in ["fail", "failed", "error"]:
+                        else:
+                            print(f"[Kie Video Warn] 비디오 다운로드 실패 (HTTP {v_res.status_code}): {video_url}")
+                    else:
+                        print(f"[Kie Video Warn] 상태는 success이나 비디오 URL을 찾을 수 없습니다. 응답: {bdata}")
                     err_msg = bdata.get("msg") or bdata.get("fail_reason") or body.get("msg")
                     print(f"[Kie Video Fail] 비디오 생성 실패: {err_msg}")
                     return None
