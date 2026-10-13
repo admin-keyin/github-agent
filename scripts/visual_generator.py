@@ -681,8 +681,8 @@ def build_multi_scene_video_concat(
             f.write(f"file '{os.path.abspath(vp)}'\n")
 
     cmd = [
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_txt,
-        "-stream_loop", "-1", "-t", str(target_duration),
+        "ffmpeg", "-y", "-stream_loop", "-1", "-f", "concat", "-safe", "0", "-i", list_txt,
+        "-t", str(target_duration),
         "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", output_video_path
     ]
