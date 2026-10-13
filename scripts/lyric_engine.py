@@ -287,21 +287,15 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 가사 전개 맞춤형 지브리 만화영화 애니메이션 멀티 씬 스토리보드 (scene_prompts)]
-가사의 흐름(기승전결)에 맞춰 장면이 전환될 수 있도록 서로 다른 5개의 영문 지브리 애니메이션 프롬프트 배열을 작성하세요.
-각 씬은 정지된 그림이 아닌, 생생하고 감성적인 애니메이션 모션이 돋보이도록 작성합니다:
-1. Scene 1 (도입부/기): 서사의 시작 배경 (예: Studio Ghibli style, vintage train running along the coast at twilight, sea breeze blowing green grass, fluffy painted clouds in watercolor sky, peaceful nostalgic atmosphere)
-2. Scene 2 (1절/승): 인물의 서사와 감정 (예: Studio Ghibli aesthetic, young character standing under a gentle bus stop in soft rain, warm glowing lantern light, puddles reflecting city lights, heartfelt melancholy expression)
-3. Scene 3 (후렴/전/클라이맥스): 감정의 폭발과 환상적인 연출 (예: Studio Ghibli style, breathtaking magical night sky with countless shooting stars and glowing auroras, vibrant colors bursting, soaring emotional cinematic view)
-4. Scene 4 (2절·브릿지/전환): 몽환적이고 깊은 서사 (예: Studio Ghibli aesthetic, character walking through quiet forest with glowing fireflies, wind rustling leaves, mystical ancient trees, peaceful dreamlike atmosphere)
-5. Scene 5 (아웃트로/결): 따스한 여운과 결말 (예: Studio Ghibli style, peaceful golden sunrise spreading over hills, windmill turning slowly, petals fluttering in warm sunlight, comforting hopeful ending)
-(각 프롬프트는 "Studio Ghibli style, anime animation, Hayao Miyazaki aesthetic, hand-drawn pastel watercolor texture, soft wind blowing, cinematic lighting" 등의 지브리 특유의 감성 키워드를 풍부하게 포함)
-
-[★ 4. 숏츠용 3단 지브리 애니메이션 스토리보드 (shorts_scene_prompts)]
-숏츠(45초)에서 15초마다 박진감 넘치게 전환될 3개의 9:16 세로형 지브리 애니메이션 프롬프트 배열:
-1. Scene 1 (빌드업 0~15초): Studio Ghibli style, mysterious character close-up in soft evening light, wind gently blowing hair
-2. Scene 2 (클라이맥스 15~35초): Studio Ghibli style, bursting magical lanterns floating into starry night sky, euphoric breathtaking visual
-3. Scene 3 (피날레 35~45초): Studio Ghibli style, gentle warm smile looking towards the golden sunrise, fluttering petals
+[★ 3. 가사 전개 맞춤형 현대 극장판 애니메이션 멀티 씬 스토리보드 (scene_prompts)]
+가사의 흐름(기승전결)에 맞춰 장면이 전환될 수 있도록 서로 다른 5개의 영문 애니메이션 프롬프트 배열을 작성하세요.
+배경은 감성적인 수채화/노을 풍경, 인물은 트렌디하고 세련된 현대 일본 극장판 애니메이션(신카이 마코토, 쿄애니 스타일) 화풍으로 자연스럽게 어우러지게 작성합니다:
+1. Scene 1 (도입부/기): 서사의 시작 배경 (예: modern anime aesthetic, coastal train station at magic hour, golden sunlight reflecting on ocean waves, gentle breeze, beautiful cinematic composition)
+2. Scene 2 (1절/승): 인물의 서사와 감정 (예: modern anime aesthetic, charming young boy or girl standing under glowing evening streetlight in gentle drizzle, detailed delicate face expression, reflective wet pavement, emotional atmosphere)
+3. Scene 3 (후렴/전/클라이맥스): 감정의 폭발과 환상적인 연출 (예: modern anime aesthetic, breathtaking cosmic night sky filled with shooting stars, radiant glowing auroras, soaring emotional climax, vibrant colors)
+4. Scene 4 (2절·브릿지/전환): 몽환적이고 깊은 서사 (예: modern anime aesthetic, walking through peaceful twilight city street with warm neon lights, wind rustling cherry blossom petals, cinematic depth of field)
+5. Scene 5 (아웃트로/결): 따스한 여운과 결말 (예: modern anime aesthetic, standing on grassy hill overlooking sunlit sunrise horizon, gentle hopeful smile, golden sun rays, comforting ending)
+(각 프롬프트는 "modern anime aesthetic, Makoto Shinkai style, Kyoto Animation quality, delicate face features, gorgeous cinematic lighting, high quality anime" 키워드 중심 작성)
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -476,11 +470,11 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"Studio Ghibli style, anime animation, vintage green train passing coastal flower field, gentle sea breeze, soft watercolor clouds, peaceful nostalgic feeling",
-        f"Studio Ghibli style, anime animation, young character with umbrella waiting under warm glowing streetlight in gentle evening rain, detailed watercolor aesthetic",
-        f"Studio Ghibli style, anime animation, breathtaking night sky exploding with magical shooting stars, glowing colorful auroras, soaring emotional climax",
-        f"Studio Ghibli style, anime animation, walking through mystical lush forest filled with glowing fireflies and gentle wind rustling ancient trees",
-        f"Studio Ghibli style, anime animation, standing on grassy hill overlooking sunlit valley at golden dawn, windmill turning, fluttering flower petals"
+        f"modern anime aesthetic, Makoto Shinkai style, vintage train running along coastal sunset, glistening sea, vibrant pastel sky, peaceful nostalgic atmosphere",
+        f"modern anime aesthetic, Kyoto Animation quality, charming young character with umbrella waiting under warm streetlight in soft evening rain, delicate facial features",
+        f"modern anime aesthetic, breathtaking night sky exploding with magical shooting stars, glowing colorful auroras, soaring emotional climax",
+        f"modern anime aesthetic, walking through quiet city alleyway with warm neon lights and cherry blossoms, cinematic lighting",
+        f"modern anime aesthetic, standing on grassy hill overlooking sunlit valley at golden sunrise, windmill turning, fluttering flower petals"
     ]
     fallback_shorts_scenes = [
         f"masterpiece, anime aesthetic, emotional character close up, dramatic lighting, high quality anime",

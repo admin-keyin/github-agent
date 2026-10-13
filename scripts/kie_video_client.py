@@ -38,11 +38,11 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 지브리 특유의 2D 감성 수채화 애니메이션 프롬프트 강화
+        # 배경/풍경은 감성적 수채화 빛감, 인물은 트렌디한 일본 현대 극장판 애니메이션 스타일 (신카이 마코토 / 쿄애니 감성)
         ghibli_prompt = (
-            f"Studio Ghibli aesthetic, anime animation style, masterpiece, {prompt}, "
-            f"Hayao Miyazaki direction, soft pastel watercolor texture, gentle natural motion, "
-            f"cinematic lighting, hand-drawn anime aesthetic, warm emotional atmosphere, 24fps smooth motion, no watermark"
+            f"modern anime animation aesthetic, Makoto Shinkai style, Kyoto Animation quality, {prompt}, "
+            f"gorgeous cinematic lighting, beautifully drawn anime character, delicate face features, "
+            f"rich painterly watercolor landscape background, glowing natural atmosphere, 4k master animation, 24fps smooth motion, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
