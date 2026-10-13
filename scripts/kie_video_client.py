@@ -55,20 +55,32 @@ class KieVideoGenerator:
         ]
 
         task_id = None
+        # Wan 3.0 공식 스펙: resolution="480P", duration=5~30 (정수), audio=True/False
+        norm_resolution = resolution.upper() if resolution.lower().endswith("p") else resolution
+
         for model in candidate_models:
+            input_params = {
+                "prompt": ghibli_prompt[:2500],
+                "duration": int(duration),
+                "resolution": norm_resolution,
+                "aspect_ratio": aspect_ratio
+            }
+            if model == "wan/3-0-video":
+                input_params["audio"] = False
+
             payload = {
                 "model": model,
-                "input": {
-                    "prompt": ghibli_prompt[:1500],
-                    "duration": int(duration),
-                    "resolution": resolution,
-                    "aspect_ratio": aspect_ratio
-                }
+                "input": input_params
             }
             try:
                 res = requests.post(create_url, headers=headers, json=payload, timeout=30)
-                if res.status_code == 200:
+                data = {}
+                try:
                     data = res.json()
+                except Exception:
+                    pass
+
+                if res.status_code == 200:
                     data_field = data.get("data")
                     if isinstance(data_field, dict):
                         task_id = data_field.get("taskId") or data_field.get("task_id")
@@ -80,8 +92,12 @@ class KieVideoGenerator:
                     if task_id:
                         print(f"[Kie Video Engine] {model} 작업 요청 성공 (Task ID: {task_id}, 길이: {duration}초)")
                         break
+                    else:
+                        print(f"[Kie Video Warn] {model} 200 OK이나 taskId 없음: {data}")
+                else:
+                    print(f"[Kie Video Warn] {model} 요청 실패 (HTTP {res.status_code}): {data or res.text[:200]}")
             except Exception as e:
-                print(f"[Kie Video Warn] {model} 요청 중 오류: {e}")
+                print(f"[Kie Video Warn] {model} 요청 중 예외: {e}")
 
         if not task_id:
             print("[Kie Video Error] 모든 비디오 모델에 대한 작업 요청에 실패했습니다.")
