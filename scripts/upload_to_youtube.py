@@ -118,15 +118,25 @@ if __name__ == "__main__":
     video_id = response.get('id')
     print(f"Upload complete! Video ID: {video_id}")
 
-    # 썸네일 자동 설정
-    thumb_path = "temp/bg.jpg"
-    if os.path.exists(thumb_path) and video_id:
+    # 썸네일 자동 설정 (메타데이터 지정 썸네일 -> 쇼츠/풀버전 전용 썸네일 -> 기본 썸네일)
+    thumb_path = ""
+    if isinstance(meta, dict) and meta.get("thumbnail") and os.path.exists(meta["thumbnail"]):
+        thumb_path = meta["thumbnail"]
+    elif "shorts" in video_file.lower() and os.path.exists("temp/thumbnail_shorts.jpg"):
+        thumb_path = "temp/thumbnail_shorts.jpg"
+    elif os.path.exists("temp/thumbnail.jpg"):
+        thumb_path = "temp/thumbnail.jpg"
+    elif os.path.exists("temp/bg.jpg"):
+        thumb_path = "temp/bg.jpg"
+
+    if thumb_path and os.path.exists(thumb_path) and video_id:
         try:
-            print("Setting custom thumbnail for the video...")
+            print(f"Setting custom thumbnail ({thumb_path}) for the video...")
             youtube_service.thumbnails().set(
                 videoId=video_id,
                 media_body=MediaFileUpload(thumb_path, mimetype='image/jpeg')
             ).execute()
-            print("Custom thumbnail set successfully!")
+            print(f"Custom thumbnail ({thumb_path}) set successfully!")
         except Exception as e:
             print(f"Notice: Custom thumbnail could not be set automatically: {e}")
+

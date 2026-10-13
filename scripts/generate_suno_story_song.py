@@ -1,13 +1,17 @@
 """
-'고스타그램', '꿈꾸던 어른이 되었나요' 스타일의 감성 AI 뮤직 비디오 생성 파이프라인.
-Suno AI API (Kie.ai, SunoApi.org, Apiframe, Cookie) 연동을 우선으로 하며,
-음원 생성 -> 감성 비주얼 배경 및 가사 타이포그래피 생성 -> 비주얼라이저 합성 -> 유튜브 메타데이터 생성까지 자동 수행합니다.
+'Inkey Studio' - 고품격 감성 AI 뮤직 비디오 및 숏츠 생성 파이프라인.
+Suno AI API (Kie.ai, SunoApi.org, Apiframe, Cookie) 연동 음원 생성
+-> AI 맞춤 일러스트 배경 생성
+-> 프로페셔널 썸네일 자동 그래픽 합성
+-> 가사 타임라인 파싱 & 키네틱 가사 애니메이션 (풀버전 리릭 비디오 & 숏츠 팝업 바운스)
+-> 시네마틱 비디오 렌더링 & 고품격 스토리텔링 메타데이터 생성까지 자동 수행합니다.
 """
 
 import os
 import sys
 import json
 import random
+import shutil
 import requests
 import subprocess
 from pathlib import Path
@@ -19,62 +23,50 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 try:
     from scripts.suno_api_client import SunoMusicGenerator
+    from scripts.kie_video_client import KieVideoGenerator
     from scripts.lyric_engine import generate_lyric_and_style
-    from scripts.audio_mixer_engine import create_standalone_studio_track
+    from scripts.visual_generator import (
+        generate_artwork,
+        generate_multi_scene_artworks,
+        build_multi_scene_concat,
+        build_multi_scene_video_concat,
+        calculate_scene_durations,
+        create_professional_thumbnail,
+        parse_lyrics_timeline,
+        render_lyric_animation_assets,
+        render_full_cinematic_mv,
+        extract_shorts_from_full_video,
+        get_korean_font
+    )
 except ImportError:
     from suno_api_client import SunoMusicGenerator
+    from kie_video_client import KieVideoGenerator
     from lyric_engine import generate_lyric_and_style
-    from audio_mixer_engine import create_standalone_studio_track
-
-BACKGROUND_IMAGES = [
-    # 감성 새벽 밤하늘 / 도시 야경 / 방 안의 감성
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&h=1080&q=90",
-    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&h=1080&q=90",
-    "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1920&h=1080&q=90",
-    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&h=1080&q=90",
-    "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1920&h=1080&q=90"
-]
-
-def fetch_background_image(output_path: str):
-    url = random.choice(BACKGROUND_IMAGES)
-    try:
-        r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
-        if r.status_code == 200 and len(r.content) > 1000:
-            with open(output_path, "wb") as f:
-                f.write(r.content)
-            return
-    except Exception as e:
-        print(f"Background fetch fallback: {e}")
-    # 폴백 이미지 생성
-    subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x0d1117:s=1280x720:d=1", "-vframes", "1", output_path], check=True)
+    from visual_generator import (
+        generate_artwork,
+        generate_multi_scene_artworks,
+        build_multi_scene_concat,
+        build_multi_scene_video_concat,
+        calculate_scene_durations,
+        create_professional_thumbnail,
+        parse_lyrics_timeline,
+        render_lyric_animation_assets,
+        render_full_cinematic_mv,
+        extract_shorts_from_full_video,
+        get_korean_font
+    )
 
 
-def create_lyric_title_overlay(title: str, subtitle: str, output_path: str, width=1280, height=720):
+
+def create_minimal_title_card(title: str, subtitle: str, output_path: str, width=1280, height=720):
+    """
+    풀버전 영상 상단 중앙에 배치되는 미니멀하고 세련된 글래스모피즘 타이틀 카드
+    """
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    font_paths = [
-        "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
-        "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
-        "/usr/share/fonts/nanum/NanumGothic.ttf",
-        "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
-        "/System/Library/Fonts/AppleSDGothicNeo.ttc",
-        "/Library/Fonts/AppleSDGothicNeo.ttc"
-    ]
-    font_title = None
-    font_sub = None
-    for p in font_paths:
-        if os.path.exists(p):
-            try:
-                font_title = ImageFont.truetype(p, 32)
-                font_sub = ImageFont.truetype(p, 18)
-                break
-            except Exception:
-                pass
-
-    if not font_title:
-        font_title = ImageFont.load_default()
-        font_sub = ImageFont.load_default()
+    font_title = get_korean_font(28, bold=True)
+    font_sub = get_korean_font(16, bold=False)
 
     bbox_t = draw.textbbox((0, 0), title, font=font_title)
     w_t = bbox_t[2] - bbox_t[0]
@@ -85,151 +77,56 @@ def create_lyric_title_overlay(title: str, subtitle: str, output_path: str, widt
 
     max_w = max(w_t, w_s)
     x = (width - max_w) // 2
-    y = 60
+    y = 45
 
-    # 반투명 배경 카드 박스
+    # 슬림 반투명 글래스 박스
     draw.rounded_rectangle(
-        [x - 30, y - 16, x + max_w + 30, y + h_t + 40],
-        radius=16,
-        fill=(10, 15, 25, 200),
+        [x - 26, y - 12, x + max_w + 26, y + h_t + 32],
+        radius=14,
+        fill=(10, 15, 25, 190),
         outline=(255, 255, 255, 40),
         width=1
     )
 
-    # 텍스트 그리기
     draw.text(((width - w_t) // 2, y), title, font=font_title, fill=(255, 255, 255, 255))
-    draw.text(((width - w_s) // 2, y + h_t + 10), subtitle, font=font_sub, fill=(180, 210, 255, 230))
-
+    draw.text(((width - w_s) // 2, y + h_t + 8), subtitle, font=font_sub, fill=(180, 220, 255, 220))
     img.save(output_path, "PNG")
 
 
-def render_music_video(image_path: str, overlay_png: str, audio_path: str, output_path: str):
-    audio = AudioSegment.from_file(audio_path)
-    duration = len(audio) / 1000.0
-
-    # 파스텔 시안 & 핑크 감성 이퀄라이저 비주얼라이저 (16:9 가로형 풀버전)
-    filter_complex = (
-        f"[0:v]scale=1280:720[bg];"
-        f"[bg][1:v]overlay=0:0[bg_titled];"
-        f"[2:a]showfreqs=s=920x150:mode=bar:fscale=log:colors=0x00ffee@0.95|0xff66cc@0.7:win_size=1024[eq];"
-        f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-180[v]"
-    )
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-loop", "1", "-i", image_path,
-        "-loop", "1", "-i", overlay_png,
-        "-i", audio_path,
-        "-filter_complex", filter_complex,
-        "-map", "[v]", "-map", "2:a",
-        "-c:v", "libx264", "-t", str(duration),
-        "-pix_fmt", "yuv420p",
-        "-preset", "ultrafast", "-crf", "20",
-        "-c:a", "aac", "-b:a", "320k",
-        "-shortest", output_path
-    ]
-    subprocess.run(cmd, check=True)
-    print(f"[Render Success] 풀버전 영상 완료: {output_path} (길이: {duration:.1f}초)")
-
-
-def render_shorts_video(image_path: str, title: str, audio_path: str, output_path: str, shorts_duration=45.0):
+def create_shorts_top_badge(title: str, output_path: str, width=1080, height=1920):
     """
-    곡의 가장 에너지 넘치는 하이라이트(싸비/클라이맥스) 45초를 자동 추출하여
-    9:16 (1080x1920) 세로형 유튜브 쇼츠(Shorts) 영상을 렌더링합니다.
+    숏츠 상단에 배치되는 미니 배지 카드
     """
-    audio = AudioSegment.from_file(audio_path)
-    total_sec = len(audio) / 1000.0
-
-    # 하이라이트 구간 시작점 계산 (보통 1분 지점부터 하이라이트)
-    if total_sec > shorts_duration + 20:
-        start_sec = 40.0 # 40초~85초 하이라이트
-    elif total_sec > shorts_duration:
-        start_sec = max(0.0, (total_sec - shorts_duration) / 2.0)
-    else:
-        start_sec = 0.0
-        shorts_duration = total_sec
-
-    # 하이라이트 오디오 슬라이스 및 페이드 인/아웃
-    highlight_audio = audio[int(start_sec * 1000):int((start_sec + shorts_duration) * 1000)]
-    highlight_audio = highlight_audio.fade_in(1000).fade_out(1500)
-    temp_shorts_audio = "temp/shorts_highlight.mp3"
-    highlight_audio.export(temp_shorts_audio, format="mp3", bitrate="320k")
-
-    # 9:16 쇼츠용 세로 타이틀 카드 생성 (1080x1920)
-    shorts_overlay_png = "temp/shorts_overlay.png"
-    img = Image.new('RGBA', (1080, 1920), (0, 0, 0, 0))
+    img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    font_paths = [
-        "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
-        "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
-        "/usr/share/fonts/nanum/NanumGothic.ttf",
-        "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
-        "/System/Library/Fonts/AppleSDGothicNeo.ttc",
-        "/Library/Fonts/AppleSDGothicNeo.ttc"
-    ]
-    font_main = None
-    font_sub = None
-    for p in font_paths:
-        if os.path.exists(p):
-            try:
-                font_main = ImageFont.truetype(p, 48)
-                font_sub = ImageFont.truetype(p, 28)
-                break
-            except Exception:
-                pass
+    font_badge = get_korean_font(30, bold=True)
+    font_sub = get_korean_font(22, bold=False)
 
-    if not font_main:
-        font_main = ImageFont.load_default()
-        font_sub = ImageFont.load_default()
+    badge_line = f"🎧 {title}"
+    sub_line = "INKEY STUDIO ORIGINAL • HIGHLIGHT"
 
-    sub_text = "Inkey Studio Highlight #Shorts"
-    bbox_m = draw.textbbox((0, 0), title, font=font_main)
-    w_m = bbox_m[2] - bbox_m[0]
-    h_m = bbox_m[3] - bbox_m[1]
+    bbox_b = draw.textbbox((0, 0), badge_line, font=font_badge)
+    wb = bbox_b[2] - bbox_b[0]
+    hb = bbox_b[3] - bbox_b[1]
 
-    bbox_s = draw.textbbox((0, 0), sub_text, font=font_sub)
-    w_s = bbox_s[2] - bbox_s[0]
+    bbox_s = draw.textbbox((0, 0), sub_line, font=font_sub)
+    ws = bbox_s[2] - bbox_s[0]
 
-    max_w = max(w_m, w_s)
-    x = (1080 - max_w) // 2
-    y = 380
+    max_w = max(wb, ws)
+    x = (width - max_w) // 2
+    y = 180
 
-    # 세로형 반투명 카드
     draw.rounded_rectangle(
-        [x - 40, y - 20, x + max_w + 40, y + h_m + 60],
-        radius=20,
-        fill=(10, 15, 25, 210),
-        outline=(255, 255, 255, 60),
-        width=2
+        [x - 30, y - 14, x + max_w + 30, y + hb + 40],
+        radius=16,
+        fill=(10, 15, 25, 205),
+        outline=(0, 230, 255, 80),
+        width=1
     )
-    draw.text(((1080 - w_m) // 2, y), title, font=font_main, fill=(255, 255, 255, 255))
-    draw.text(((1080 - w_s) // 2, y + h_m + 16), sub_text, font=font_sub, fill=(180, 220, 255, 240))
-    img.save(shorts_overlay_png, "PNG")
-
-    # 9:16 세로 렌더링 + 중앙 센터 비주얼라이저
-    filter_complex = (
-        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[bg];"
-        f"[bg][1:v]overlay=0:0[bg_titled];"
-        f"[2:a]showfreqs=s=880x200:mode=bar:fscale=log:colors=0x00ffee@0.95|0xff66cc@0.75:win_size=1024[eq];"
-        f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-450[v]"
-    )
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-loop", "1", "-i", image_path,
-        "-loop", "1", "-i", shorts_overlay_png,
-        "-i", temp_shorts_audio,
-        "-filter_complex", filter_complex,
-        "-map", "[v]", "-map", "2:a",
-        "-c:v", "libx264", "-t", str(shorts_duration),
-        "-pix_fmt", "yuv420p",
-        "-preset", "ultrafast", "-crf", "20",
-        "-c:a", "aac", "-b:a", "320k",
-        "-shortest", output_path
-    ]
-    subprocess.run(cmd, check=True)
-    print(f"[Shorts Render Success] 9:16 쇼츠 하이라이트 영상 완료: {output_path} ({shorts_duration:.1f}초)")
+    draw.text(((width - wb) // 2, y), badge_line, font=font_badge, fill=(255, 255, 255, 255))
+    draw.text(((width - ws) // 2, y + hb + 10), sub_line, font=font_sub, fill=(0, 240, 255, 220))
+    img.save(output_path, "PNG")
 
 
 def main():
@@ -242,25 +139,53 @@ def main():
     instrumental = os.getenv("INPUT_INSTRUMENTAL", "false").lower() == "true"
 
     print("\n" + "="*65)
-    print(" [Inkey Studio - Suno AI Storytelling Song Generator]")
+    print(" [Inkey Studio - Premium AI Story Song & Lyric Video Engine]")
     print(f" [Song Theme] {song_type}")
-    print(f" [Custom Prompt] {custom_prompt or 'None (Using Preset)'}")
+    print(f" [Custom Prompt] {custom_prompt or 'None (Using Preset/Gemini)'}")
     print("="*65 + "\n")
 
-    # 1. 감성 가사 및 스타일 태그 생성
-    title, style_tags, lyrics = generate_lyric_and_style(song_type, custom_prompt)
+    # 1. 감성 가사, 스타일 태그, 아트 프롬프트 및 스토리 메타데이터 생성
+    lyric_res = generate_lyric_and_style(song_type, custom_prompt)
+    if len(lyric_res) == 4:
+        title, style_tags, lyrics, extra_meta = lyric_res
+    else:
+        title, style_tags, lyrics = lyric_res[:3]
+        extra_meta = {
+            "image_prompt": "masterpiece, anime aesthetic, Makoto Shinkai wallpaper style, cinematic lighting",
+            "story_description": f"Inkey Studio가 전하는 감성 오리지널 트랙 '{title}'.",
+            "shorts_concept": f"가슴을 울리는 킬링파트 🎧 '{title}'",
+            "genre_name": "감성 인디 & 록",
+            "category": "indie_band"
+        }
+
+    # 곡명 클렌징
+    import re
+    title = re.sub(r'\s*#\d+', '', title).strip()
+
     print(f"[곡 제목] {title}")
+    print(f"[장르] {extra_meta.get('genre_name', 'Original')}")
     print(f"[음악 스타일 태그]\n{style_tags}\n")
-    print(f"[작사된 가사]\n{lyrics[:300]}...\n")
+    print(f"[아트 프롬프트]\n{extra_meta.get('image_prompt')}\n")
+
+    # 가사 클렌징
+    clean_lyrics_lines = []
+    for line in lyrics.splitlines():
+        if re.match(r'^\s*\([가-힣\s\.,!\?]+\)\s*$', line):
+            continue
+        cleaned_line = re.sub(r'\s*\([^\)]*(?:잔나비|넬|검정치마|day6|qwer|style|가수)[^\)]*\)', '', line, flags=re.IGNORECASE)
+        clean_lyrics_lines.append(cleaned_line)
+    display_lyrics = "\n".join(clean_lyrics_lines).strip()
 
     audio_path = "temp/ai_song.mp3"
-    bg_image = "temp/bg.jpg"
+    bg_16_9 = "temp/bg_full.jpg"
+    bg_9_16 = "temp/bg_shorts.jpg"
     title_png = "temp/title_overlay.png"
+    shorts_badge_png = "temp/shorts_badge.png"
     output_video = "output_music_video.mp4"
+    output_shorts = "output_shorts_video.mp4"
 
     # 2. 음원 생성 (Kie.ai Suno V6 클라우드 AI 엔진 호출)
     suno_client = SunoMusicGenerator()
-
     if not suno_client.has_any_api_key():
         raise RuntimeError("KIE_API_KEY 또는 SUNO_API_KEY 가 설정되지 않았습니다. Suno AI 음원을 생성할 수 없습니다.")
 
@@ -272,82 +197,239 @@ def main():
         output_audio_path=audio_path,
         instrumental=instrumental
     )
-    # 곡명 및 가사 클렌징
-    import re
-    title = re.sub(r'\s*#\d+', '', title).strip()
 
-    # 가사에서 가수명 언급이나 괄호 속 설명 문구 제거
-    clean_lyrics_lines = []
-    for line in lyrics.splitlines():
-        # (고요한 선율과 함께...) 같은 한글 연주 설명 괄호줄 제거
-        if re.match(r'^\s*\([가-힣\s\.,!\?]+\)\s*$', line):
-            continue
-        # 태그 내 가수명/스타일 잔여 문구 정리 (예: (잔나비·넬·검정치마 Style), (DAY6·QWER 등))
-        cleaned_line = re.sub(r'\s*\([^\)]*(?:잔나비|넬|검정치마|day6|qwer|style|가수)[^\)]*\)', '', line, flags=re.IGNORECASE)
-        clean_lyrics_lines.append(cleaned_line)
-    display_lyrics = "\n".join(clean_lyrics_lines).strip()
-
-    # 3. 비주얼 배경 및 타이포그래피 생성
-    fetch_background_image(bg_image)
-    subtitle = "Inkey Studio Original Track"
-    create_lyric_title_overlay(title, subtitle, title_png)
-
-    # 4. 풀버전 16:9 비디오 렌더링
-    render_music_video(bg_image, title_png, audio_path, output_video)
-
-    # 4-2. 9:16 세로형 쇼츠 하이라이트 영상 렌더링 (45초)
-    output_shorts = "output_shorts_video.mp4"
-    render_shorts_video(bg_image, title, audio_path, output_shorts, shorts_duration=45.0)
-
-    # 5. 유튜브 업로드용 메타데이터 저장 (풀버전용)
     audio = AudioSegment.from_file(audio_path)
     duration_sec = len(audio) / 1000.0
+    print(f"[Audio Info] 음원 준비 완료: 길이 {duration_sec:.1f}초 ({int(duration_sec // 60)}분 {int(duration_sec % 60)}초)")
 
-    youtube_title = f"{title} - Inkey Studio"
+    # 3. 가사 흐름 맞춤형 지브리 애니메이션 비디오 씬 생성 (Kie.ai Wan 3.0, 480p)
+    cat_type = extra_meta.get("category", "indie_band")
+    scene_prompts = extra_meta.get("scene_prompts", [])
+    if not scene_prompts:
+        scene_prompts = [extra_meta.get("image_prompt", "Studio Ghibli style, peaceful aesthetic")]
+    shorts_scene_prompts = extra_meta.get("shorts_scene_prompts", scene_prompts[:3])
+
+    kie_video_client = KieVideoGenerator()
+    video_clips_full = []
+    video_clips_shorts = []
+
+    # 각 씬의 지속시간 계산 (노래 길이에 맞춰 분배)
+    full_durations = calculate_scene_durations(duration_sec, len(scene_prompts), is_shorts=False)
+
+    shorts_duration = 45.0
+    if duration_sec > shorts_duration + 20:
+        start_sec = 40.0
+    elif duration_sec > shorts_duration:
+        start_sec = max(0.0, (duration_sec - shorts_duration) / 2.0)
+    else:
+        start_sec = 0.0
+        shorts_duration = duration_sec
+
+    shorts_durations = calculate_scene_durations(shorts_duration, len(shorts_scene_prompts), is_shorts=True, shorts_duration=shorts_duration)
+
+    # Kie.ai API 키가 있는 경우 Wan 3.0 지브리 애니메이션 비디오 클립 생성 시도
+    if kie_video_client.has_api_key():
+        print(f"\n[Step 3] Kie.ai Wan 3.0 엔진으로 가사 서사 맞춤형 지브리 애니메이션 비디오(480P) 생성 시작...")
+        os.makedirs("temp/videos_full", exist_ok=True)
+        os.makedirs("temp/videos_shorts", exist_ok=True)
+
+        # 풀버전 각 씬별 비디오 클립 생성 (최대 30초)
+        for idx, (p_text, dur) in enumerate(zip(scene_prompts, full_durations)):
+            v_clip_path = f"temp/videos_full/scene_{idx}.mp4"
+            clip_dur = min(30, max(5, int(dur)))
+            print(f" - [Scene {idx+1}/{len(scene_prompts)}] 지브리 비디오 렌더링 요청 ({clip_dur}초): {p_text[:60]}...")
+            res_v = kie_video_client.generate_video_clip(
+                prompt=p_text,
+                duration=clip_dur,
+                resolution="480p",
+                aspect_ratio="16:9",
+                output_path=v_clip_path
+            )
+            if res_v:
+                video_clips_full.append(res_v)
+
+    # 비디오가 정상 생성된 경우 하나의 결합 배경 비디오로 빌드
+    use_video_bg_full = False
+    bg_full_input = ""
+
+    if video_clips_full and len(video_clips_full) > 0:
+        print(f"[Video Pipeline] {len(video_clips_full)}개의 Wan 3.0 지브리 비디오 클립을 연결합니다.")
+        bg_full_video_path = "temp/bg_full_video.mp4"
+        bg_full_input = build_multi_scene_video_concat(
+            video_paths=video_clips_full,
+            target_duration=duration_sec,
+            output_video_path=bg_full_video_path,
+            width=1280,
+            height=720
+        )
+        use_video_bg_full = True
+
+    # 3-B. 비디오 생성이 없거나 실패한 경우 정지 이미지 멀티씬 디졸브로 안전한 폴백
+    scenes_full_dir = "temp/scenes_full"
+    scene_full_paths = []
+
+    if not use_video_bg_full:
+        print("\n[Step 3-Fallback] 이미지 멀티 씬 일러스트 생성 중 (폴백 및 썸네일용)...")
+        scene_full_paths = generate_multi_scene_artworks(
+            scene_prompts=scene_prompts,
+            output_dir=scenes_full_dir,
+            width=1280,
+            height=720,
+            song_type=cat_type,
+            is_shorts=False
+        )
+
+        bg_full_input = build_multi_scene_concat(
+            scene_image_paths=scene_full_paths,
+            scene_durations=full_durations,
+            output_dir="temp",
+            width=1280,
+            height=720,
+            transition_dur=0.8,
+            is_shorts=False
+        )
+    else:
+        # 비디오 생성이 성공했더라도 썸네일 추출용 일러스트 확보
+        scene_full_paths = generate_multi_scene_artworks(
+            scene_prompts=[scene_prompts[0], scene_prompts[min(2, len(scene_prompts)-1)]],
+            output_dir=scenes_full_dir,
+            width=1280,
+            height=720,
+            song_type=cat_type,
+            is_shorts=False
+        )
+
+    if scene_full_paths:
+        shutil.copy(scene_full_paths[0], "temp/bg.jpg")
+
+    # 4. 프로페셔널 유튜브 썸네일 생성
+    print("\n[Step 4] 최고 품질의 프로페셔널 썸네일 디자인 합성 중...")
+    thumb_full = "temp/thumbnail.jpg"
+    thumb_shorts = "temp/thumbnail_shorts.jpg"
+    genre_display = extra_meta.get("genre_name", "Original Track")
+    sub_text = extra_meta.get("story_description", "").split("\n")[0][:36] or "Inkey Studio Original"
+
+    best_full_scene = scene_full_paths[min(2, len(scene_full_paths)-1)] if scene_full_paths else "temp/bg.jpg"
+
+    create_professional_thumbnail(
+        bg_image_path=best_full_scene,
+        title=title,
+        subtitle=sub_text,
+        genre_name=genre_display,
+        output_path=thumb_full,
+        width=1280,
+        height=720,
+        is_shorts=False
+    )
+    create_professional_thumbnail(
+        bg_image_path=best_full_scene,
+        title=title,
+        subtitle=extra_meta.get("shorts_concept", f"{title} 하이라이트"),
+        genre_name=genre_display,
+        output_path=thumb_shorts,
+        width=1080,
+        height=1920,
+        is_shorts=True
+    )
+
+    # 5. 가사 타임라인 파싱 및 키네틱 가사 애니메이션 렌더링
+    print("\n[Step 5] 작사된 가사 타임라인 파싱 및 키네틱 가사 애니메이션 에셋 렌더링...")
+    timeline_full = parse_lyrics_timeline(display_lyrics, duration_sec, is_shorts=False)
+    concat_txt_full = render_lyric_animation_assets(timeline_full, 1280, 720, "temp", is_shorts=False)
+
+    # 6. 상단 미니 오버레이 카드 생성
+    create_minimal_title_card(title, f"Inkey Studio • {genre_display}", title_png, 1280, 720)
+    create_shorts_top_badge(title, shorts_badge_png, 1080, 1920)
+
+    # 7. 풀버전 16:9 지브리 애니메이션 뮤직 비디오 렌더링
+    print("\n[Step 7] 16:9 풀버전 지브리 애니메이션 리릭 MV 합성 렌더링 (이퀄라이저 제거)...")
+    render_full_cinematic_mv(
+        bg_input=bg_full_input,
+        title_png_path=title_png,
+        lyric_concat_txt=concat_txt_full,
+        audio_path=audio_path,
+        output_video_path=output_video,
+        duration=duration_sec,
+        is_video_bg=use_video_bg_full
+    )
+
+    # 8. 원본 풀버전 영상에서 하이라이트 구간을 세로(9:16)로 직접 크롭하여 숏츠 생성
+    print("\n[Step 8] 원본 풀버전 영상에서 하이라이트 구간을 9:16 세로로 크롭하여 숏츠 자동 제작...")
+    extract_shorts_from_full_video(
+        full_video_path=output_video,
+        output_shorts_path=output_shorts,
+        top_badge_png=shorts_badge_png,
+        start_sec=start_sec,
+        duration=shorts_duration
+    )
+
+
+    # 9. 유튜브 고품격 스토리텔링 메타데이터 저장 (풀버전용)
+    youtube_title = f"{title} - Inkey Studio [Official Lyric Video]"
+    story_essay = extra_meta.get("story_description", "").strip()
+
     desc = (
         f"🎧 {youtube_title}\n\n"
-        f"🎼 트랙 정보\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📖 [Track Story & Liner Notes]\n"
+        f"{story_essay}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🎼 트랙 정보 (Information)\n"
         f"• 곡명: {title}\n"
+        f"• 장르: {genre_display}\n"
         f"• 프로듀싱: Inkey Studio\n"
         f"• 재생 시간: {int(duration_sec // 60)}분 {int(duration_sec % 60)}초\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         f"📝 가사 (Lyrics)\n"
-        f"----------------------------------------\n"
-        f"{display_lyrics}\n"
-        f"----------------------------------------\n\n"
+        f"{display_lyrics}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"☕ 이런 순간에 함께 들어보세요\n"
+        f"• 혼자 걷는 늦은 밤, 조용히 마음을 정리하고 싶을 때\n"
+        f"• 하루 끝 지친 마음을 따뜻하게 안아줄 위로가 필요할 때\n"
+        f"• 공부, 작업, 새벽 드라이브 플레이리스트와 함께\n\n"
         f"✨ Collaboration:\n"
         f"본 음원은 음악 협업도구 KIE와 함께 제작되었습니다.\n"
         f"🔗 KIE 바로가기: https://kie.ai?ref=a75838b6fecc53ef2774b5279d142d11\n\n"
-        f"일상 속 따뜻한 위로와 감성을 전하는 Inkey Studio의 오리지널 음악입니다.\n\n"
-        f"#InkeyMusic #InkeyStudio #인디발라드 #새벽감성 #KPOP #오리지널트랙 #힐링음악 #KIE"
+        f"#InkeyStudio #InkeyMusic #신곡 #감성인디 #리릭비디오 #OfficialMV #플레이리스트 #KIE"
     )
 
     meta_info = {
         "title": youtube_title[:100],
         "description": desc,
         "artist": "Inkey Studio",
-        "song_title": title
+        "song_title": title,
+        "thumbnail": thumb_full
     }
     with open("temp/video_info.json", "w", encoding="utf-8") as f:
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
 
-    # 5-2. 유튜브 쇼츠용 메타데이터 저장
-    shorts_title = f"{title} (Highlight) #Shorts"
+    # 10. 유튜브 쇼츠용 메타데이터 저장
+    shorts_concept_text = extra_meta.get("shorts_concept", f"{title} 하이라이트")
+    shorts_title = f"{title} 🎧 킬링파트 가사 하이라이트 #Shorts"
     shorts_desc = (
         f"🎧 {title} - Inkey Studio Highlight\n\n"
-        f"풀버전 음원은 채널에서 감상하실 수 있습니다.\n\n"
-        f"✨ 음악 협업도구 KIE: https://kie.ai?ref=a75838b6fecc53ef2774b5279d142d11\n\n"
-        f"#Shorts #InkeyStudio #InkeyMusic #하이라이트 #신곡 #노래추천 #킬링파트 #KIE"
+        f"✨ {shorts_concept_text}\n\n"
+        f"풀버전 가사 뮤직비디오는 채널에서 감상하실 수 있습니다.\n\n"
+        f"🔗 음악 협업도구 KIE: https://kie.ai?ref=a75838b6fecc53ef2774b5279d142d11\n\n"
+        f"#Shorts #InkeyStudio #리릭비디오 #신곡 #킬링파트 #노래추천 #KIE"
     )
     shorts_meta_info = {
         "title": shorts_title[:100],
         "description": shorts_desc,
         "artist": "Inkey Studio",
-        "song_title": title
+        "song_title": title,
+        "thumbnail": thumb_shorts
     }
     with open("temp/video_info_shorts.json", "w", encoding="utf-8") as f:
         json.dump(shorts_meta_info, f, ensure_ascii=False, indent=2)
 
-    print("\n[Complete] 풀버전 영상 및 9:16 쇼츠 하이라이트 영상 제작이 모두 완료되었습니다!")
+    print("\n" + "="*65)
+    print(" [Complete] 풀버전 리릭 비디오 & 9:16 쇼츠 키네틱 애니메이션 제작 완료!")
+    print(f" - 풀버전 영상: {output_video}")
+    print(f" - 쇼츠 영상: {output_shorts}")
+    print(f" - 풀버전 썸네일: {thumb_full}")
+    print(f" - 쇼츠 썸네일: {thumb_shorts}")
+    print("="*65 + "\n")
 
 
 if __name__ == "__main__":
