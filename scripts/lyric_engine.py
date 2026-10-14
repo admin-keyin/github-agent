@@ -287,15 +287,15 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 가사 전개 맞춤형 현대 극장판 애니메이션 멀티 씬 스토리보드 (scene_prompts)]
+[★ 3. 가사 전개 맞춤형 오리지널 현대 애니메이션 멀티 씬 스토리보드 (scene_prompts)]
 가사의 흐름(기승전결)에 맞춰 장면이 전환될 수 있도록 서로 다른 5개의 영문 애니메이션 프롬프트 배열을 작성하세요.
-배경은 감성적인 수채화/노을 풍경, 인물은 트렌디하고 세련된 현대 일본 극장판 애니메이션(신카이 마코토, 쿄애니 스타일) 화풍으로 자연스럽게 어우러지게 작성합니다:
-1. Scene 1 (도입부/기): 서사의 시작 배경 (예: modern anime aesthetic, coastal train station at magic hour, golden sunlight reflecting on ocean waves, gentle breeze, beautiful cinematic composition)
-2. Scene 2 (1절/승): 인물의 서사와 감정 (예: modern anime aesthetic, charming young boy or girl standing under glowing evening streetlight in gentle drizzle, detailed delicate face expression, reflective wet pavement, emotional atmosphere)
-3. Scene 3 (후렴/전/클라이맥스): 감정의 폭발과 환상적인 연출 (예: modern anime aesthetic, breathtaking cosmic night sky filled with shooting stars, radiant glowing auroras, soaring emotional climax, vibrant colors)
-4. Scene 4 (2절·브릿지/전환): 몽환적이고 깊은 서사 (예: modern anime aesthetic, walking through peaceful twilight city street with warm neon lights, wind rustling cherry blossom petals, cinematic depth of field)
-5. Scene 5 (아웃트로/결): 따스한 여운과 결말 (예: modern anime aesthetic, standing on grassy hill overlooking sunlit sunrise horizon, gentle hopeful smile, golden sun rays, comforting ending)
-(각 프롬프트는 "modern anime aesthetic, Makoto Shinkai style, Kyoto Animation quality, delicate face features, gorgeous cinematic lighting, high quality anime" 키워드 중심 작성)
+특정 기존 애니메이션(너의 이름은, 지브리 등)을 뻔하게 모방하지 않고, 세련되고 감각적인 독창적 2D 애니메이션 뮤직비디오 스타일로 작성합니다:
+1. Scene 1 (도입부/기): 서사의 시작 배경 (예: original anime aesthetic, coastal platform at twilight, quiet ocean horizon, cool evening breeze, stylish moody lighting)
+2. Scene 2 (1절/승): 인물의 서사와 감정 (예: original anime aesthetic, charismatic youth standing under city lights in gentle rain, natural and stylish facial features, subtle emotive gaze, cinematic composition)
+3. Scene 3 (후렴/전/클라이맥스): 감정의 폭발과 역동적 연출 (예: original anime aesthetic, vibrant city rooftop at night, glowing neon reflections, swirling light trails and dynamic wind, soaring energy, stylish colors)
+4. Scene 4 (2절·브릿지/전환): 몽환적이고 깊은 분위기 (예: original anime aesthetic, walking down a quiet night alleyway with warm cafe lights, falling flower petals, atmospheric depth)
+5. Scene 5 (아웃트로/결): 따스한 여운과 결말 (예: original anime aesthetic, standing against golden sunrise, gentle sincere smile, calm morning breeze, hopeful open ending)
+(각 프롬프트는 "original modern anime aesthetic, high-end 2D anime music video style, stylish character design, clean line art, beautiful cinematic lighting" 키워드 중심 작성)
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -470,11 +470,11 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"modern anime aesthetic, Makoto Shinkai style, vintage train running along coastal sunset, glistening sea, vibrant pastel sky, peaceful nostalgic atmosphere",
-        f"modern anime aesthetic, Kyoto Animation quality, charming young character with umbrella waiting under warm streetlight in soft evening rain, delicate facial features",
-        f"modern anime aesthetic, breathtaking night sky exploding with magical shooting stars, glowing colorful auroras, soaring emotional climax",
-        f"modern anime aesthetic, walking through quiet city alleyway with warm neon lights and cherry blossoms, cinematic lighting",
-        f"modern anime aesthetic, standing on grassy hill overlooking sunlit valley at golden sunrise, windmill turning, fluttering flower petals"
+        f"original modern anime aesthetic, high-end 2D anime music video style, coastal train platform at twilight, glowing ocean horizon, stylish atmospheric lighting",
+        f"original modern anime aesthetic, charismatic young character waiting under warm streetlight in gentle evening rain, clean stylish character design, cinematic depth",
+        f"original modern anime aesthetic, breathtaking night sky with glowing light streaks and neon reflections, dynamic wind, soaring energetic climax",
+        f"original modern anime aesthetic, walking through stylish evening city street with ambient neon and glowing storefronts, atmospheric mood",
+        f"original modern anime aesthetic, standing on grassy hill overlooking sunlit sunrise horizon, calm morning glow, inspiring hopeful ending"
     ]
     fallback_shorts_scenes = [
         f"masterpiece, anime aesthetic, emotional character close up, dramatic lighting, high quality anime",
