@@ -329,30 +329,30 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하는 사이버펑크 2D 애니 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (정통 일본 2D 애니메이션 화풍 고정, 눈이 크고 귀엽고 섹시한 글래머러스 여주인공, 몸매가 드러나는 타이트한 사이버 테크웨어, 네온 시티 & 서사 탐험, 가사와 1:1 직결):
-1. 정통 일본 2D 애니메이션 화풍 (Authentic Japanese 2D anime aesthetic, CloverWorks / Kyoto Animation quality, Makoto Shinkai level cinematic lighting):
-   - 실사화나 반실사(semi-realistic)를 철저히 배제하고 순수 일본 2D 애니메이션 감성 유지.
-   - 생동감 넘치는 고채도 네온 색감과 정교한 셀 셰이딩(vibrant high-contrast anime palette, clean 2D cel shading, crisp dynamic 2D outlines).
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 일본 2D 애니 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (정통 일본 2D 애니메이션 화풍 고정, 은발/라벤더 헤어 & 프릴 카츄샤, 눈이 크고 귀엽고 섹시한 글래머러스 여주인공, 오픈 버스트 메이드 드레스, 가사 감성에 맞춘 다채로운 배경 1:1 직결):
+1. 정통 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, Kyoto Animation / CloverWorks quality, Makoto Shinkai level cinematic lighting):
+   - 실사화나 반실사(semi-realistic)를 철저히 배제하고 순수 일본 2D 모에 애니메이션 감성 유지.
+   - 생동감 넘치는 부드러운 애니메이션 색감과 정교한 셀 셰이딩(vibrant anime palette, soft pastel anime lighting, clean 2D cel shading, crisp dynamic 2D outlines).
    - 실사 사진(photorealistic), 3D CGI, 서구권 코믹스, 기괴한 얼굴 왜곡 철저 배제(not 3D, not photorealistic, not semi-realistic, no live-action, no real human photo).
-2. '눈이 크고 글래머러스하며 몸매가 드러나는 옷을 입은 귀엽고 섹시한 예쁜 애니 여캐'를 모든 씬의 '고정 주인공'으로 전면 등장:
-   - 외형 고정: 크고 맑은 매혹적인 애니메이션 눈망울(large expressive luminous anime eyes, delicate eyelashes), 눈부시게 예쁘고 귀여운 미모(cute and sexy gorgeous face, charming smile), 우아하고 글래머러스한 볼륨감 넘치는 몸매(voluptuous hourglass figure, attractive curves), 몸매 실루엣이 확연히 드러나는 타이트한 미래형 사이버 테크웨어(stylish form-fitting body-hugging cyberpunk techwear with luminous neon accents), 찰랑이는 긴 생머리(silky long flowing hair).
-   - 캐릭터 외형과 분위기는 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 감정선에 맞춰 사이버 시티 속을 걸어가거나, 노래하거나, 난간에 기대어 응시하거나, 질주합니다.
-3. 가사 텍스트와 사이버펑크 여캐 서사의 1:1 직결 연출:
+2. '은발/라벤더 헤어에 크고 맑은 눈망울, 글래머러스하며 가슴골/몸매가 드러나는 메이드 드레스를 입은 귀엽고 섹시한 예쁜 애니 여캐'를 모든 씬의 '고정 주인공'으로 전면 등장:
+   - 외형 고정: 찰랑이는 긴 은발/연보라빛 헤어와 귀여운 프릴 카츄샤(silky long silver-lavender hair with frilled cute maid headdress), 크고 맑은 매혹적인 보랏빛 애니메이션 눈망울(very large expressive luminous anime eyes with delicate eyelashes), 사랑스럽고 예쁜 미모와 달콤한 미소(gorgeous cute and sexy moe anime girl, adorable pretty face, charming sweet smile), 우아하고 글래머러스한 볼륨감 넘치는 몸매(extremely glamorous hourglass figure, voluptuous curves), 가슴골과 바디라인이 매혹적으로 드러나는 오픈 버스트 메이드 코르셋 드레스(stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette).
+   - 캐릭터 외형과 의상은 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 감정선에 맞춰 다양한 감성 배경 속에서 걷거나, 노래하거나, 창가에 기대어 사색하거나, 미소 짓습니다.
+3. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 얽매이지 않고 곡의 감성에 맞춘 자유로운 배경):
    - 방금 작사한 [lyrics]의 실제 단어, 소재, 감정선, 공간적 배경과 여주인공의 감정/행동을 1:1로 매핑하세요:
-     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 큰 눈망울로 카메라를 응시하는 여캐
-     • [밤/별/우주/새벽]: 마천루 옥상 난간에 기대어 거대한 홀로그램 별들과 은하수가 수놓인 네온 스카이라인을 바라보며 바람에 머리카락을 흩날리는 여캐
-     • [질주/탈출/바람/길]: 네온 라인이 빛나는 사이버 바이크에 올라타거나 고속 모노레일 창가에 서서 질주하는 바람을 맞으며 결의에 찬 눈빛을 빛내는 여캐
-     • [무대/열정/불꽃/소리쳐]: 홀로그램 조명과 사이버 레이저가 쏟아지는 미래형 라이브 무대 위에서 마이크를 쥐고 열정적으로 포효하듯 노래하는 여캐
-     • [꽃/봄/온기/사랑]: 네온 온실이나 사이버 정원에서 빛나는 바이오루미네센스 꽃잎을 손끝에 얹고 부드럽고 매혹적인 미소를 짓는 여캐
-     • [기억/시간/시계/어제]: 디지털 홀로그램 기억 조각들이 부유하는 아늑한 사이버룸 창가에서 헤드폰을 끼고 아련한 눈빛으로 회상하는 여캐
+     • [비/우산/물/눈물]: 촉촉이 비 내리는 감성적인 유럽풍 거리나 빗방울 맺힌 카페 창가에서 투명 우산을 쓰거나 찻잔을 든 채 큰 눈망울로 카메라를 아련하게 응시하는 여주인공
+     • [밤/별/우주/새벽]: 고풍스러운 앤티크 테라스나 언덕에 서서 쏟아지는 별빛 은하수 밤하늘을 올려다보며 은발을 바람에 흩날리는 여주인공
+     • [질주/탈출/바람/길]: 싱그러운 바람이 부는 푸른 초원 언덕길이나 해안 도로를 달리며 생동감 넘치게 미소 짓는 여주인공
+     • [무대/열정/불꽃/소리쳐]: 화려한 콘서트 라이브 조명이 쏟아지는 무대 위에서 마이크를 쥐고 벅찬 감정으로 열정적으로 노래하는 여주인공
+     • [꽃/봄/온기/사랑]: 벚꽃이나 들꽃이 만발한 햇살 가득한 온실 정원에서 꽃잎을 손끝에 얹고 사랑스럽고 매혹적인 미소를 짓는 여주인공
+     • [기억/시간/시계/어제]: 부드러운 햇살이 스며드는 따뜻한 서재나 창가 소파에서 앤티크 오르골을 바라보며 아련한 추억에 잠긴 여주인공
 4. 씬의 전개:
-   - Scene 1 (도입부): 푸른 네온 골목이나 고층 룸에서 여주인공이 시크하게 등장하며 시작하는 오프닝
-   - Scene 2 (1절/프리코러스): 가사의 소재와 감정을 마주하며 네온 시티를 이동하거나 몰입하는 여주인공의 씬
-   - Scene 3 (후렴): 후렴 훅의 벅찬 감정과 함께 가장 화려한 네온 클라이맥스(마천루 옥상 레이저, 화려한 라이브 무대 등) 속 매혹적인 여주인공 씬
+   - Scene 1 (도입부): 따스한 햇살이 드는 방이나 거리에서 여주인공이 사랑스럽게 등장하며 시작하는 오프닝
+   - Scene 2 (1절/프리코러스): 가사의 소재와 감정을 마주하며 거리를 걷거나 감정에 젖어드는 여주인공의 씬
+   - Scene 3 (후렴): 후렴 훅의 벅찬 감정과 함께 가장 화려하고 감동적인 클라이맥스(별빛 언덕, 화려한 무대, 만개한 꽃밭 등) 속 매혹적인 여주인공 씬
    - Scene 4 (2절/브릿지): 깊은 감정선과 아련하고 예쁜 큰 눈망울의 감성 클로즈업/미디엄 씬
-   - Scene 5 (아웃트로): 사이버 시티 너머로 떠오르는 여명이나 찬란한 네온 야경을 바라보며 깊은 여운을 남기는 피날레 씬
-(형식: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating curves, glowing luminous neon accents, silky long flowing hair, [가사 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo")
+   - Scene 5 (아웃트로): 노을 지는 석양이나 은은한 여명을 바라보며 깊은 여운을 남기는 피날레 씬
+(형식: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette, [가사 파트에 기반한 여주인공의 행동/표정 및 감성적인 배경 연출], breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -529,16 +529,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear outfit accentuating curves, standing on high skyscraper rooftop terrace looking out at vast futuristic neon metropolis under starry galaxy night sky, flowing detailed hair caught in wind, vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
-        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, holding a transparent holographic umbrella on rainy neon Tokyo street, glowing pink and cyan puddle reflections, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating silhouette, vibrant cyberpunk cityscape background, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
-        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, singing passionately with microphone on glowing neon cyber live concert stage, laser beams and holographic digital stars bursting around her, wearing alluring form-fitting cyberpunk outfit, charismatic aura, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
-        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, riding a sleek glowing cyber-bike along an elevated highway, form-fitting techwear hugging her body curves, city lights streaking past in neon motion blur, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
-        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, leaning against panoramic glass window of penthouse as pink pastel sunrise illuminates the cyberpunk city skyline, gentle charming smile, form-fitting cyber techwear, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette, standing on an antique sunlit terrace overlooking a picturesque romantic town under blue sky with fluffy clouds, gentle breeze fluttering her hair, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage, holding a transparent umbrella on a charming cobblestone street with warm glowing streetlights and gentle rain reflections, soft cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage, singing passionately with microphone on a grand concert stage, surrounded by sparkling stage lights and floating flower petals, charismatic aura, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage, sitting in a cozy sunlit cafe by a wooden window, warm tea on table, soft golden hour sunlight, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage, leaning against stone balcony terrace gazing at a breathtaking starry night sky with glowing crescent moon, gentle peaceful smile, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
     ]
     fallback_shorts_scenes = [
-        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy anime girl protagonist, big expressive luminous anime eyes, stunningly pretty face, glamorous figure, wearing stylish form-fitting cyberpunk techwear accentuating curves with luminous neon details, singing into microphone on high-tech stage, dynamic angle, dazzling digital laser sparkles, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action",
-        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy anime girl protagonist, big expressive luminous anime eyes, stunningly pretty face, charming smile, glamorous curvy figure in form-fitting techwear, rooftop night view with neon city skyline, gentle breeze blowing hair, warm neon reflections, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action",
-        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy anime girl protagonist, big expressive luminous anime eyes, captivating emotional gaze, pretty face, form-fitting body-hugging cyber outfit, gazing through rain-streaked neon window, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action"
+        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy moe anime girl protagonist, big expressive luminous anime eyes, stunningly pretty face, silky silver-lavender hair with cute maid headdress, extremely glamorous figure, wearing stylish form-fitting cute maid corset dress with bust cutout accentuating cleavage, singing into microphone on radiant stage, dynamic angle, sparkling lights, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action",
+        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy moe anime girl protagonist, big expressive luminous anime eyes, stunningly pretty face, charming smile, silky silver-lavender hair, glamorous curvy figure in form-fitting maid dress, antique cafe terrace night view under starry sky, gentle breeze, warm ambient lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action",
+        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy moe anime girl protagonist, big expressive luminous anime eyes, captivating emotional gaze, pretty face, silky silver-lavender hair, form-fitting maid dress with bust cutout, gazing through rain-streaked cafe window, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],
@@ -564,7 +564,7 @@ def generate_scene_prompts_for_duration(
 ) -> list:
     """
     곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
-    눈이 크고 귀엽고 섹시한 글래머러스 여캐(몸매가 드러나는 사이버 테크웨어) 일본 2D 애니메이션 프롬프트 N개를 생성합니다.
+    은발/라벤더 헤어에 크고 맑은 눈망울, 글래머러스한 오픈 버스트 메이드 드레스의 귀엽고 섹시한 미소녀 일본 2D 애니메이션 프롬프트 N개를 생성합니다.
     """
     import math
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
@@ -583,24 +583,24 @@ def generate_scene_prompts_for_duration(
 [가사 전문]:
 {lyrics}
 
-[★ 정통 일본 2D 애니메이션 화풍 + 큰 눈의 귀엽고 섹시한 글래머러스 여캐 고정 주인공 규칙]:
-1. 최정상급 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, CloverWorks / Kyoto Animation quality, Makoto Shinkai cinematic lighting):
-   - 실사화나 반실사(semi-realistic)를 배제하고 확실한 2D 애니메이션 작화(clean 2D cel shading, vibrant anime palette, crisp anime linework) 유지.
+[★ 정통 일본 2D 애니메이션 화풍 + 은발/라벤더 헤어 큰 눈의 귀엽고 섹시한 글래머러스 메이드 미소녀 고정 주인공 규칙]:
+1. 최정상급 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, Kyoto Animation / CloverWorks quality, Makoto Shinkai cinematic lighting):
+   - 실사화나 반실사(semi-realistic)를 배제하고 확실한 2D 애니메이션 작화(clean 2D cel shading, soft pastel lighting, vibrant anime palette, crisp anime linework) 유지.
    - 실사 사진(photorealistic), 3D CGI, 서양 코믹스, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, not semi-realistic, no live-action, no real human photo).
-2. '눈이 크고 글래머러스하며 몸매가 드러나는 옷을 입은 귀엽고 섹시한 예쁜 애니 여캐' 고정:
-   - 외형 고정: 눈이 크고 맑은 매혹적인 애니메이션 눈망울(large expressive luminous anime eyes, delicate eyelashes), 눈부시게 예쁘고 귀여운 미모(cute and sexy gorgeous pretty face, charming sweet smile), 우아하고 볼륨감 넘치는 글래머러스 체형(voluptuous hourglass figure, attractive curves), 몸매 굴곡이 그대로 드러나는 타이트한 미래형 사이버 테크웨어(stylish form-fitting body-hugging cyberpunk techwear with luminous neon accents), 찰랑이는 긴 생머리(silky long flowing hair).
-   - 캐릭터 외형과 매력은 모든 씬에서 일관되게 유지됩니다.
-3. 가사 텍스트와 사이버펑크 여캐 서사의 1:1 직결 연출:
+2. '은발/라벤더 헤어에 크고 맑은 눈망울, 글래머러스하며 가슴골/몸매가 드러나는 메이드 드레스를 입은 귀엽고 섹시한 예쁜 애니 여캐' 고정:
+   - 외형 고정: 찰랑이는 긴 은발/연보라빛 헤어와 귀여운 프릴 카츄샤(silky long silver-lavender hair with frilled cute maid headdress), 크고 맑은 매혹적인 보랏빛 애니메이션 눈망울(very large expressive luminous anime eyes with delicate eyelashes), 사랑스럽고 예쁜 미모와 달콤한 미소(gorgeous cute and sexy moe anime girl, adorable pretty face, charming sweet smile), 우아하고 글래머러스한 볼륨감 넘치는 몸매(extremely glamorous hourglass figure, voluptuous curves), 가슴골과 바디라인이 매혹적으로 드러나는 오픈 버스트 메이드 코르셋 드레스(stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette).
+   - 캐릭터 외형과 의상은 모든 씬에서 일관되게 유지됩니다.
+3. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 한정되지 않고 곡의 정서에 맞춘 다채로운 감성 배경):
    - 가사의 실제 단어, 감정, 분위기에 맞춰 여주인공의 표정, 행동, 공간을 정밀하게 연출:
-     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 큰 눈망울로 카메라를 응시하는 여캐
-     • [밤/별/우주/새벽]: 마천루 옥상 난간에 기대어 거대한 홀로그램 별들과 은하수가 수놓인 네온 스카이라인을 바라보며 바람에 머리카락을 흩날리는 여캐
-     • [질주/탈출/바람/길]: 네온 라인이 빛나는 사이버 바이크에 올라타거나 고속 모노레일 창가에 서서 질주하는 바람을 맞으며 결의에 찬 눈빛을 빛내는 여캐
-     • [무대/열정/불꽃/소리쳐]: 홀로그램 조명과 사이버 레이저가 쏟아지는 미래형 라이브 무대 위에서 마이크를 쥐고 열정적으로 포효하듯 노래하는 여캐
-     • [꽃/봄/온기/사랑]: 네온 온실이나 사이버 정원에서 빛나는 바이오루미네센스 꽃잎을 손끝에 얹고 부드럽고 매혹적인 미소를 짓는 여캐
-     • [기억/시간/시계/어제]: 디지털 홀로그램 기억 조각들이 부유하는 아늑한 사이버룸 창가에서 헤드폰을 끼고 아련한 눈빛으로 회상하는 여캐
+     • [비/우산/물/눈물]: 빗방울 맺힌 카페 창가나 낭만적인 비 내리는 유럽풍 거리에서 우산을 쓰고 찻잔을 든 채 큰 눈망울로 카메라를 아련하게 응시하는 여주인공
+     • [밤/별/우주/새벽]: 앤티크 테라스나 언덕에 서서 쏟아지는 별빛 밤하늘을 올려다보며 은발을 바람에 흩날리는 여주인공
+     • [질주/탈출/바람/길]: 푸른 초원이나 해변 길을 바람을 가르며 활기차게 달리는 여주인공
+     • [무대/열정/불꽃/소리쳐]: 반짝이는 무대 조명 아래에서 마이크를 쥐고 감정을 담아 노래하는 여주인공
+     • [꽃/봄/온기/사랑]: 꽃잎이 흩날리는 따스한 야외 정원이나 창가에서 꽃을 만지며 사랑스러운 미소를 짓는 여주인공
+     • [기억/시간/시계/어제]: 따뜻한 햇살이 비치는 앤티크 룸에서 옛 추억을 회상하는 아련한 여주인공
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
 5. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating curves, glowing luminous neon accents, silky long flowing hair, [가사 해당 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
+   "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette, [가사 해당 파트에 기반한 여주인공의 행동/표정 및 감성적인 배경 연출], breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -643,11 +643,11 @@ def generate_scene_prompts_for_duration(
         clean_lines = ["빛나는 계절", "어두운 밤하늘", "불어오는 바람", "지나온 시간들", "새벽의 온기"]
 
     cam_variations = [
-        "cinematic slow camera tracking shot, floating holographic dust particles, soft glowing neon ambient lighting",
-        "wide atmospheric shot capturing the glamorous anime girl on high skyscraper ledge overlooking sprawling neon metropolis",
-        "medium close-up showing radiant star-shaped pupils glowing in mesmerizing eyes, flowing hair, breathtaking anime expression",
-        "dynamic low angle shot, glowing laser beams and digital sparks fluttering in wind, energetic anime mood",
-        "epic cyberpunk sunset golden hour backlighting, vibrant neon skyline, deeply emotional and nostalgic anime atmosphere"
+        "cinematic slow camera tracking shot, soft floating dust motes, warm ambient lighting, emotional anime mood",
+        "wide atmospheric shot capturing the glamorous maid anime girl on an antique scenic terrace under vast beautiful sky",
+        "medium close-up showing large luminous anime eyes with delicate eyelashes, pretty face, charming captivating expression",
+        "dynamic low angle shot, floating flower petals dancing in gentle wind, heartwarming anime mood",
+        "epic sunset golden hour backlighting, deeply emotional and nostalgic anime atmosphere"
     ]
 
     result_prompts = []
@@ -656,52 +656,52 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 가사 단어 기반 사이버펑크 귀엽고 섹시한 글래머러스 여캐 행동 및 배경 정밀 매핑
+        # 가사 단어 기반 은발/라벤더 메이드 미소녀의 감성적인 행동 및 다채로운 배경 정밀 매핑
         if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
-            visual_theme = "standing on high rooftop as a colossal glowing holographic neon dragon glides majestically through the futuristic night sky behind her"
+            visual_theme = "standing on stone castle balcony as a majestic white fantasy dragon glides gracefully through the twilight sky behind her"
         elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
-            visual_theme = "wielding a glowing magenta cyber energy blade with fierce determined big anime eyes, wind whipping her form-fitting techwear outfit on skyscraper ledge"
+            visual_theme = "holding an ornate glowing silver rapier with fierce determined big anime eyes, wind whipping her maid dress ribbons on fortress wall"
         elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억", "차원"]):
-            visual_theme = "surrounded by floating golden holographic clockwork cogs and shimmering digital memory fragments in a high-tech observatory, wistful gaze"
+            visual_theme = "surrounded by floating golden clockwork cogs and shimmering light fragments in an antique sunlit clock tower library, wistful gaze"
         elif any(w in target_line for w in ["우주", "은하", "성운", "행성", "궤도"]):
-            visual_theme = "gazing up from high glass observation platform at a breathtaking celestial galaxy nebula and neon shooting stars across the cosmic night sky"
+            visual_theme = "gazing up from an antique glass observatory dome at a breathtaking celestial galaxy nebula and shooting stars across the cosmic night sky"
         elif any(w in target_line for w in ["성", "유적", "고대", "탑", "라퓨타", "신전"]):
-            visual_theme = "exploring towering overgrown cybernetic ruins where glowing bioluminescent vines entangle futuristic steel monoliths, curious gaze"
+            visual_theme = "exploring towering ancient mossy stone ruins where blooming wisteria and ivy drape over grand cathedral arches, curious gaze"
         elif any(w in target_line for w in ["산", "절벽", "바위", "협곡", "봉우리"]):
-            visual_theme = "standing at the edge of an ultra-high cyber tower skydeck, wind blowing her hair as misty clouds swirl below the neon megacity at dawn"
+            visual_theme = "standing at the edge of a verdant mountain cliff overlooking rolling misty green valleys at dawn, breeze fluttering her silver hair"
         elif any(w in target_line for w in ["심해", "해저", "산호", "해파리"]):
-            visual_theme = "visiting a massive futuristic underwater bio-dome, watching glowing turquoise jellyfish and coral lights reflect across her large expressive anime eyes"
+            visual_theme = "visiting a magical aquatic hall, watching glowing turquoise jellyfish and water reflections ripple across her large expressive anime eyes"
         elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변"]):
-            visual_theme = "standing on a coastal cyber walkway at purple twilight, gentle ocean breeze blowing her hair as bioluminescent waves roll in"
+            visual_theme = "walking along a picturesque seaside promenade at golden sunset, gentle ocean breeze blowing her dress as waves lap the shore"
         elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼"]):
-            visual_theme = "leaning against the glass window of a sleek high-speed neon cyber-train streaking across elevated tracks over glowing city lights"
+            visual_theme = "leaning against the polished wooden window frame of a vintage train carriage as golden countryside scenery rolls past"
         elif any(w in target_line for w in ["눈", "겨울", "얼음", "시리", "추위"]):
-            visual_theme = "catching glowing cyber snowflakes on her fingertips on a snowy neon street illuminated by soft holographic aurora lanterns"
+            visual_theme = "catching soft white snowflakes on her fingertips on a snow-covered cobblestone village square with glowing warm lanterns"
         elif any(w in target_line for w in ["비", "빗", "물", "적시"]):
-            visual_theme = "holding a transparent holographic umbrella on a rain-soaked neon street, pink and cyan streetlight puddles shimmering under her feet"
+            visual_theme = "holding a transparent umbrella on a quiet cobblestone street, gentle rain ripples reflecting warm amber streetlights"
         elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = "sitting on high rooftop railing overlooking endless glowing city lights, looking up at vast starry indigo sky with big luminous anime eyes"
+            visual_theme = "sitting on a rustic stone garden bench under a deep indigo sky, looking up at shimmering constellations with big luminous anime eyes"
         elif any(w in target_line for w in ["바람", "흔들", "풀", "나무", "숲"]):
-            visual_theme = "walking through an illuminated rooftop greenhouse garden, gentle breeze fluttering her glamorous form-fitting techwear and vibrant hair"
+            visual_theme = "strolling through an enchanted sun-dappled forest path, gentle wind rustling emerald leaves and fluttering her ribbons"
         elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
-            visual_theme = "gently cupping glowing holographic cherry blossom petals dancing in neon night air, soft enchanting smile with big beautiful anime eyes"
+            visual_theme = "gently cupping blooming pink cherry blossom petals in a sunlit garden, soft enchanting smile with big beautiful anime eyes"
         elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침", "태양"]):
-            visual_theme = "basking on penthouse balcony as warm pink morning sunlight illuminates her glamorous silhouette against the futuristic city horizon"
+            visual_theme = "basking on an antique bedroom balcony as warm morning sunlight illuminates her glamorous silhouette and silver hair"
         elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염"]):
-            visual_theme = "singing passionately with microphone on a dazzling cyber live stage, surrounded by burst of pyrotechnic sparks and laser beams"
+            visual_theme = "singing passionately with microphone on an illuminated grand musical stage, surrounded by burst of warm golden stage lights"
         elif base_prompts and len(base_prompts) > i:
             visual_theme = f"charismatically standing in {base_prompts[i]}"
         else:
-            visual_theme = f"reflecting the emotional scene of '{target_line}' in stunning cyberpunk setting, big beautiful anime eyes gleaming"
+            visual_theme = f"reflecting the emotional scene of '{target_line}' in stunning scenic setting, big beautiful anime eyes gleaming"
 
         cam_mod = cam_variations[i % len(cam_variations)]
         full_p = (
             f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-            f"gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, "
-            f"glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating curves, glowing luminous neon accents, silky long flowing hair, "
+            f"gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, "
+            f"silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, "
+            f"extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette, "
             f"{visual_theme}, "
-            f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, "
-            f"{cam_mod}, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, "
+            f"{cam_mod}, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
             f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
         )
         result_prompts.append(full_p)

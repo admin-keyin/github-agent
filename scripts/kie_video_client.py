@@ -39,15 +39,14 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 정통 일본 2D 애니메이션 화풍 + 큰 눈의 귀엽고 섹시한 글래머러스 여캐 고정 주인공 (몸매가 드러나는 사이버 테크웨어)
+        # 정통 일본 2D 모에 애니메이션 화풍 + 은발/라벤더 헤어 큰 눈의 귀엽고 섹시한 글래머러스 여캐 고정 주인공 (오픈 버스트 메이드 드레스)
         anime_prompt = (
             f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-            f"gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, "
-            f"glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating attractive silhouette, "
-            f"glowing luminous neon accents, silky long flowing hair, "
+            f"gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, "
+            f"silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, "
+            f"extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette, "
             f"{prompt}, "
-            f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, "
-            f"clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, "
+            f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
             f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo, no watermark"
         )
 
