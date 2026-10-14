@@ -39,11 +39,13 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 은은한 스튜디오 지브리 풍의 2D 손그림 수채화 애니메이션 스타일 (실사/3D 완전 배제)
+        # 일본 애니메이션 명작풍 2D 셀 애니메이션 스타일 (매력적인 일본 여자 캐릭터 주인공 및 가사 연출)
         anime_prompt = (
-            f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation style, {prompt}, "
-            f"lush hand-painted scenery, soft nostalgic watercolor palette, whimsical warm atmosphere, bold 2D outlines, vibrant cel shading, "
-            f"not photorealistic, not realistic, not 3D CGI, no live-action footage, no camera photo, no human face close-up, no watermark"
+            f"masterpiece 2D Japanese anime style, Kyoto Animation and Makoto Shinkai aesthetic, {prompt}, "
+            f"vibrant hand-drawn 2D cel animation, beautiful expressive anime girl, delicate emotive facial features, "
+            f"flowing detailed hair, rich atmospheric cinematic lighting, painterly background scenery, bold crisp 2D outlines, "
+            f"clean cel shading, highly detailed anime visual, not photorealistic, not realistic photography, not 3D CGI, "
+            f"no live-action, no real human photo, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
@@ -63,7 +65,7 @@ class KieVideoGenerator:
                 "prompt": anime_prompt[:2500],
                 "aspect_ratio": aspect_ratio,
                 "resolution": target_res,
-                "negative_prompt": "photorealistic, real life, realistic photography, 3D CGI, 3D render, live action, film grain, human face close-up"
+                "negative_prompt": "photorealistic, real life, realistic photography, live action footage, camera selfie, 3D CGI, 3D render, deformed, disfigured, blurry, ugly, watermark"
             }
             if "bytedance" in model:
                 # SeaDance 규격: duration은 "10s", camera_fixed: false

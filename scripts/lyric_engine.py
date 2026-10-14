@@ -287,23 +287,23 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하는 서정적 지브리 풍 2D 애니메이션 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (지브리 감성 화풍, 실사 배제, 가사와 1:1 직결, 사람 얼굴 클로즈업 배제):
-1. 스튜디오 지브리 특유의 서정적이고 따뜻한 2D 손그림 수채화 애니메이션 화풍(Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, lush hand-painted scenery, soft nostalgic watercolor palette)을 가미하세요:
-   - 선명한 2D 외곽선(bold 2D outlines), 다채로운 수채화/셀 채색(vibrant cel shading), 지브리 명작 애니메이션 화풍을 명시하고 실사 사진이나 3D CG 느낌을 엄격히 배제하세요.
-2. 막연한 '감성'이나 뻔한 동물 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
-   - 당신이 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간, 서사를 지브리풍 2D 애니메이션으로 직접 1:1 시각화하세요.
-   - 예: 가사에 바다가 나오면 지브리풍 푸른 파도/수평선/해변, 골목길이나 마을이 나오면 아늑한 가로등/비에 젖은 돌담길, 들꽃이나 바람이 나오면 푸른 풀밭과 흔들리는 꽃잎, 밤하늘이나 우주가 나오면 서정적인 달빛/별무리 등 가사의 실제 텍스트 소재를 1:1로 직접 묘사하세요.
-3. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
-   - no human face close-up, no human face
-   - 인물이 등장해야 한다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 신체 일부(손, 발걸음)나 풍경 속 원경으로만 처리하고, 기본적으로는 풍경, 사물, 공간의 서정적인 미장센 위주로 연출하세요.
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 일본 2D 애니메이션 여자 주인공 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (일본 셀 애니메이션 화풍, 매력적인 여자 캐릭터 주인공, 실사 배제, 가사와 1:1 직결):
+1. 일본 극장판 애니메이션 특유의 감성적이고 수려한 2D 셀 애니메이션 화풍(masterpiece 2D Japanese anime style, Kyoto Animation and Makoto Shinkai aesthetic, vibrant hand-drawn 2D cel animation, painterly background scenery):
+   - 선명하고 섬세한 2D 외곽선(bold crisp 2D outlines), 투명하고 다채로운 셀 채색(clean vibrant cel shading), 실사 사진이나 3D CGI 느낌을 엄격히 배제하세요.
+2. 매력적인 일본 여자 캐릭터 주인공(beautiful expressive anime girl)을 가사의 서사와 감정선에 맞게 매번 새롭게 디자인하여 전면에 연출하세요:
+   - 가사의 무드와 계절에 맞춘 캐릭터 외형(헤어스타일, 눈망울, 의상 스타일 - 예: 교복, 청순한 원피스, 니트 스웨터, 우비 등)을 부여하세요.
+   - 단조로운 얼굴 얼짱 각도 클로즈업만 남발하지 말고, 전신/상반신/옆모습/바람에 날리는 머리카락/감정 표현(노래를 흥얼거리는 모습, 눈을 감고 바람을 느끼는 모습, 눈물을 글썽이는 모습, 달려가는 역동적인 포즈 등)을 가사의 행동과 일치시키세요.
+3. 막연한 '감성'이나 뻔한 동물 클리셰를 엄격히 금지합니다:
+   - 반드시 당신이 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간, 서사와 주인공 소녀의 행동을 1:1로 직접 연결하세요.
+   - 예: 비가 오면 투명 우산을 쓰고 물웅덩이를 밟는 소녀, 별이 빛나면 옥상에서 밤하늘을 올려다보는 소녀, 바다가 나오면 해변 방파제에 걸터앉아 수평선을 바라보는 소녀, 기차역이 나오면 플랫폼에서 열차를 기다리는 소녀 등.
 4. 씬의 전개:
-   - Scene 1 (도입부): 인트로 및 1절 초반 가사의 공간적 배경을 여는 와이드 샷
-   - Scene 2 (1절/프리코러스): 가사의 행동과 감정이 전개되는 디테일 샷
-   - Scene 3 (후렴): 후렴 가사의 감정 폭발과 클라이맥스 시각화
-   - Scene 4 (2절/브릿지): 브릿지 가사의 내면적 분위기 반전 샷
-   - Scene 5 (아웃트로): 아웃트로 가사의 깊은 여운을 남기는 풀샷 피날레
-(형식: "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, [가사 파트에 기반한 구체적 공간/사물/빛 연출], lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face")
+   - Scene 1 (도입부): 인트로/1절 가사 공간 속에서 주인공 소녀가 등장하는 분위기 있는 씬
+   - Scene 2 (1절/프리코러스): 가사의 감정과 서사를 표현하며 움직이는 주인공 소녀 씬
+   - Scene 3 (후렴): 후렴 가사의 감정 폭발과 클라이맥스를 담은 역동적인 주인공 씬
+   - Scene 4 (2절/브릿지): 브릿지 가사의 내면적 분위기 반전과 깊은 감정선 씬
+   - Scene 5 (아웃트로): 아웃트로 가사의 깊은 여운을 남기는 주인공 소녀의 피날레 씬
+(형식: "masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, [가사 파트에 기반한 아름다운 여자 주인공의 구체적 외형/행동/감정/공간 연출], beautiful expressive anime girl, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -478,16 +478,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cozy bus stop in gentle evening rain, puddles reflecting streetlights, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, starry galaxy night sky with blooming vibrant aurora and falling shooting stars, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, misty forest canopy and tranquil lake at dusk, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, sunlit golden wildflower field on a high hill overlooking endless sunrise ocean, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face"
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful expressive anime girl standing on quiet coastal train platform at twilight, wind gently blowing her hair, glowing pastel ocean horizon, calm water reflections, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo",
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful expressive anime girl holding a clear transparent umbrella at cozy bus stop in gentle evening rain, streetlights reflecting on wet pavement, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo",
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful expressive anime girl looking up at starry night sky from rooftop, glowing celestial stars and blooming aurora, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo",
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful expressive anime girl walking along misty forest path beside tranquil lake at dusk, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo",
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful expressive anime girl running through sunlit golden wildflower field overlooking endless sunrise ocean, radiant smiling expression, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo"
     ]
     fallback_shorts_scenes = [
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, glowing jellyfish drifting through starry night sky clouds, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, radiant aurora borealis over snowy pine mountains with glowing fireflies, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, sunlit wooden window sill looking at soft morning sunrise, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, no photorealism, not 3D, no human face"
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful anime girl reaching her hand towards glowing starry night sky clouds, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo",
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful anime girl watching radiant aurora over snowy mountains with glowing fireflies, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo",
+        f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, beautiful anime girl leaning on sunlit wooden window sill looking at soft morning sunrise, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],
@@ -513,7 +513,7 @@ def generate_scene_prompts_for_duration(
 ) -> list:
     """
     곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
-    가사 흐름과 감정선에 맞춘 2D 애니메이션 프롬프트 N개를 생성합니다. (사람 얼굴 배제, 동물/자연/우주 중심)
+    가사 흐름과 감정선에 맞춘 매력적인 2D 일본 애니메이션 여자 캐릭터 주인공 중심 프롬프트 N개를 생성합니다.
     """
     import math
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
@@ -526,24 +526,23 @@ def generate_scene_prompts_for_duration(
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
                 prompt_instruction = f"""
-당신은 대한민국 최고 수준의 2D 애니메이션 뮤직비디오 비주얼 디렉터입니다.
+당신은 일본 명작 극장판 애니메이션(신카이 마코토, 쿄애니 스타일)의 최고 수준 비주얼 총괄 디렉터입니다.
 이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
 
 [가사 전문]:
 {lyrics}
 
-[★ 서정적 지브리 풍 2D 애니메이션 화풍 및 가사 1:1 직결 절대 규칙]:
-1. 스튜디오 지브리 특유의 서정적이고 따뜻한 2D 손그림 수채화 애니메이션 화풍(Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, lush hand-painted scenery, soft nostalgic watercolor palette)을 가미하세요!
-   - 선명한 2D 외곽선(bold 2D outlines), 다채로운 수채화/셀 채색(vibrant cel shading), 지브리 명작 애니메이션 화풍을 명시하고 실사 사진이나 3D CG 느낌을 엄격히 배제하세요.
-2. 막연한 '감성'이나 뻔한 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
-   - 반드시 위에 제공된 [가사 전문]의 실제 단어, 소재, 오브제, 공간적 배경, 서사를 지브리풍 2D 애니메이션으로 직접 1:1 시각화하세요.
-   - 예: 가사에 비나 우산이 나오면 지브리풍 빗방울 맺힌 유리창/물웅덩이, 골목길이나 마을이 나오면 아늑한 가로등/비에 젖은 돌담길, 들꽃이나 바람이 나오면 푸른 풀밭과 흔들리는 꽃잎, 바다나 파도가 나오면 청명한 수평선/부서지는 파도, 기차나 역이 나오면 서정적인 플랫폼/철길, 밤하늘이 나오면 따뜻한 달빛/별무리 등 가사의 실제 텍스트 소재를 직접 묘사하세요.
-3. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
-   - no human face close-up, no human face
-   - 사람이 필요하다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 발걸음/손/원경으로만 처리하고, 기본적으로는 풍경, 사물, 공간의 서정적인 미장센 위주로 연출하세요.
+[★ 일본 극장판 2D 애니메이션 여자 캐릭터 주인공 및 가사 1:1 직결 절대 규칙]:
+1. 극장판 2D 셀 애니메이션 화풍(masterpiece 2D Japanese anime style, Kyoto Animation and Makoto Shinkai aesthetic, vibrant hand-drawn 2D cel animation, painterly background scenery):
+   - 선명하고 섬세한 2D 외곽선(bold crisp 2D outlines), 투명하고 다채로운 셀 채색(clean vibrant cel shading), 실사 사진이나 3D CG 느낌을 엄격히 배제하세요.
+2. 매력적인 일본 여자 캐릭터 주인공(beautiful expressive anime girl)을 가사의 서사와 감정선에 맞게 매번 새롭게 디자인하여 전면에 등장시키세요:
+   - 가사의 무드와 계절에 어울리는 헤어스타일, 눈망울, 의상(교복, 청순한 원피스, 니트, 우비 등)을 설정하세요.
+   - 단조로운 얼짱 각도 정지화면이 아니라, 가사의 내용과 직결된 생생한 포즈와 행동(바람에 흩날리는 머리카락, 눈을 감고 노래하는 모습, 물웅덩이를 건너뛰는 모습, 밤하늘을 올려다보는 모습, 눈물을 훔치는 모습, 환하게 웃으며 달려가는 모습 등)을 묘사하세요.
+3. 뻔한 동물 클리셰나 정형화된 템플릿 금지:
+   - 제공된 [가사 전문]의 실제 단어, 소재, 오브제, 공간적 배경과 주인공 소녀의 행동을 1:1로 직접 시각화하세요.
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
 5. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, [가사 해당 파트의 구체적 공간/사물/자연/빛 연출], lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, dynamic composition, no photorealism, not 3D, no human face"
+   "masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, [가사 해당 파트의 아름다운 여자 주인공의 구체적 외형/행동/감정/공간 연출], beautiful expressive anime girl, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, dynamic cinematic lighting, no photorealism, not 3D, no real photo"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -568,7 +567,7 @@ def generate_scene_prompts_for_duration(
 
                     parsed = json.loads(raw_text.strip())
                     if isinstance(parsed, list) and len(parsed) >= num_scenes:
-                        print(f"[Scene Engine] Gemini가 지브리풍 가사 직결 10초 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
+                        print(f"[Scene Engine] Gemini가 일본 애니메이션 여자 주인공 가사 직결 10초 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
                         return parsed[:num_scenes]
                     elif isinstance(parsed, list) and len(parsed) > 0:
                         print(f"[Scene Engine] Gemini 생성 {len(parsed)}개 수령, 목표치 {num_scenes}개로 확장합니다.")
@@ -579,19 +578,18 @@ def generate_scene_prompts_for_duration(
             except Exception as e:
                 print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
 
-    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드
+    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (일본 애니메이션 여자 캐릭터 주연)
     print(f"[Scene Engine] 가사 실제 구절을 분석하여 {num_scenes}개 씬 시퀀스를 빌드합니다.")
     clean_lines = [l.strip() for l in lyrics.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
     if not clean_lines:
         clean_lines = ["빛나는 계절", "어두운 밤하늘", "불어오는 바람", "지나온 시간들", "새벽의 온기"]
 
     cam_variations = [
-        "slow cinematic camera push-in",
-        "wide atmospheric panoramic view",
-        "smooth low angle tracking shot",
-        "gentle wind motion, ethereal lighting",
-        "epic cinematic aerial view",
-        "soft ambient glow, peaceful depth"
+        "cinematic camera slow tracking shot, wind blowing hair and skirt gently",
+        "wide atmospheric shot capturing full figure and breathtaking anime landscape",
+        "medium shot showing expressive emotional eyes, soft rim lighting",
+        "dynamic low angle shot, petals and breeze dancing in air",
+        "epic sunset backlighting, glowing hair silhouette, delicate hand gesture"
     ]
 
     result_prompts = []
@@ -600,30 +598,30 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 가사 단어 기반 구체적 비주얼 테마 매핑
+        # 가사 단어 기반 일본 애니메이션 여자 주인공 행동/상황 매핑
         if any(w in target_line for w in ["비", "빗", "물", "적시"]):
-            visual_theme = "rain puddles reflecting soft city streetlights, gentle ripples in water, rain mist"
+            visual_theme = "beautiful anime girl holding clear umbrella in gentle rain, wet streetlights reflections, looking up with wistful eyes"
         elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = "starry midnight sky with glowing celestial starlight and soft moonlight breaking through clouds"
+            visual_theme = "beautiful anime girl on school rooftop gazing at vast starry sky and glowing aurora, stars reflecting in her sparkling eyes"
         elif any(w in target_line for w in ["바다", "파도", "수평선", "모래"]):
-            visual_theme = "rolling ocean waves washing ashore at twilight, distant glowing horizon and soft foam"
+            visual_theme = "beautiful anime girl sitting on seaside seawall at twilight, sea breeze fluttering her summer dress, rolling waves"
         elif any(w in target_line for w in ["바람", "흔들", "풀", "나무"]):
-            visual_theme = "green grass and wildflowers swaying in gentle afternoon breeze, sunlight filtering through leaves"
+            visual_theme = "beautiful anime girl standing on grassy green hill, holding her straw hat as gentle breeze rushes by, wildflowers"
         elif any(w in target_line for w in ["꽃", "봄", "피어"]):
-            visual_theme = "delicate wildflowers blooming on a sunlit hillside, soft petals floating in light"
+            visual_theme = "beautiful anime girl smiling softly under blooming cherry blossom trees, delicate petals drifting in warm sunlight"
         elif any(w in target_line for w in ["길", "골목", "발자국", "정거장"]):
-            visual_theme = "quiet evening street corner with glowing warm streetlight and empty railway platform"
+            visual_theme = "beautiful anime girl walking down nostalgic quiet street under amber streetlights, turning around with gentle expression"
         elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침"]):
-            visual_theme = "warm golden morning sunbeams breaking through mist over rolling hills, new dawn"
+            visual_theme = "beautiful anime girl standing by classroom window bathed in golden morning sunrise, peaceful radiant smile"
         elif any(w in target_line for w in ["불", "타오", "열정", "폭발"]):
-            visual_theme = "vibrant glowing sparks and blazing neon embers rising into dark cinematic night"
+            visual_theme = "beautiful anime girl performing with passionate energy on stage under blazing lights, sparks and glowing embers"
         elif base_prompts and len(base_prompts) > i:
-            visual_theme = base_prompts[i]
+            visual_theme = f"beautiful anime girl, {base_prompts[i]}"
         else:
-            visual_theme = f"poetic atmospheric scene expressing '{target_line}', dramatic cinematic lighting"
+            visual_theme = f"beautiful anime girl expressing the emotion of '{target_line}', dramatic cinematic lighting"
 
         cam_mod = cam_variations[i % len(cam_variations)]
-        full_p = f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, {visual_theme}, lush hand-painted scenery, soft nostalgic watercolor palette, bold 2D outlines, vibrant cel shading, {cam_mod}, no photorealism, not 3D, no human face"
+        full_p = f"masterpiece 2D Japanese anime style, Kyoto Animation aesthetic, {visual_theme}, beautiful expressive anime girl, vibrant hand-drawn 2D cel animation, painterly background scenery, bold crisp 2D outlines, clean cel shading, {cam_mod}, no photorealism, not 3D, no real photo"
         result_prompts.append(full_p)
 
     return result_prompts
