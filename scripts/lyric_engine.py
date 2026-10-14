@@ -12,6 +12,7 @@ import json
 import random
 import requests
 import time
+import re
 
 # -------------------------------------------------------------
 # 1. 서브 장르 & 사운드 팔레트 (동적 조합 풀)
@@ -135,7 +136,7 @@ THEMES = [
     "옥상 난간에 기대어 바라보는 서울의 푸른 새벽과 희미해지는 별빛",
     "어깨를 짓누르던 어제를 털어내고, 내일의 햇살을 향해 내딛는 첫 발걸음",
     # 질주 팝록 / 애니메이션 밴드 / 에너지 / 해방감 테마
-    "답답했던 일상과 한계를 부수고 시원하게 터져 나오는 통쾌한 질주와 해방감",
+    "답답했던 일상에서 벗어나 시원하게 터져 나오는 통쾌한 질주와 해방감",
     "끝없는 야근과 반복되는 일상을 박차고 나와 밤의 고속도로를 시속 150km로 달리는 순간",
     "남들의 시선 따위 상관없이 내 방식대로 리듬을 타고 웃어넘기는 유쾌한 반란",
     "절망의 늪에서 피어오른 오기와 자신감, 절대 무너지지 않고 끝까지 밀어붙이는 불꽃의 결의",
@@ -165,6 +166,39 @@ def resolve_category(song_type: str) -> str:
         weights=[40, 35, 25],
         k=1
     )[0]
+
+
+def generate_short_title(category: str) -> str:
+    """
+    한계, 돌파, 플레이리스트 등 진부한 단어와 장황한 문장형 제목을 철저히 배제하고,
+    짧고 감각적인 1~2단어(2~5음절)의 순수 단어, 혼합어(합성어), 감성 신조어를 생성합니다.
+    """
+    if category in ("changpop", "battle_epic"):
+        # 질주 팝록 / 애니메이션 밴드 / 파워풀 팝
+        standalones = [
+            "야간비행", "스파크런", "달빛서퍼", "네온스텝", "비행운",
+            "은하질주", "새벽워프", "루미너스", "블루스텝", "플래시백",
+            "스카이워크", "불꽃놀이", "찰나", "잔향", "소닉붐", "유성우",
+            "일탈", "점프컷", "선샤인", "파도타기", "빛의궤적", "스타더스트"
+        ]
+        part_a = ["달빛", "별빛", "네온", "새벽", "은하", "바람", "불꽃", "구름", "푸른", "물빛", "광속", "태양"]
+        part_b = ["유영", "비행", "스텝", "서퍼", "러너", "스파크", "웨이브", "소풍", "워프", "궤도", "점프", "샤워"]
+    else:
+        # 서정 발라드 / 인디 밴드 / 어쿠스틱
+        standalones = [
+            "윤슬", "잔향", "여명", "새벽녘", "물그림자", "달그림자",
+            "낮달", "소나기", "바람결", "밤안개", "별조각", "온도",
+            "잔상", "귀로", "계절감", "여운", "초록", "숲결", "봄샘",
+            "노을빛", "달빛창가", "이슬길"
+        ]
+        part_a = ["달빛", "별빛", "새벽", "바람", "물빛", "꽃잎", "구름", "노을", "숲속", "기억", "안개", "풀잎"]
+        part_b = ["유영", "항해", "산책", "소풍", "조각", "스케치", "그림자", "물결", "속삭임", "발자국", "온기", "선율"]
+
+    # 50% 확률로 엄선된 단독 단어/신조어, 50% 확률로 감각적인 합성어(혼합어)
+    if random.random() < 0.5:
+        return random.choice(standalones)
+    else:
+        return f"{random.choice(part_a)}{random.choice(part_b)}"
 
 
 def build_dynamic_music_spec(song_type: str):
@@ -269,8 +303,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 4. 템포 및 마스터링 (예: "{spec['bpm']} bpm", "{spec['texture']}")
 (주의: 추상적인 미사여구 대신 Suno 엔진이 바로 오디오 신디사이징으로 해석할 수 있는 구체적 음악 용어 위주로 작성)
 
-[★ 2. 중독적인 가사 (lyrics) 작사 규칙]
-1. 곡 제목(title)은 온전한 한국어 곡명으로 짓고, 절대 '#1', '#91' 같은 해시태그나 임의의 숫자 번호를 붙이지 마세요.
+[★ 2. 곡 제목 (title) 및 중독적인 가사 (lyrics) 작사 규칙]
+1. 【곡 제목(title) 필수 절대 원칙 - 짧은 단어 / 혼합어 / 신조어】:
+   - 길이 및 형식: 공백 포함 2~6자 내외의 짧고 감각적인 '단어', '혼합어(합성어)', 또는 '감성 신조어'로만 지으세요.
+   - 절대 문장형이나 장황한 수식어구(예: '모두가 잠든 밤의 노래', '너를 향해 달리는 순간', '마지막 정거장에서' 등)로 짓지 마세요.
+   - 썸네일과 영상에 크게 박힐 때 뇌리에 단번에 꽂히는 1~2단어(2~5음절) 형태여야 합니다.
+   - 【절대 금지 단어】: '한계', '돌파', '플레이리스트', '하이라이트', '오버드라이브', '카운트다운' 등 진부하고 상투적인 단어는 제목과 가사 모두에서 절대 사용 금지.
+   - 절대 '#1', '#91' 같은 해시태그나 임의의 트랙 번호를 붙이지 마세요.
+   - 【추천 스타일 예시】:
+     • 질주/애니록/팝: '야간비행', '스파크런', '달빛서퍼', '네온스텝', '비행운', '은하질주', '새벽워프', '찰나', '불꽃놀이', '루미너스', '블루스텝', '플래시백'
+     • 서정/인디/발라드: '윤슬', '잔향', '새벽녘', '달빛유영', '물그림자', '별조각', '여명', '바람소풍', '낮달', '소나기', '구름산책', '밤안개'
 2. 가사 본문이나 제목에 '정상화', '카운터', '신창섭' 등 특정 인터넷 밈 단어를 절대 사용하지 마세요. 대신 청춘, 일탈, 자유, 사랑, 질주, 열정 등 신선하고 몰입감 넘치는 대중가요 어휘를 사용하세요.
 3. 가사 본문이나 대괄호 섹션 태그에 특정 가수명이나 밴드명(예: 잔나비, 넬, DAY6 등)을 절대 언급하거나 포함하지 마세요. 순수 음악적 연주 지시어만 영문으로 작성하세요.
 4. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
@@ -327,7 +369,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 
 반드시 마크다운 코드블록(```json) 없이 순수 JSON만 출력하세요:
 {{
-  "title": "독창적이고 매력적인 한글 곡 제목 (필요시 부제 병기)",
+  "title": "2~6글자의 짧고 감각적인 단어/혼합어/신조어 제목 (한계, 돌파, 플레이리스트 등 상투어 절대 금지. 예: 야간비행, 윤슬, 스파크런, 달빛유영)",
   "style_tags": "Suno V6용 정교한 영문 스타일 & 선율 태그 문자열",
   "lyrics": "섹션별 연주 지시 큐가 포함된 완성된 전체 신곡 가사",
   "story_description": "유튜브 감성 곡 소개 에세이 및 시놉시스",
@@ -362,6 +404,15 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
                     if raw_text.endswith("```"):
                         raw_text = raw_text[:-3]
                     parsed = json.loads(raw_text.strip())
+                    raw_title = parsed.get("title", "").strip()
+                    clean_title = re.sub(r'[\'\"#\[\]\(\)]', '', raw_title).strip()
+                    for sep in [":", "-", "–", "—", "/"]:
+                        if sep in clean_title:
+                            clean_title = clean_title.split(sep)[0].strip()
+                    forbidden_words = ["한계", "돌파", "플레이리스트", "하이라이트", "오버드라이브", "카운트다운"]
+                    if not clean_title or any(fw in clean_title for fw in forbidden_words) or len(clean_title) > 8:
+                        clean_title = generate_short_title(spec["category"])
+                    parsed["title"] = clean_title
                     print(f"[Lyric Engine Success] 새로운 오리지널 곡 창작 완료: '{parsed['title']}' ({spec['name']})")
                     scenes = parsed.get("scene_prompts", [])
                     if not isinstance(scenes, list) or len(scenes) < 3:
@@ -385,7 +436,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
                         "scene_prompts": scenes,
                         "shorts_scene_prompts": shorts_scenes,
                         "story_description": parsed.get("story_description", f"Inkey Studio가 전하는 오리지널 사운드트랙 '{parsed['title']}'."),
-                        "shorts_concept": parsed.get("shorts_concept", f"{parsed['title']} 하이라이트 킬링파트"),
+                        "shorts_concept": parsed.get("shorts_concept", f"{parsed['title']} 킬링파트"),
                         "genre_name": spec["name"],
                         "category": spec["category"]
                     }
@@ -396,12 +447,9 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 
     # 2. Gemini 미연동 또는 실패 시 다채로운 룰베이스 동적 폴백 생성기
     seed = int(time.time() * 1000) % 10000
+    title = generate_short_title(spec["category"])
 
     if spec["category"] == "changpop":
-        prefixes = ["모두가 잠든 밤의", "거침없는", "멈추지 않는", "심장을 뛰게 할", "통쾌한", "푸른 불꽃의", "전력질주", "마침내 찾아온", "한계를 부수는", "눈부신 속도의"]
-        subjects = ["하이라이트", "오버드라이브", "질주", "스파크", "돌파구", "새벽탈출", "시그널", "엔진소리", "플레이리스트", "카운트다운"]
-        title = f"{random.choice(prefixes)} {random.choice(subjects)}"
-        
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
         lyrics = f"""[Intro: Driving Drums & Bass Riff]
 [Verse 1: Fast Rhythmic Delivery]
@@ -441,10 +489,6 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 완벽한 순간!
 지금부터가 진짜 시작이야."""
     else:
-        prefixes = ["우리가 머물던", "어느 늦은 밤의", "푸른 새벽의", "바람이 머무는", "달빛 스케치", "비 내리는 오후", "기억의 파도", "너에게 닿는", "계절의 끝자락", "소란한 밤의", "마지막 정거장의"]
-        subjects = ["정거장", "노랫소리", "고백", "온기", "발자국", "그림자", "풍경", "기억", "바람", "빛", "계절", "여름밤", "일기장"]
-        title = f"{random.choice(prefixes)} {random.choice(subjects)}"
-        
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
         lyrics = f"""[Intro: Acoustic & Piano Melody Lead]
 [Verse 1: Whispering Intimate Voice]

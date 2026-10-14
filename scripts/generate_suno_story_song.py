@@ -467,11 +467,11 @@ def main():
         f"☕ 이런 순간에 함께 들어보세요\n"
         f"• 혼자 걷는 늦은 밤, 조용히 마음을 정리하고 싶을 때\n"
         f"• 하루 끝 지친 마음을 따뜻하게 안아줄 위로가 필요할 때\n"
-        f"• 공부, 작업, 새벽 드라이브 플레이리스트와 함께\n\n"
+        f"• 몰입이 필요한 작업 시간, 새벽 드라이브를 나설 때\n\n"
         f"✨ Collaboration:\n"
         f"본 음원은 음악 협업도구 KIE와 함께 제작되었습니다.\n"
         f"🔗 KIE 바로가기: https://kie.ai?ref=a75838b6fecc53ef2774b5279d142d11\n\n"
-        f"#InkeyStudio #InkeyMusic #신곡 #감성인디 #리릭비디오 #OfficialMV #플레이리스트 #KIE"
+        f"#InkeyStudio #InkeyMusic #신곡 #감성인디 #리릭비디오 #OfficialMV #노래추천 #KIE"
     )
 
     meta_info = {
@@ -485,8 +485,8 @@ def main():
         json.dump(meta_info, f, ensure_ascii=False, indent=2)
 
     # 10. 유튜브 쇼츠용 메타데이터 저장
-    shorts_concept_text = extra_meta.get("shorts_concept", f"{title} 하이라이트")
-    shorts_title = f"{title} 🎧 킬링파트 가사 하이라이트 #Shorts"
+    shorts_concept_text = extra_meta.get("shorts_concept", f"{title} 킬링파트")
+    shorts_title = f"{title} 🎧 킬링파트 #Shorts"
     shorts_desc = (
         f"🎧 {title} - Inkey Studio Highlight\n\n"
         f"✨ {shorts_concept_text}\n\n"
