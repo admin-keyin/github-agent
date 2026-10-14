@@ -287,27 +287,24 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하는 최신 대세 애니 여주인공 스타일 2D 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (최신 대세 애니 여주인공 비주얼: 마린, 시키모리, 치즈루, 렘, 시에스타 스타일, 가사와 1:1 직결):
-1. 최신 톱티어 애니메이션 화풍 (CloverWorks, Doga Kobo, White Fox 최신 작화 퀄리티):
-   - 반짝이는 보석 같은 그라데이션 눈동자(sparkling gradient eyes with delicate lashes), 결이 살아있는 섬세한 헤어 하이라이트(silky layered hair with soft highlights), 화사하고 투명감 넘치는 피부 톤, 선명하고 세련된 2D 셀 채색(crisp modern 2D cel shading).
-   - 실사 사진(photorealistic)이나 3D CG 느낌을 엄격히 배제하세요.
-2. 일본 서브컬처 최고 인기 여주인공 5대 비주얼 모티브를 곡의 감정선과 가사에 맞춰 적극 차용:
-   - ① 키타가와 마린 타입: 눈부시게 밝은 금발 투톤/피어싱/초커, 화려하고 트렌디한 패션, 활기차고 매혹적인 미소
-   - ② 시키모리 타입: 부드러운 그라데이션 핑크빛 헤어, 평소엔 사랑스럽다가 순간순간 터져 나오는 쿨하고 치명적인 눈빛
-   - ③ 미즈하라 치즈루 타입: 롱 웨이브 갈색 머리, 청순함과 성숙미를 넘나드는 완벽한 비율의 정통파 히로인 스타일
-   - ④ 렘 타입: 사랑스럽고 헌신적인 단발 헤어, 신비로운 푸른빛 눈동자, 서정적이고 아련한 감정선
-   - ⑤ 시에스타 타입: 신비롭고 지적인 백발/은발 쇼트보브, 푸른 리본, 쿨하면서도 몽환적이고 독보적인 미모
-3. 가사 텍스트와 여주인공 행동의 1:1 직결:
-   - 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간적 배경과 주인공 여캐의 행동을 1:1로 직접 연결하세요.
-   - 예: 비가 오면 투명 우산 밑에서 빗방울을 손끝으로 받으며 설레는 표정의 마린/치즈루풍 여캐, 밤하늘/별빛이면 옥상 난간에서 바람에 머리칼을 날리며 신비롭게 뒤돌아보는 시에스타/렘풍 여캐, 질주/바람이면 푸른 언덕을 달려가며 눈이 마주치자 쿨하게 미소 짓는 시키모리풍 여캐 등.
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 지브리 검은 석탄 요정(스스와타리) 2D 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (스튜디오 지브리 손그림 수채화 화풍, 귀여운 검은 석탄 캐릭터 고정 주인공, 서정적 배경 탐험, 가사와 1:1 직결):
+1. 스튜디오 지브리 특유의 따뜻하고 서정적인 2D 손그림 수채화 애니메이션 화풍 (Hayao Miyazaki & Studio Ghibli classic aesthetic):
+   - 부드러운 수채화 질감의 자연/도시 풍경(lush hand-painted watercolor scenery, soft nostalgic pastel palette), 유기적인 2D 외곽선과 수공예적 셀 채색.
+   - 실사 사진(photorealistic), 3D CGI, 복잡한 인물 얼굴 왜곡을 철저히 배제합니다.
+2. <센과 치히로의 행방불명>의 동글동글 귀여운 검은 석탄 요정(Susuwatari / Soot Sprite)을 모든 씬의 '고정 주인공'으로 전면 등장:
+   - 외형: 몽실몽실하고 둥근 털 뭉치 같은 검은 숯 요정, 호기심 가득한 땡그란 흰 눈동자, 앙증맞은 가는 손발(cute fluffy round black soot sprite with big curious white eyes and tiny stick legs).
+   - 캐릭터 외형은 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 흐름에 맞춰 지브리풍 배경을 아장아장 걷거나 뛰거나 머물며 탐험합니다.
+3. 가사 텍스트와 석탄 캐릭터 모험의 1:1 직결 연출:
+   - 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간적 배경 속을 석탄 요정이 직접 탐험하게 만드세요.
+   - 예: 비가 오면 커다란 토토로 잎사귀 우산을 쓰고 빗방울 물웅덩이를 건너뛰는 석탄 요정, 밤하늘/별빛이면 언덕 잔디밭이나 처마 끝에 앉아 쏟아지는 별똥별과 은하수를 올려다보는 석탄 요정, 바다/바람이면 모래사장에서 조개껍데기 옆에 서서 부서지는 하얀 파도를 구경하는 석탄 요정, 꽃/봄이면 민들레 홀씨나 들꽃에 매달려 바람을 타고 두둥실 날아가는 석탄 요정 등.
 4. 씬의 전개:
-   - Scene 1 (도입부): 인트로 공간 속에서 눈길을 단번에 사로잡는 여주인공의 등장 시네마틱 샷
-   - Scene 2 (1절/프리코러스): 가사의 감정과 서사를 표현하며 움직이는 여주인공의 매력적인 디테일 샷
-   - Scene 3 (후렴): 후렴 훅의 폭발적 감정과 함께 화려하고 역동적인 여주인공 클라이맥스 씬
-   - Scene 4 (2절/브릿지): 깊은 감정선과 아련함/반전 매력을 보여주는 여주인공 씬
-   - Scene 5 (아웃트로): 강한 여운과 심쿵을 남기는 여주인공의 피날레 풀샷 씬
-(형식: "modern masterpiece 2D Japanese anime style, top-tier romance and fantasy anime heroine visual, [가사 파트에 기반한 매혹적인 여주인공의 구체적 외형/헤어/패션/포즈/공간 연출], sparkling gradient eyes, silky flowing hair, crisp high-end 2D outlines, clean vibrant cel shading, cinematic soft lighting, no photorealism, not 3D, no real photo")
+   - Scene 1 (도입부): 아늑한 지브리풍 공간 속에서 석탄 요정이 뽈뽈거리며 걸어 나오는 오프닝 씬
+   - Scene 2 (1절/프리코러스): 가사의 소재와 서사를 만나 신기해하며 탐험하는 석탄 요정의 씬
+   - Scene 3 (후렴): 후렴 훅의 벅찬 감정과 함께 가장 장관인 지브리 배경(별빛 언덕, 빛나는 바다 등) 속 석탄 요정의 클라이맥스 씬
+   - Scene 4 (2절/브릿지): 깊은 감정선과 따뜻한 휴식을 취하는 석탄 요정 씬
+   - Scene 5 (아웃트로): 노을이나 새벽빛을 바라보며 깊은 여운을 남기는 석탄 요정의 피날레 씬
+(형식: "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, [가사 파트에 기반한 석탄 요정의 행동 및 지브리 수채화 배경 연출], lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -482,16 +479,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"modern masterpiece 2D Japanese anime style, inspired by Marin Kitagawa and Chizuru Mizuhara aesthetic, gorgeous anime heroine in trendy stylish summer school outfit standing on seaside platform at sunset, wind blowing her silky blonde-pink gradient hair, sparkling gradient eyes, warm sunset glow, crisp 2D outlines, clean vibrant cel shading, cinematic depth, no photorealism, not 3D, no real photo",
-        f"modern masterpiece 2D Japanese anime style, inspired by Shikimori and Siesta aesthetic, stunning cool anime heroine with soft pink and silver-tinted hair holding clear umbrella in gentle evening rain, amber streetlights reflecting in her intense alluring eyes, stylish oversized cardigan, crisp 2D outlines, clean cel shading, no photorealism, not 3D, no real photo",
-        f"modern masterpiece 2D Japanese anime style, inspired by Rem and Siesta aesthetic, beautiful anime heroine with short bob hairstyle and delicate ribbon sitting on rooftop railing, vast starry night sky and glowing aurora, stars sparkling in her expressive blue eyes, gentle nostalgic smile, crisp 2D outlines, clean cel shading, no photorealism, not 3D, no real photo",
-        f"modern masterpiece 2D Japanese anime style, inspired by Chizuru Mizuhara aesthetic, gorgeous anime heroine with flowing wavy brown hair walking along romantic tree-lined boulevard at twilight, turning around with dazzling heart-fluttering smile, soft warm bokeh lighting, crisp 2D outlines, clean cel shading, no photorealism, not 3D, no real photo",
-        f"modern masterpiece 2D Japanese anime style, inspired by Marin Kitagawa aesthetic, radiant anime heroine running cheerfully forward in sunlit golden wildflower field overlooking endless ocean, brilliant joyful expression, fluttering skirt and golden hair, crisp 2D outlines, clean vibrant cel shading, no photorealism, not 3D, no real photo"
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, exploring a quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, holding a large green leaf umbrella at cozy bus stop in gentle evening rain, puddle ripples reflecting streetlights, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, sitting on a mossy hill looking up at vast starry galaxy night sky with blooming aurora and shooting stars, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, waddling through sun-dappled ancient forest path beside tranquil lake at dusk, glowing fireflies, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, holding onto a fluffy dandelion seed floating over sunlit golden wildflower field overlooking sunrise ocean, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
     ]
     fallback_shorts_scenes = [
-        f"modern masterpiece 2D Japanese anime style, inspired by Marin Kitagawa aesthetic, gorgeous anime heroine smiling playfully and winking at camera, sparkling jewel eyes, trendy hair accessories, vibrant cel animation, crisp 2D outlines, clean cel shading, no photorealism, not 3D, no real photo",
-        f"modern masterpiece 2D Japanese anime style, inspired by Shikimori aesthetic, stunning anime heroine with cool captivating gaze and gentle windblown hair, glowing sunset backlighting, high-end modern anime visual, crisp 2D outlines, clean cel shading, no photorealism, not 3D, no real photo",
-        f"modern masterpiece 2D Japanese anime style, inspired by Siesta and Rem aesthetic, beautiful anime heroine leaning close to window in soft morning sunlight, peaceful angelic smile, translucent skin, crisp 2D outlines, clean cel shading, no photorealism, not 3D, no real photo"
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, floating among glowing pastel starry night clouds, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, hopping across snowy wooden fence with dancing aurora in background, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
+        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, sitting on warm sunlit wooden window sill looking at morning sunrise over countryside village, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],
@@ -517,7 +514,7 @@ def generate_scene_prompts_for_duration(
 ) -> list:
     """
     곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
-    최신 대세 애니 여주인공(키타가와 마린, 시키모리, 미즈하라 치즈루, 렘, 시에스타) 모티브의 2D 프롬프트 N개를 생성합니다.
+    센과 치히로의 검은 석탄 요정(스스와타리)이 지브리 수채화 배경을 탐험하는 2D 애니메이션 프롬프트 N개를 생성합니다.
     """
     import math
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
@@ -530,27 +527,25 @@ def generate_scene_prompts_for_duration(
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
                 prompt_instruction = f"""
-당신은 일본 최신 톱티어 애니메이션(CloverWorks, Doga Kobo, White Fox 스튜디오)의 최고 수준 캐릭터 & 비주얼 디렉터입니다.
+당신은 스튜디오 지브리(미야자키 하야오) 클래식 애니메이션의 최고 수준 비주얼 총괄 디렉터입니다.
 이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
 
 [가사 전문]:
 {lyrics}
 
-[★ 최신 대세 애니 여주인공 비주얼 (마린, 시키모리, 치즈루, 렘, 시에스타 모티브) 및 가사 1:1 직결 규칙]:
-1. 최신 톱티어 2D 애니메이션 화풍(modern masterpiece 2D Japanese anime style, top-tier romance and fantasy anime heroine visual):
-   - 반짝이는 보석 같은 그라데이션 눈동자(sparkling gradient eyes), 섬세한 결의 헤어 하이라이트(silky layered hair with highlights), 화사하고 투명감 있는 채색, 선명한 2D 외곽선(crisp 2D outlines, clean vibrant cel shading).
-   - 실사 사진(photorealistic)이나 3D CG 느낌을 엄격히 배제하세요.
-2. 서브컬처 최고 인기 여주인공 비주얼 모티브를 가사 감정선에 맞추어 적극 변주:
-   - ① 키타가와 마린(밝은 투톤 금발, 화려하고 트렌디한 패션, 활기차고 당당한 심쿵 미소)
-   - ② 시키모리(부드러운 핑크빛 헤어, 사랑스러움과 순간순간 터지는 쿨하고 멋진 눈빛)
-   - ③ 미즈하라 치즈루(찰랑이는 롱 웨이브 갈색 머리, 청순함과 성숙한 완벽 미모의 정통파 히로인)
-   - ④ 렘(사랑스럽고 서정적인 푸른빛 단발 헤어와 맑고 신비로운 눈동자)
-   - ⑤ 시에스타(신비롭고 쿨한 백발/은발 단발, 푸른 리본, 몽환적이고 독보적인 미모)
-3. 가사 텍스트와 1:1 직결 연출:
-   - 가사의 실제 단어, 소재, 오브제, 공간적 배경과 여주인공의 동적 행동(포즈, 표정, 손짓, 바람에 날리는 머리칼)을 1:1로 직접 시각화하세요.
+[★ 지브리 검은 석탄 요정(스스와타리) 고정 주인공 및 지브리 수채화 배경 탐험 규칙]:
+1. 스튜디오 지브리 특유의 서정적이고 따뜻한 2D 손그림 수채화 화풍 (Studio Ghibli aesthetic, Hayao Miyazaki classic hand-drawn 2D animation):
+   - 부드러운 수채화 질감의 자연/마을/하늘 풍경(lush hand-painted watercolor scenery, soft nostalgic warm palette), 유기적인 2D 외곽선과 수공예적 셀 채색.
+   - 실사 사진(photorealistic), 3D CGI, 사람 얼굴 클로즈업 절대 금지(no photorealism, not 3D, no human face).
+2. <센과 치히로의 행방불명>에 나오는 동글동글 귀여운 검은 석탄 요정(Susuwatari / Soot Sprite)을 모든 씬의 '고정 주인공'으로 일관되게 등장:
+   - 외형 고정: 몽실몽실하고 둥근 검은 털 뭉치 요정, 호기심 가득한 땡그란 흰 눈동자, 앙증맞은 가는 손발(cute fluffy round black soot sprite Susuwatari with big curious round white eyes and tiny stick legs).
+   - 캐릭터의 외형은 씬 전체에서 완전히 고정되며, 가사의 무드와 흐름에 맞춰 지브리풍 배경 속을 아장아장 걷거나 뛰거나 머물며 탐험합니다.
+3. 가사 텍스트와 석탄 요정 모험의 1:1 직결 연출:
+   - 가사의 실제 단어, 소재, 오브제, 공간적 배경과 석탄 요정의 행동을 1:1로 직접 연결하세요.
+   - 예: 비/우산 가사 -> 초록 나뭇잎 우산을 쓰고 물웅덩이를 건너뛰는 석탄 요정, 밤하늘/별빛 -> 언덕 잔디밭에서 별똥별을 올려다보는 석탄 요정, 바다/파도 -> 모래사장에서 부서지는 파도를 구경하는 석탄 요정, 바람/꽃 -> 꽃잎이나 민들레 씨앗에 매달려 날아가는 석탄 요정 등.
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
 5. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "modern masterpiece 2D Japanese anime style, top-tier anime heroine visual inspired by [모티브 여주인공명], [가사 해당 파트의 매혹적인 여주인공의 구체적 외형/패션/행동/공간 연출], sparkling gradient eyes, silky flowing hair, crisp high-end 2D outlines, clean vibrant cel shading, cinematic soft lighting, no photorealism, not 3D, no real photo"
+   "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, [가사 해당 파트에 기반한 석탄 요정의 행동 및 지브리 수채화 배경 연출], lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -575,7 +570,7 @@ def generate_scene_prompts_for_duration(
 
                     parsed = json.loads(raw_text.strip())
                     if isinstance(parsed, list) and len(parsed) >= num_scenes:
-                        print(f"[Scene Engine] Gemini가 최신 대세 여주인공 스타일 10초 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
+                        print(f"[Scene Engine] Gemini가 지브리 석탄 요정 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
                         return parsed[:num_scenes]
                     elif isinstance(parsed, list) and len(parsed) > 0:
                         print(f"[Scene Engine] Gemini 생성 {len(parsed)}개 수령, 목표치 {num_scenes}개로 확장합니다.")
@@ -586,26 +581,18 @@ def generate_scene_prompts_for_duration(
             except Exception as e:
                 print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
 
-    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (마린/치즈루/시키모리/렘/시에스타 모티브)
+    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (지브리 석탄 요정 고정 주연)
     print(f"[Scene Engine] 가사 실제 구절을 분석하여 {num_scenes}개 씬 시퀀스를 빌드합니다.")
     clean_lines = [l.strip() for l in lyrics.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
     if not clean_lines:
         clean_lines = ["빛나는 계절", "어두운 밤하늘", "불어오는 바람", "지나온 시간들", "새벽의 온기"]
 
     cam_variations = [
-        "cinematic camera slow tracking shot, wind fluttering skirt and silky hair, radiant glowing rim lighting",
-        "wide atmospheric shot capturing full figure in charming fashionable outfit against breathtaking scenic backdrop",
-        "medium close-up showing sparkling expressive gradient eyes and enchanting smile, shallow depth of field",
-        "dynamic low angle shot, petals and soft breeze dancing in air, heart-fluttering eye contact",
-        "epic sunset backlighting, glowing hair silhouette, delicate charming hand gesture"
-    ]
-
-    heroine_motifs = [
-        ("Marin Kitagawa aesthetic", "stylish blonde hair with soft pink tips, sparkling hazel-pink eyes, radiant fashionable charisma"),
-        ("Shikimori aesthetic", "silky gradient pink hair, captivating jewel eyes, effortlessly cool yet adorable expression"),
-        ("Chizuru Mizuhara aesthetic", "flowing layered brunette wavy hair, dazzling hazel eyes, elegant refined beauty"),
-        ("Rem aesthetic", "delicate pastel blue bob hair with hair ribbon, clear expressive sky-blue eyes, pure sweet emotive presence"),
-        ("Siesta aesthetic", "mysterious silver-white bob hair with navy ribbon, intelligent deep blue eyes, cool enchanting allure")
+        "cinematic slow camera tracking shot, gentle whimsical breeze, soft warm ambient lighting",
+        "wide atmospheric shot capturing the tiny soot sprite in breathtaking vast Ghibli landscape",
+        "medium close-up showing cute curious round white eyes, charming animation movement",
+        "dynamic low angle shot, floating petals and dandelion seeds, playful fairytale mood",
+        "epic sunset golden hour backlighting, glowing watercolor sky, peaceful nostalgic atmosphere"
     ]
 
     result_prompts = []
@@ -614,32 +601,36 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        motif_tag, motif_desc = heroine_motifs[i % len(heroine_motifs)]
-
-        # 가사 단어 기반 여주인공 행동/상황 매핑
+        # 가사 단어 기반 석탄 요정(스스와타리) 행동 및 배경 매핑
         if any(w in target_line for w in ["비", "빗", "물", "적시"]):
-            visual_theme = f"gorgeous anime heroine ({motif_desc}) holding clear umbrella in gentle rain, water drops glistening, looking up with heart-fluttering smile"
+            visual_theme = "holding a large green leaf umbrella in gentle rain, hopping over glistening water puddles on a cobblestone village path"
         elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = f"stunning anime heroine ({motif_desc}) on rooftop balcony under vast glowing starry night sky and aurora, celestial starlight reflecting in her eyes"
+            visual_theme = "sitting on a cozy wooden roof edge, gazing up at vast glowing starry night sky filled with shooting stars and soft nebula"
         elif any(w in target_line for w in ["바다", "파도", "수평선", "모래"]):
-            visual_theme = f"beautiful anime heroine ({motif_desc}) standing by coastal seawall at twilight, sea breeze fluttering her stylish summer outfit, rolling waves"
+            visual_theme = "standing near sea glass and shells on sandy shore at twilight, watching gentle foamy ocean waves rolling in"
         elif any(w in target_line for w in ["바람", "흔들", "풀", "나무"]):
-            visual_theme = f"radiant anime heroine ({motif_desc}) standing on sunlit grassy hill, holding her hat as gentle breeze rushes by, wildflowers in bloom"
+            visual_theme = "waddling through tall green grass and swaying wildflowers on a sunlit hillside, wind gently rustling its fuzzy body"
         elif any(w in target_line for w in ["꽃", "봄", "피어"]):
-            visual_theme = f"enchanting anime heroine ({motif_desc}) smiling softly under blooming cherry blossom trees, delicate petals drifting in warm sunlight"
+            visual_theme = "sitting inside a blooming wildflower cup, delicate pastel petals dancing in warm spring sunlight"
         elif any(w in target_line for w in ["길", "골목", "발자국", "정거장"]):
-            visual_theme = f"charming anime heroine ({motif_desc}) walking down quiet train platform at golden dusk, turning around with dazzling affectionate smile"
+            visual_theme = "trotting along a quiet rustic countryside railway track at golden hour, amber lanterns glowing gently"
         elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침"]):
-            visual_theme = f"stunning anime heroine ({motif_desc}) leaning against morning window bathed in bright golden sunbeams, joyful pure expression"
+            visual_theme = "basking on a sunlit wooden window sill as warm morning sunbeams illuminate the peaceful room, stretch and blink"
         elif any(w in target_line for w in ["불", "타오", "열정", "폭발"]):
-            visual_theme = f"charismatic anime heroine ({motif_desc}) performing with vibrant passionate energy under dazzling stage lights, sparks dancing around"
+            visual_theme = "dancing excitedly around a cozy glowing hearth fireplace with warm crackling embers and flying sparks"
         elif base_prompts and len(base_prompts) > i:
-            visual_theme = f"gorgeous anime heroine ({motif_desc}), {base_prompts[i]}"
+            visual_theme = f"exploring {base_prompts[i]}"
         else:
-            visual_theme = f"gorgeous anime heroine ({motif_desc}) expressing '{target_line}', dramatic cinematic lighting"
+            visual_theme = f"curiously exploring the scenery of '{target_line}', peaceful whimsical mood"
 
         cam_mod = cam_variations[i % len(cam_variations)]
-        full_p = f"modern masterpiece 2D Japanese anime style, inspired by {motif_tag}, {visual_theme}, sparkling gradient eyes, silky flowing hair, crisp high-end 2D outlines, clean vibrant cel shading, {cam_mod}, no photorealism, not 3D, no real photo"
+        full_p = (
+            f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, "
+            f"cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, "
+            f"{visual_theme}, "
+            f"lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, "
+            f"{cam_mod}, no photorealism, not 3D, no real photo, no human face"
+        )
         result_prompts.append(full_p)
 
     return result_prompts

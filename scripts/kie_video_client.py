@@ -39,14 +39,14 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 최신 대세 애니 여주인공 비주얼 (키타가와 마린, 시키모리, 미즈하라 치즈루, 렘, 시에스타 스타일)
+        # 스튜디오 지브리 2D 손그림 수채화 애니메이션 (귀여운 검은 석탄 요정 '스스와타리' 고정 주인공 & 서정적 배경 탐험)
         anime_prompt = (
-            f"modern masterpiece 2D Japanese anime style, top-tier modern romance and fantasy heroine visual, "
-            f"inspired by Marin Kitagawa, Shikimori, Chizuru Mizuhara, Rem, and Siesta aesthetic, {prompt}, "
-            f"gorgeous charismatic anime heroine, sparkling expressive gradient eyes, intricately detailed eyelashes, "
-            f"silky flowing layered hair with delicate highlights, charming fashionable outfit, soft translucent skin tones, "
-            f"clean vibrant cel shading, crisp high-end 2D anime outlines, CloverWorks and Doga Kobo studio production quality, "
-            f"cinematic ambient lighting, shallow depth of field, not photorealistic, not realistic photography, not 3D CGI, "
+            f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation style, "
+            f"featuring cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes and tiny stick legs, "
+            f"{prompt}, "
+            f"lush hand-painted watercolor scenery, soft nostalgic warm palette, whimsical fairytale atmosphere, "
+            f"bold organic 2D outlines, clean hand-crafted cel shading, painterly Ghibli background art, "
+            f"cinematic ambient lighting, not photorealistic, not realistic photography, not 3D CGI, "
             f"no live-action, no real human photo, no watermark"
         )
 
