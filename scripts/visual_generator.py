@@ -25,15 +25,43 @@ from pydub import AudioSegment
 # 폰트 로더 유틸리티
 # ----------------------------------------------------------------------
 def get_korean_font(size: int, bold: bool = True) -> ImageFont.ImageFont:
+    """
+    고급 한글 타이포그래피 폰트 로더:
+    1. 프로젝트 내장 트렌디 산세리프 폰트 (SUIT-ExtraBold / SUIT-Medium)
+    2. macOS Apple SD 산돌고딕 Neo (TTC 인덱스 활용하여 실제 ExtraBold / SemiBold 로드)
+    3. Linux Ubuntu 환경 NanumGothic 및 시스템 폰트
+    """
+    # 1. assets/fonts에 내장된 SUIT 폰트 우선 로드
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    suit_eb = os.path.join(base_dir, "assets", "fonts", "SUIT-ExtraBold.otf")
+    suit_md = os.path.join(base_dir, "assets", "fonts", "SUIT-Medium.otf")
+
+    if bold and os.path.exists(suit_eb):
+        try:
+            return ImageFont.truetype(suit_eb, size)
+        except Exception:
+            pass
+    elif not bold and os.path.exists(suit_md):
+        try:
+            return ImageFont.truetype(suit_md, size)
+        except Exception:
+            pass
+
+    # 2. macOS Apple SD Gothic Neo (Bold=index 6, SemiBold=index 4, Regular=index 0)
+    apple_sd = "/System/Library/Fonts/AppleSDGothicNeo.ttc"
+    if os.path.exists(apple_sd):
+        try:
+            return ImageFont.truetype(apple_sd, size, index=6 if bold else 0)
+        except Exception:
+            pass
+
+    # 3. Linux/Ubuntu Nanum 폰트
     font_paths = [
+        "/usr/share/fonts/truetype/nanum/NanumBarunGothicBold.ttf" if bold else "/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf",
         "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf" if bold else "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
-        "/usr/share/fonts/truetype/nanum/NanumBarunGothicBold.ttf",
-        "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
-        "/usr/share/fonts/nanum/NanumGothicBold.ttf",
-        "/usr/share/fonts/nanum/NanumGothic.ttf",
-        "/System/Library/Fonts/AppleSDGothicNeo.ttc",
-        "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
+        "/usr/share/fonts/nanum/NanumGothicBold.ttf" if bold else "/usr/share/fonts/nanum/NanumGothic.ttf",
         "/Library/Fonts/AppleSDGothicNeo.ttc",
+        "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
         "/Library/Fonts/NanumGothic.ttf"
     ]
     for p in font_paths:
@@ -43,6 +71,7 @@ def get_korean_font(size: int, bold: bool = True) -> ImageFont.ImageFont:
             except Exception:
                 continue
     return ImageFont.load_default()
+
 
 
 # ----------------------------------------------------------------------
@@ -276,11 +305,11 @@ def create_professional_thumbnail(
     is_shorts: bool = False
 ):
     """
-    유튜브 시청자의 시선을 사로잡는 최상급 퀄리티의 썸네일을 렌더링합니다.
-    - 배경 블러 & 다크 시네마틱 비네팅
-    - 대형 볼드 타이포그래피 + 엠보싱/네온 글로우 + 드롭 섀도우
-    - 감성 카피라이트 문구 & 트랙 배지
-    - 오디오 플레이어 UI 모티브
+    유튜브 시청자의 시선을 사로잡는 최상급 세련미의 스튜디오 썸네일을 렌더링합니다.
+    - 자연스러운 시네마틱 듀얼 그라디언트 비네팅 (과한 촌스러운 네온 테두리 배제)
+    - 트렌디한 프리미엄 산세리프 폰트(SUIT / Apple SD 산돌고딕) 기반의 볼드 타이포그래피
+    - 가우시안 블러 소프트 드롭 섀도우를 통한 최고급 가독성과 깊이감
+    - 미니멀 글래스모피즘 메타 배지 및 감성 서브타이틀
     """
     if os.path.exists(bg_image_path):
         base_img = Image.open(bg_image_path).convert("RGBA")
@@ -292,116 +321,144 @@ def create_professional_thumbnail(
     d_overlay = ImageDraw.Draw(overlay)
 
     if not is_shorts:
-        # 16:9 가로 썸네일
+        # ==========================================
+        # 16:9 가로 썸네일 (모던 스튜디오 & 지브리 감성 레이아웃)
+        # ==========================================
+        # 하단 45%부터 부드럽게 깊어지는 다크 시네마틱 그라디언트
         for y in range(height):
-            ratio = max(0.0, (y - height * 0.45) / (height * 0.55))
-            alpha = int(220 * (ratio ** 1.3))
-            d_overlay.line([(0, y), (width, y)], fill=(5, 8, 18, alpha))
+            if y > height * 0.38:
+                ratio = (y - height * 0.38) / (height * 0.62)
+                alpha = int(225 * (ratio ** 1.35))
+                d_overlay.line([(0, y), (width, y)], fill=(6, 9, 16, alpha))
         
-        d_overlay.rectangle([0, 0, width, height], fill=(0, 0, 0, 40))
+        # 전체 미세 콘트라스트 보정 레이어
+        d_overlay.rectangle([0, 0, width, height], fill=(0, 0, 0, 25))
         img = Image.alpha_composite(base_img, overlay)
-        draw = ImageDraw.Draw(img)
 
-        font_title = get_korean_font(58, bold=True)
-        font_sub = get_korean_font(24, bold=False)
+        # 폰트 로드 (내장 SUIT 폰트 또는 Apple SD Gothic)
+        font_title = get_korean_font(64, bold=True)
+        font_sub = get_korean_font(25, bold=False)
         font_badge = get_korean_font(18, bold=True)
 
-        # 상단 좌측: 배지
-        badge_text = f"★ ORIGINAL MV • {genre_name.upper()}"
+        draw = ImageDraw.Draw(img)
+
+        # 1. 상단 미니멀 글래스 배지 (Inkey Studio | GENRE)
+        badge_text = f"INKEY STUDIO  •  {genre_name.upper()}"
         bbox_b = draw.textbbox((0, 0), badge_text, font=font_badge)
         bw = bbox_b[2] - bbox_b[0]
         bh = bbox_b[3] - bbox_b[1]
-        bx, by = 60, 50
-        draw.rounded_rectangle(
-            [bx - 14, by - 8, bx + bw + 14, by + bh + 8],
-            radius=8,
-            fill=(255, 45, 85, 230),
-            outline=(255, 255, 255, 120),
+        bx, by = 68, 52
+
+        # 글래스모피즘 배지 배경
+        badge_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        d_badge = ImageDraw.Draw(badge_layer)
+        d_badge.rounded_rectangle(
+            [bx - 16, by - 9, bx + bw + 16, by + bh + 9],
+            radius=10,
+            fill=(12, 16, 26, 175),
+            outline=(255, 255, 255, 45),
             width=1
         )
-        draw.text((bx, by), badge_text, font=font_badge, fill=(255, 255, 255, 255))
+        img = Image.alpha_composite(img, badge_layer)
+        draw = ImageDraw.Draw(img)
+        draw.text((bx, by), badge_text, font=font_badge, fill=(240, 245, 255, 240))
 
-        # 메인 타이틀
-        tx = 60
-        ty = height - 230
+        # 2. 메인 타이틀 & 서브타이틀 위치 계산
+        tx = 68
+        ty = height - 210
 
-        glow_color = (0, 230, 255, 140)
-        for offset_x, offset_y in [(-3, 0), (3, 0), (0, -3), (0, 3), (-2, -2), (2, 2)]:
-            draw.text((tx + offset_x, ty + offset_y), title, font=font_title, fill=glow_color)
-        
-        for shadow_dist in range(4, 9, 2):
-            draw.text((tx + shadow_dist, ty + shadow_dist), title, font=font_title, fill=(0, 0, 0, 240))
-        
+        # 소프트 가우시안 블러 드롭 섀도우 생성 (촌스러운 각진 외곽선 완전 대체)
+        shadow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        d_shadow = ImageDraw.Draw(shadow_layer)
+        d_shadow.text((tx + 3, ty + 6), title, font=font_title, fill=(0, 0, 0, 230))
+        shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=5.5))
+        img = Image.alpha_composite(img, shadow_layer)
+
+        draw = ImageDraw.Draw(img)
+        # 메인 타이틀 텍스트 (순백색 깔끔한 산세리프)
         draw.text((tx, ty), title, font=font_title, fill=(255, 255, 255, 255))
 
-        # 서브타이틀
-        sy = ty + 75
-        sub_display = f"🎧 Inkey Studio | {subtitle}"
-        draw.text((tx + 2, sy + 2), sub_display, font=font_sub, fill=(0, 0, 0, 200))
-        draw.text((tx, sy), sub_display, font=font_sub, fill=(210, 235, 255, 240))
+        # 3. 서브타이틀 (세련된 트랙 코멘트 / 감성 카피)
+        sy = ty + 82
+        sub_display = f"🎧 {subtitle}"
+        # 서브타이틀 부드러운 그림자
+        draw.text((tx + 2, sy + 3), sub_display, font=font_sub, fill=(0, 0, 0, 190))
+        draw.text((tx, sy), sub_display, font=font_sub, fill=(215, 230, 248, 235))
 
-        # 하단 미니 오디오 플레이어 UI
-        py = height - 55
-        draw.rounded_rectangle([tx, py, tx + 400, py + 4], radius=2, fill=(255, 255, 255, 50))
-        draw.rounded_rectangle([tx, py, tx + 180, py + 4], radius=2, fill=(0, 240, 255, 220))
-        draw.ellipse([tx + 176, py - 4, tx + 188, py + 8], fill=(255, 255, 255, 255))
-        draw.text((tx + 420, py - 8), "01:24 / 03:40", font=font_badge, fill=(180, 200, 230, 180))
+        # 4. 하단 미니멀 오디오 프로그레스 악센트 바
+        py = height - 42
+        draw.rounded_rectangle([tx, py, tx + 320, py + 3], radius=2, fill=(255, 255, 255, 40))
+        draw.rounded_rectangle([tx, py, tx + 140, py + 3], radius=2, fill=(255, 255, 255, 210))
+        draw.ellipse([tx + 137, py - 3, tx + 145, py + 5], fill=(255, 255, 255, 255))
 
     else:
-        # 9:16 세로 숏츠 썸네일
+        # ==========================================
+        # 9:16 세로 숏츠 썸네일 (강렬한 중앙 포커스 & 세련된 타이포)
+        # ==========================================
+        # 중앙 텍스트 영역을 감싸는 부드러운 비네팅
         for y in range(height):
-            dist_center = abs(y - height * 0.45) / (height * 0.5)
-            alpha = int(140 + (1.0 - min(1.0, dist_center)) * 70)
-            d_overlay.line([(0, y), (width, y)], fill=(10, 12, 20, alpha))
+            dist_center = abs(y - height * 0.44) / (height * 0.44)
+            alpha = int(120 + (1.0 - min(1.0, dist_center)) * 80)
+            d_overlay.line([(0, y), (width, y)], fill=(8, 10, 18, alpha))
         
         img = Image.alpha_composite(base_img, overlay)
+
+        font_shorts_badge = get_korean_font(28, bold=True)
+        font_shorts_title = get_korean_font(72, bold=True)
+        font_shorts_sub = get_korean_font(34, bold=False)
+
         draw = ImageDraw.Draw(img)
 
-        font_shorts_badge = get_korean_font(32, bold=True)
-        font_shorts_title = get_korean_font(74, bold=True)
-        font_shorts_sub = get_korean_font(36, bold=False)
-
-        # 상단 뱃지
-        badge_text = "INKEY STUDIO ORIGINAL #SHORTS"
+        # 상단 미니 배지
+        badge_text = f"INKEY STUDIO • {genre_name.upper()}"
         bbox_sb = draw.textbbox((0, 0), badge_text, font=font_shorts_badge)
         sbw = bbox_sb[2] - bbox_sb[0]
+        sbh = bbox_sb[3] - bbox_sb[1]
         sbx = (width - sbw) // 2
-        sby = 240
-        draw.rounded_rectangle(
-            [sbx - 20, sby - 10, sbx + sbw + 20, sby + 48],
+        sby = 220
+
+        badge_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        d_badge = ImageDraw.Draw(badge_layer)
+        d_badge.rounded_rectangle(
+            [sbx - 22, sby - 10, sbx + sbw + 22, sby + sbh + 10],
             radius=12,
-            fill=(255, 0, 80, 240),
-            outline=(255, 255, 255, 150),
-            width=2
+            fill=(10, 15, 25, 185),
+            outline=(255, 255, 255, 55),
+            width=1
         )
-        draw.text((sbx, sby), badge_text, font=font_shorts_badge, fill=(255, 255, 255, 255))
+        img = Image.alpha_composite(img, badge_layer)
+        draw = ImageDraw.Draw(img)
+        draw.text((sbx, sby), badge_text, font=font_shorts_badge, fill=(245, 248, 255, 245))
 
         # 중앙 대형 타이틀
         bbox_st = draw.textbbox((0, 0), title, font=font_shorts_title)
         stw = bbox_st[2] - bbox_st[0]
         sth = bbox_st[3] - bbox_st[1]
         stx = (width - stw) // 2
-        sty = (height - sth) // 2 - 80
+        sty = (height - sth) // 2 - 70
 
-        for ox in range(-4, 5, 2):
-            for oy in range(-4, 5, 2):
-                draw.text((stx + ox, sty + oy), title, font=font_shorts_title, fill=(0, 0, 0, 240))
-        for ox in [-2, 2]:
-            for oy in [-2, 2]:
-                draw.text((stx + ox, sty + oy), title, font=font_shorts_title, fill=(0, 240, 255, 220))
+        # 소프트 블러 그림자
+        shadow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        d_shadow = ImageDraw.Draw(shadow_layer)
+        d_shadow.text((stx + 3, sty + 8), title, font=font_shorts_title, fill=(0, 0, 0, 240))
+        shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=6.0))
+        img = Image.alpha_composite(img, shadow_layer)
+
+        draw = ImageDraw.Draw(img)
         draw.text((stx, sty), title, font=font_shorts_title, fill=(255, 255, 255, 255))
 
-        # 하단 서브
+        # 하단 서브타이틀
         sub_t = f"🎧 {subtitle}"
         bbox_sub = draw.textbbox((0, 0), sub_t, font=font_shorts_sub)
         subw = bbox_sub[2] - bbox_sub[0]
         subx = (width - subw) // 2
-        suby = sty + sth + 50
-        draw.text((subx + 2, suby + 2), sub_t, font=font_shorts_sub, fill=(0, 0, 0, 220))
-        draw.text((subx, suby), sub_t, font=font_shorts_sub, fill=(255, 235, 120, 255))
+        suby = sty + sth + 55
+
+        draw.text((subx + 2, suby + 3), sub_t, font=font_shorts_sub, fill=(0, 0, 0, 200))
+        draw.text((subx, suby), sub_t, font=font_shorts_sub, fill=(225, 238, 255, 240))
 
     img.convert("RGB").save(output_path, "JPEG", quality=95)
-    print(f"[Thumbnail Success] 썸네일 생성 완료: {output_path} ({'Shorts 9:16' if is_shorts else 'Full 16:9'})")
+    print(f"[Thumbnail Success] 세련된 스튜디오 썸네일 생성 완료: {output_path} ({'Shorts 9:16' if is_shorts else 'Full 16:9'})")
     return True
 
 
@@ -766,40 +823,55 @@ def render_full_cinematic_mv(
 ):
     """
     16:9 가로 풀버전 멀티 씬 감성 애니메이션 영상 렌더링:
-    - 감성 애니메이션 배경 영상 (이퀄라이저 제거로 화면 가림 없음)
-    - 시네마틱 감성 색감 보정
-    - 동적 가사 타이포그래피 애니메이션 오버레이
-    - 상단 미니 타이틀 카드
+    - 감성 애니메이션 배경 영상 (가사 자막 및 이퀄라이저 제거로 화면을 가리지 않는 온전한 영상미 보장)
+    - 시네마틱 감성 색감 보정 (콘트라스트 & 채도 & 비네팅)
+    - 상단 미니멀 타이틀 카드 (옵션)
     """
     if is_video_bg:
         bg_input_args = ["-i", bg_input]
     else:
         bg_input_args = ["-f", "concat", "-safe", "0", "-i", bg_input]
 
-    filter_complex = (
-        f"[0:v]scale=1280:720,vignette=PI/4,eq=contrast=1.04:saturation=1.08[bg];"
-        f"[bg][1:v]overlay=0:0[bg_lyric];"
-        f"[bg_lyric][2:v]overlay=0:0[v]"
-    )
+    # 가사 자막을 화면에 찍지 않고, 온전한 애니메이션 영상미 감상에 집중
+    if title_png_path and os.path.exists(title_png_path):
+        filter_complex = (
+            f"[0:v]scale=1280:720,vignette=PI/4,eq=contrast=1.04:saturation=1.08[bg];"
+            f"[bg][1:v]overlay=0:0[v]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            *bg_input_args,
+            "-loop", "1", "-i", title_png_path,
+            "-i", audio_path,
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "2:a",
+            "-c:v", "libx264", "-t", str(duration),
+            "-pix_fmt", "yuv420p",
+            "-preset", "ultrafast", "-crf", "21",
+            "-c:a", "aac", "-b:a", "320k",
+            "-shortest", output_video_path
+        ]
+    else:
+        filter_complex = (
+            f"[0:v]scale=1280:720,vignette=PI/4,eq=contrast=1.04:saturation=1.08[v]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            *bg_input_args,
+            "-i", audio_path,
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "1:a",
+            "-c:v", "libx264", "-t", str(duration),
+            "-pix_fmt", "yuv420p",
+            "-preset", "ultrafast", "-crf", "21",
+            "-c:a", "aac", "-b:a", "320k",
+            "-shortest", output_video_path
+        ]
 
-    cmd = [
-        "ffmpeg", "-y",
-        *bg_input_args,
-        "-f", "concat", "-safe", "0", "-i", lyric_concat_txt,
-        "-loop", "1", "-i", title_png_path,
-        "-i", audio_path,
-        "-filter_complex", filter_complex,
-        "-map", "[v]", "-map", "3:a",
-        "-c:v", "libx264", "-t", str(duration),
-        "-pix_fmt", "yuv420p",
-        "-preset", "ultrafast", "-crf", "21",
-        "-c:a", "aac", "-b:a", "320k",
-        "-shortest", output_video_path
-    ]
-
-    print(f"[Render Engine] 16:9 감성 애니메이션 뮤직비디오 렌더링 시작 ({duration:.1f}초, 이퀄라이저 제거됨)...")
+    print(f"[Render Engine] 16:9 감성 애니메이션 뮤직비디오 렌더링 시작 ({duration:.1f}초, 가사 자막 미출력 클린 비주얼)...")
     subprocess.run(cmd, check=True)
     print(f"[Render Success] 풀버전 감성 MV 완료: {output_video_path}")
+
 
 
 # ----------------------------------------------------------------------

@@ -71,8 +71,8 @@ def create_minimal_title_card(title: str, subtitle: str, output_path: str, width
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    font_title = get_korean_font(28, bold=True)
-    font_sub = get_korean_font(16, bold=False)
+    font_title = get_korean_font(26, bold=True)
+    font_sub = get_korean_font(15, bold=False)
 
     bbox_t = draw.textbbox((0, 0), title, font=font_title)
     w_t = bbox_t[2] - bbox_t[0]
@@ -83,19 +83,19 @@ def create_minimal_title_card(title: str, subtitle: str, output_path: str, width
 
     max_w = max(w_t, w_s)
     x = (width - max_w) // 2
-    y = 45
+    y = 42
 
     # 슬림 반투명 글래스 박스
     draw.rounded_rectangle(
-        [x - 26, y - 12, x + max_w + 26, y + h_t + 32],
-        radius=14,
-        fill=(10, 15, 25, 190),
-        outline=(255, 255, 255, 40),
+        [x - 24, y - 10, x + max_w + 24, y + h_t + 28],
+        radius=12,
+        fill=(10, 14, 24, 170),
+        outline=(255, 255, 255, 38),
         width=1
     )
 
     draw.text(((width - w_t) // 2, y), title, font=font_title, fill=(255, 255, 255, 255))
-    draw.text(((width - w_s) // 2, y + h_t + 8), subtitle, font=font_sub, fill=(180, 220, 255, 220))
+    draw.text(((width - w_s) // 2, y + h_t + 6), subtitle, font=font_sub, fill=(205, 225, 250, 215))
     img.save(output_path, "PNG")
 
 
@@ -106,8 +106,8 @@ def create_shorts_top_badge(title: str, output_path: str, width=1080, height=192
     img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    font_badge = get_korean_font(30, bold=True)
-    font_sub = get_korean_font(22, bold=False)
+    font_badge = get_korean_font(28, bold=True)
+    font_sub = get_korean_font(20, bold=False)
 
     badge_line = f"🎧 {title}"
     sub_line = "INKEY STUDIO ORIGINAL • HIGHLIGHT"
@@ -121,17 +121,17 @@ def create_shorts_top_badge(title: str, output_path: str, width=1080, height=192
 
     max_w = max(wb, ws)
     x = (width - max_w) // 2
-    y = 180
+    y = 160
 
     draw.rounded_rectangle(
-        [x - 30, y - 14, x + max_w + 30, y + hb + 40],
-        radius=16,
-        fill=(10, 15, 25, 205),
-        outline=(0, 230, 255, 80),
+        [x - 28, y - 12, x + max_w + 28, y + hb + 36],
+        radius=14,
+        fill=(10, 14, 24, 185),
+        outline=(255, 255, 255, 45),
         width=1
     )
     draw.text(((width - wb) // 2, y), badge_line, font=font_badge, fill=(255, 255, 255, 255))
-    draw.text(((width - ws) // 2, y + hb + 10), sub_line, font=font_sub, fill=(0, 240, 255, 220))
+    draw.text(((width - ws) // 2, y + hb + 8), sub_line, font=font_sub, fill=(210, 230, 255, 220))
     img.save(output_path, "PNG")
 
 
