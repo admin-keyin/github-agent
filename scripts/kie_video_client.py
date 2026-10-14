@@ -39,11 +39,11 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 사람 대신 감성적인 동물(고양이, 여우, 철새 등), 아름다운 자연경관, 신비로운 우주/밤하늘 중심의 시네마틱 애니메이션 아트 스타일
+        # 실사(photorealistic/live-action/3D)를 완벽히 배제하고 확실한 2D 손그림 셀 만화/애니메이션 카툰 스타일 강제
         anime_prompt = (
-            f"masterpiece 2D anime music video visual, {prompt}, "
-            f"rich atmospheric depth, stunning scenery and nature, expressive animals or cosmic fantasy, "
-            f"stylish color palette, beautiful cinematic lighting, clean artistic lines, 4k master animation, smooth motion, no human face close-up, no watermark"
+            f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, colorful comic illustration aesthetic, {prompt}, "
+            f"bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, clean animated cartoon art, "
+            f"not photorealistic, not realistic, not 3D CGI, no live-action footage, no camera photo, no human face close-up, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
@@ -62,7 +62,8 @@ class KieVideoGenerator:
             input_params = {
                 "prompt": anime_prompt[:2500],
                 "aspect_ratio": aspect_ratio,
-                "resolution": target_res
+                "resolution": target_res,
+                "negative_prompt": "photorealistic, real life, realistic photography, 3D CGI, 3D render, live action, film grain, human face close-up"
             }
             if "bytedance" in model:
                 # SeaDance 규격: duration은 "10s", camera_fixed: false

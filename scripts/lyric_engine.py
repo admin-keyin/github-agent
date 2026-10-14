@@ -287,21 +287,23 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하는 구체적 시네마틱 애니메이션 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (가사와 1:1 직결, 상투적 감성 클리셰 금지, 사람 얼굴 클로즈업 배제):
-1. 막연한 '감성'이나 뻔한 동물 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
-   - 당신이 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간, 서사를 직접 1:1로 시각화하세요.
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 2D 만화 / 셀 애니메이션 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (만화/애니메이션 화풍 필수, 실사 배제, 가사와 1:1 직결, 사람 얼굴 클로즈업 배제):
+1. 실사(Photorealistic/3D) 절대 금지! 손으로 그린 만화/2D 셀 애니메이션 느낌(hand-drawn 2D cel anime style, Japanese cartoon manga visual)이 확실하게 나도록 작성하세요:
+   - 선명한 2D 외곽선(bold 2D outlines), 다채로운 셀 채색(vibrant cel shading), 2D 카툰 애니메이션 화풍을 명시하고 실사 사진이나 3D CG 느낌을 엄격히 배제하세요.
+2. 막연한 '감성'이나 뻔한 동물 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
+   - 당신이 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간, 서사를 만화적인 2D 비주얼로 직접 1:1 시각화하세요.
    - 예: 가사에 바다가 나오면 파도/수평선/해변, 골목길이나 도시가 나오면 가로등/비에 젖은 아스팔트/네온사인, 꽃이나 계절이 나오면 들꽃/낙엽/눈꽃, 밤하늘이나 우주가 나오면 별무리/달빛/오로라 등 가사의 실제 텍스트 소재를 1:1로 직접 묘사하세요.
-2. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
+3. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
    - no human face close-up, no human face
-   - 인물이 등장해야 한다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 신체 일부(손, 발걸음)나 풍경 속 원경으로만 처리하고, 기본적으로는 풍경, 사물, 공간의 영화적 미장센 위주로 연출하세요.
-3. 씬의 전개:
+   - 인물이 등장해야 한다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 신체 일부(손, 발걸음)나 풍경 속 원경으로만 처리하고, 기본적으로는 풍경, 사물, 공간의 만화적 미장센 위주로 연출하세요.
+4. 씬의 전개:
    - Scene 1 (도입부): 인트로 및 1절 초반 가사의 공간적 배경을 여는 와이드 샷
    - Scene 2 (1절/프리코러스): 가사의 행동과 감정이 전개되는 디테일 샷
    - Scene 3 (후렴): 후렴 가사의 감정 폭발과 클라이맥스 시각화
    - Scene 4 (2절/브릿지): 브릿지 가사의 내면적 분위기 반전 샷
    - Scene 5 (아웃트로): 아웃트로 가사의 깊은 여운을 남기는 풀샷 피날레
-(형식: "masterpiece 2D anime music video visual, [가사 파트에 기반한 구체적 공간/사물/빛 연출], breathtaking scenery, atmospheric depth, cinematic lighting, no human face")
+(형식: "hand-drawn 2D cel anime style, Japanese cartoon manga visual, [가사 파트에 기반한 구체적 공간/사물/빛 만화 연출], bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -476,16 +478,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"masterpiece 2D anime music video visual, quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, cinematic atmospheric lighting, no human face",
-        f"masterpiece 2D anime music video visual, cute little cat sheltering under a glowing bus stop in gentle evening rain, puddles reflecting city lights, heartwarming mood, no human face",
-        f"masterpiece 2D anime music video visual, breathtaking starry galaxy night sky with blooming vibrant aurora and falling shooting stars, cosmic fantasy landscape, dynamic cinematic lighting, no human face",
-        f"masterpiece 2D anime music video visual, flock of migrating birds flying over misty forest canopy and tranquil lake at dusk, deep ambient depth, no human face",
-        f"masterpiece 2D anime music video visual, sunlit golden flower field on a high hill overlooking endless sunrise ocean, warm morning glow, inspiring peaceful ending, no human face"
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face",
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, glowing bus stop in gentle evening rain, puddles reflecting streetlights, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face",
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, starry galaxy night sky with blooming vibrant aurora and falling shooting stars, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face",
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, misty forest canopy and tranquil lake at dusk, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face",
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, sunlit golden flower field on a high hill overlooking endless sunrise ocean, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face"
     ]
     fallback_shorts_scenes = [
-        f"masterpiece 2D anime music video visual, glowing jellyfish swimming through starry night sky above peaceful clouds, no human face",
-        f"masterpiece 2D anime music video visual, radiant aurora borealis over snowy pine mountains with glowing fireflies, no human face",
-        f"masterpiece 2D anime music video visual, calm cat resting on window sill looking at soft morning sunrise, warm cinematic anime, no human face"
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, glowing jellyfish drifting through starry night sky clouds, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face",
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, radiant aurora borealis over snowy pine mountains with glowing fireflies, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face",
+        f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, window sill looking at soft morning sunrise, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, no photorealism, not 3D, no human face"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],
@@ -530,16 +532,18 @@ def generate_scene_prompts_for_duration(
 [가사 전문]:
 {lyrics}
 
-[★ 가사 1:1 직결 연출 절대 규칙 (상투적 감성 클리셰 엄격 금지)]:
-1. 막연한 '감성'이나 뻔한 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
-   - 반드시 위에 제공된 [가사 전문]의 실제 단어, 소재, 오브제, 공간적 배경, 서사를 직접 1:1로 시각화하세요.
-   - 예: 가사에 비나 우산이 나오면 빗방울 맺힌 유리창/물웅덩이, 골목길이나 가로등이 나오면 밤의 가로등 불빛/아스팔트, 들꽃이나 바람이 나오면 바람에 흔들리는 꽃밭, 바다나 파도가 나오면 수평선/부서지는 파도, 기차나 역이 나오면 플랫폼/철길, 밤하늘이 나오면 달빛/별무리 등 가사의 실제 텍스트 소재를 직접 묘사하세요.
-2. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
+[★ 2D 만화 / 애니메이션 화풍 및 가사 1:1 직결 절대 규칙]:
+1. 실사(Photorealistic/3D) 절대 금지! 손으로 그린 만화/2D 셀 애니메이션 느낌(hand-drawn 2D cel anime style, Japanese cartoon manga visual)이 확실하게 나도록 작성하세요:
+   - 선명한 2D 외곽선(bold 2D outlines), 다채로운 셀 채색(vibrant cel shading), 2D 카툰 애니메이션 화풍을 명시하고 실사 사진이나 3D CG 느낌을 엄격히 배제하세요.
+2. 막연한 '감성'이나 뻔한 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
+   - 반드시 위에 제공된 [가사 전문]의 실제 단어, 소재, 오브제, 공간적 배경, 서사를 만화적인 2D 비주얼로 직접 1:1 시각화하세요.
+   - 예: 가사에 비나 우산이 나오면 빗방울 맺힌 유리창/물웅덩이, 골목길이나 가로등이 나오면 밤의 가로등 불빛/아스팔트, 들꽃이나 바람이 나오면 바람에 흔들리는 꽃밭, 바다나 파도가 나오면 수평선/부서지는 파도, 기차나 역이 나오면 플랫폼/철길, 밤하늘이 나오면 달빛/별무리 등 가사의 실제 텍스트 소재를 만화체로 직접 묘사하세요.
+3. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
    - no human face close-up, no human face
-   - 사람이 필요하다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 발걸음/손/원경으로만 처리하고, 기본적으로는 풍경, 사물, 빛과 그림자, 공간의 영화적 미장센 위주로 연출하세요.
-3. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
-4. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "masterpiece 2D anime music video visual, [가사 해당 파트의 구체적 공간/사물/빛 연출], dynamic composition, beautiful lighting, cinematic art style, no human face"
+   - 사람이 필요하다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 발걸음/손/원경으로만 처리하고, 기본적으로는 풍경, 사물, 공간의 만화적 미장센 위주로 연출하세요.
+4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
+5. 프롬프트 형식: 각 씬마다 영문으로 작성:
+   "hand-drawn 2D cel anime style, Japanese cartoon manga visual, [가사 해당 파트의 구체적 공간/사물/빛 만화 연출], bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, dynamic composition, no photorealism, not 3D, no human face"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -619,7 +623,7 @@ def generate_scene_prompts_for_duration(
             visual_theme = f"poetic atmospheric scene expressing '{target_line}', dramatic cinematic lighting"
 
         cam_mod = cam_variations[i % len(cam_variations)]
-        full_p = f"masterpiece 2D anime music video visual, {visual_theme}, {cam_mod}, no human face"
+        full_p = f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, {visual_theme}, bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, {cam_mod}, no photorealism, not 3D, no human face"
         result_prompts.append(full_p)
 
     return result_prompts
