@@ -396,15 +396,11 @@ def main():
     timeline_full = parse_lyrics_timeline(display_lyrics, duration_sec, audio_path=audio_path, is_shorts=False)
     concat_txt_full = render_lyric_animation_assets(timeline_full, 1280, 720, "temp", is_shorts=False)
 
-    # 6. 상단 미니 오버레이 카드 생성
-    create_minimal_title_card(title, f"Inkey Studio • {genre_display}", title_png, 1280, 720)
-    create_shorts_top_badge(title, shorts_badge_png, 1080, 1920)
-
-    # 7. 풀버전 16:9 감성 애니메이션 뮤직 비디오 렌더링
-    print("\n[Step 7] 16:9 풀버전 감성 애니메이션 리릭 MV 합성 렌더링 (이퀄라이저 제거)...")
+    # 6. 풀버전 16:9 감성 애니메이션 뮤직 비디오 렌더링 (영상 내 곡 제목 텍스트 미노출, 순수 영상미 유지)
+    print("\n[Step 6] 16:9 풀버전 감성 애니메이션 뮤직비디오 렌더링 (영상 내 곡 제목 오버레이 제거, 클린 비주얼)...")
     render_full_cinematic_mv(
         bg_input=bg_full_input,
-        title_png_path=title_png,
+        title_png_path=None,  # 썸네일을 제외한 영상 내부의 곡 제목 오버레이 완전 제거
         lyric_concat_txt=concat_txt_full,
         audio_path=audio_path,
         output_video_path=output_video,
@@ -412,12 +408,12 @@ def main():
         is_video_bg=use_video_bg_full
     )
 
-    # 8. 원본 풀버전 영상에서 하이라이트 구간을 세로(9:16)로 직접 크롭하여 숏츠 생성
-    print("\n[Step 8] 원본 풀버전 영상에서 하이라이트 구간을 9:16 세로로 크롭하여 숏츠 자동 제작...")
+    # 7. 원본 풀버전 영상에서 하이라이트 구간을 세로(9:16)로 직접 크롭하여 숏츠 생성 (영상 내 제목/배지 미노출)
+    print("\n[Step 7] 원본 풀버전 영상에서 하이라이트 구간을 9:16 세로로 크롭하여 숏츠 자동 제작 (클린 비주얼)...")
     extract_shorts_from_full_video(
         full_video_path=output_video,
         output_shorts_path=output_shorts,
-        top_badge_png=shorts_badge_png,
+        top_badge_png=None,  # 숏츠 영상 내부의 곡 제목 배지 오버레이 완전 제거
         start_sec=start_sec,
         duration=shorts_duration
     )

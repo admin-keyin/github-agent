@@ -391,26 +391,44 @@ def create_equalizer_music_video(image_path, title_png_path, audio_path, style_p
     duration_sec = len(audio) / 1000.0
 
     eq_colors = style_profile["eq_colors"]
-    filter_complex = (
-        f"[0:v]scale=1280:720[bg];"
-        f"[bg][1:v]overlay=0:0[bg_titled];"
-        f"[2:a]showfreqs=s=880x140:mode=bar:fscale=log:colors={eq_colors}:win_size=1024[eq];"
-        f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-185[v]"
-    )
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-loop", "1", "-i", image_path,
-        "-loop", "1", "-i", title_png_path,
-        "-i", audio_path,
-        "-filter_complex", filter_complex,
-        "-map", "[v]", "-map", "2:a",
-        "-c:v", "libx264", "-t", str(duration_sec),
-        "-pix_fmt", "yuv420p",
-        "-preset", "ultrafast", "-crf", "20",
-        "-c:a", "aac", "-b:a", "320k",
-        "-shortest", output_path
-    ]
+    if title_png_path and os.path.exists(title_png_path):
+        filter_complex = (
+            f"[0:v]scale=1280:720[bg];"
+            f"[bg][1:v]overlay=0:0[bg_titled];"
+            f"[2:a]showfreqs=s=880x140:mode=bar:fscale=log:colors={eq_colors}:win_size=1024[eq];"
+            f"[bg_titled][eq]overlay=x=(W-w)/2:y=H-185[v]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-loop", "1", "-i", image_path,
+            "-loop", "1", "-i", title_png_path,
+            "-i", audio_path,
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "2:a",
+            "-c:v", "libx264", "-t", str(duration_sec),
+            "-pix_fmt", "yuv420p",
+            "-preset", "ultrafast", "-crf", "20",
+            "-c:a", "aac", "-b:a", "320k",
+            "-shortest", output_path
+        ]
+    else:
+        filter_complex = (
+            f"[0:v]scale=1280:720[bg];"
+            f"[1:a]showfreqs=s=880x140:mode=bar:fscale=log:colors={eq_colors}:win_size=1024[eq];"
+            f"[bg][eq]overlay=x=(W-w)/2:y=H-185[v]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-loop", "1", "-i", image_path,
+            "-i", audio_path,
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "1:a",
+            "-c:v", "libx264", "-t", str(duration_sec),
+            "-pix_fmt", "yuv420p",
+            "-preset", "ultrafast", "-crf", "20",
+            "-c:a", "aac", "-b:a", "320k",
+            "-shortest", output_path
+        ]
 
     try:
         subprocess.run(cmd, check=True)
@@ -455,11 +473,8 @@ if __name__ == "__main__":
     # 3. 스타일별 감성 고화질 배경 이미지 준비
     fetch_hd_background(style_profile, bg_image)
 
-    # 4. Pillow로 스타일 타이틀 PNG 오버레이 생성
-    create_title_overlay_png(final_title, style_profile, title_png)
-
-    # 5. 하이파이 이퀄라이저 비주얼라이저 비디오 렌더링
-    create_equalizer_music_video(bg_image, title_png, ai_mp3, style_profile, final_video)
+    # 4. 하이파이 이퀄라이저 비주얼라이저 비디오 렌더링 (영상 내부 제목 오버레이 제외)
+    create_equalizer_music_video(bg_image, None, ai_mp3, style_profile, final_video)
 
     # 6. 유튜브 업로드용 메타데이터 JSON 저장
     desc = (

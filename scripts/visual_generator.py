@@ -907,38 +907,55 @@ def render_kinetic_shorts_mv(
 def extract_shorts_from_full_video(
     full_video_path: str,
     output_shorts_path: str,
-    top_badge_png: str,
+    top_badge_png: str = None,
     start_sec: float = 40.0,
     duration: float = 45.0
 ):
     """
     Kie.ai 비디오를 중복 생성하지 않고, 완성된 16:9 풀버전 뮤직비디오의
-    하이라이트 구간(start_sec ~ start_sec+duration)을 9:16 세로 화면으로 자동 중앙 크롭 및 뱃지 오버레이합니다.
+    하이라이트 구간(start_sec ~ start_sec+duration)을 9:16 세로 화면으로 자동 중앙 크롭합니다.
+    (영상 내 텍스트/뱃지 오버레이 없이 순수 애니메이션 화면 유지 지원)
     """
     print(f"[Shorts Generator] 원본 풀버전 영상에서 하이라이트 구간({start_sec:.1f}초~{start_sec+duration:.1f}초) 9:16 세로 쇼츠 추출 중...")
     
-    # 1. 16:9 -> 9:16 중앙 크롭 & 오디오 페이드 인/아웃 & 상단 뱃지 오버레이
-    # 세로 1080x1920 해상도에 맞춤 (가로 중앙을 스마트 크롭 후 블러 배경 패딩 또는 직접 크롭)
-    filter_complex = (
-        f"[0:v]trim=start={start_sec}:duration={duration},setpts=PTS-STARTPTS,"
-        f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[cropped];"
-        f"[cropped][1:v]overlay=0:0[v];"
-        f"[0:a]atrim=start={start_sec}:duration={duration},asetpts=PTS-STARTPTS,"
-        f"afade=t=in:st=0:d=1,afade=t=out:st={duration-1.5}:d=1.5[a]"
-    )
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", full_video_path,
-        "-loop", "1", "-i", top_badge_png,
-        "-filter_complex", filter_complex,
-        "-map", "[v]", "-map", "[a]",
-        "-c:v", "libx264", "-t", str(duration),
-        "-pix_fmt", "yuv420p",
-        "-preset", "ultrafast", "-crf", "21",
-        "-c:a", "aac", "-b:a", "320k",
-        "-shortest", output_shorts_path
-    ]
+    if top_badge_png and os.path.exists(top_badge_png):
+        filter_complex = (
+            f"[0:v]trim=start={start_sec}:duration={duration},setpts=PTS-STARTPTS,"
+            f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[cropped];"
+            f"[cropped][1:v]overlay=0:0[v];"
+            f"[0:a]atrim=start={start_sec}:duration={duration},asetpts=PTS-STARTPTS,"
+            f"afade=t=in:st=0:d=1,afade=t=out:st={duration-1.5}:d=1.5[a]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", full_video_path,
+            "-loop", "1", "-i", top_badge_png,
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-t", str(duration),
+            "-pix_fmt", "yuv420p",
+            "-preset", "ultrafast", "-crf", "21",
+            "-c:a", "aac", "-b:a", "320k",
+            "-shortest", output_shorts_path
+        ]
+    else:
+        filter_complex = (
+            f"[0:v]trim=start={start_sec}:duration={duration},setpts=PTS-STARTPTS,"
+            f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v];"
+            f"[0:a]atrim=start={start_sec}:duration={duration},asetpts=PTS-STARTPTS,"
+            f"afade=t=in:st=0:d=1,afade=t=out:st={duration-1.5}:d=1.5[a]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", full_video_path,
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-t", str(duration),
+            "-pix_fmt", "yuv420p",
+            "-preset", "ultrafast", "-crf", "21",
+            "-c:a", "aac", "-b:a", "320k",
+            "-shortest", output_shorts_path
+        ]
     subprocess.run(cmd, check=True)
     print(f"[Shorts Success] 원본 영상 기반 9:16 쇼츠 추출 완료: {output_shorts_path}")
 
