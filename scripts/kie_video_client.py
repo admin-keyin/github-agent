@@ -48,26 +48,32 @@ class KieVideoGenerator:
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
         
-        # Wan 3.0 우선 시도, 실패시 wan 2.6 및 kling 순차 시도
+        # Kling 3.0 Omni (할인 중, 크레딧 절약 최우선) -> Wan 3.0 순차 시도
         candidate_models = [
-            "wan/3-0-video",
-            "wan/2-6-text-to-video",
-            "kling-3.0/video"
+            "kling-3.0-omni/text-to-video",
+            "kling-3.0/video",
+            "wan/3-0-video"
         ]
 
         task_id = None
-        # Wan 3.0 공식 스펙: resolution="480P", duration=5~30 (정수), audio=True/False
-        norm_resolution = resolution.upper() if resolution.lower().endswith("p") else resolution
+        # Kling Omni / Wan 규격 맞춤 (기본 720p 또는 480P)
+        norm_resolution = "720p" if "kling" in candidate_models[0] else (resolution.upper() if resolution.lower().endswith("p") else resolution)
+        # 크레딧 절약을 위해 클립당 최대 길이를 5~10초로 제한
+        safe_duration = min(10, max(5, int(duration)))
 
         for model in candidate_models:
             input_params = {
                 "prompt": anime_prompt[:2500],
-                "duration": int(duration),
+                "duration": safe_duration,
                 "resolution": norm_resolution,
                 "aspect_ratio": aspect_ratio
             }
-            if model == "wan/3-0-video":
+            if "kling" in model:
                 input_params["audio"] = False
+                input_params["duration"] = str(safe_duration)
+            elif model == "wan/3-0-video":
+                input_params["audio"] = False
+                input_params["resolution"] = "480P"
 
             payload = {
                 "model": model,
