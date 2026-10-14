@@ -39,10 +39,10 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 실사(photorealistic/live-action/3D)를 완벽히 배제하고 확실한 2D 손그림 셀 만화/애니메이션 카툰 스타일 강제
+        # 은은한 스튜디오 지브리 풍의 2D 손그림 수채화 애니메이션 스타일 (실사/3D 완전 배제)
         anime_prompt = (
-            f"hand-drawn 2D cel anime style, Japanese cartoon manga visual, colorful comic illustration aesthetic, {prompt}, "
-            f"bold 2D outlines, vibrant cel shading, flat 2D anime aesthetic, clean animated cartoon art, "
+            f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation style, {prompt}, "
+            f"lush hand-painted scenery, soft nostalgic watercolor palette, whimsical warm atmosphere, bold 2D outlines, vibrant cel shading, "
             f"not photorealistic, not realistic, not 3D CGI, no live-action footage, no camera photo, no human face close-up, no watermark"
         )
 
