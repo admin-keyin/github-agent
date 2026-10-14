@@ -295,9 +295,19 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 2. <센과 치히로의 행방불명>의 동글동글 귀여운 검은 석탄 요정(Susuwatari / Soot Sprite)을 모든 씬의 '고정 주인공'으로 전면 등장:
    - 외형: 몽실몽실하고 둥근 털 뭉치 같은 검은 숯 요정, 호기심 가득한 땡그란 흰 눈동자, 앙증맞은 가는 손발(cute fluffy round black soot sprite with big curious white eyes and tiny stick legs).
    - 캐릭터 외형은 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 흐름에 맞춰 지브리풍 배경을 아장아장 걷거나 뛰거나 머물며 탐험합니다.
-3. 가사 텍스트와 석탄 캐릭터 모험의 1:1 직결 연출:
-   - 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간적 배경 속을 석탄 요정이 직접 탐험하게 만드세요.
-   - 예: 비가 오면 커다란 토토로 잎사귀 우산을 쓰고 빗방울 물웅덩이를 건너뛰는 석탄 요정, 밤하늘/별빛이면 언덕 잔디밭이나 처마 끝에 앉아 쏟아지는 별똥별과 은하수를 올려다보는 석탄 요정, 바다/바람이면 모래사장에서 조개껍데기 옆에 서서 부서지는 하얀 파도를 구경하는 석탄 요정, 꽃/봄이면 민들레 홀씨나 들꽃에 매달려 바람을 타고 두둥실 날아가는 석탄 요정 등.
+3. 가사 텍스트와 석탄 요정 모험의 1:1 직결 연출 (다채로운 지브리 세계관 확장):
+   - 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간적 배경 속을 석탄 요정이 직접 탐험하게 만드세요. 지브리 특유의 서정적 일상부터 장대한 모험/판타지/SF 감성까지 가사의 스케일에 맞춰 무궁무진하게 확장합니다:
+     • [비/우산/물/눈]: 커다란 토토로 잎사귀 우산을 쓰고 빗방울 물웅덩이를 건너뛰거나, 하얀 눈 덮인 나뭇가지 위를 총총 걷는 석탄 요정
+     • [우주/별/은하]: 별빛 흐르는 은하수 강물 위를 종이배 타고 항해하거나, 신비로운 오로라 구름 속에서 별똥별을 만지는 석탄 요정
+     • [시공간/차원/태엽]: 째깍거리는 하울의 거대 태엽 시계탑 속 톱니바퀴 사이를 탐험하거나 빛나는 시공간 게이트를 들여다보는 석탄 요정
+     • [용/비행/하늘]: 백룡(하쿠)의 하얀 비늘 등 뒤에 살포시 얹혀 푸른 하늘과 뭉게구름 속을 날아가는 석탄 요정
+     • [과거/고대유적/성]: 천공의 성 라퓨타 같은 덩굴 우거진 고대 돌사원 유적의 이끼 낀 거신병 어깨 위를 아장아장 걷는 석탄 요정
+     • [용사/검/기사/전쟁]: 이끼 덮인 전설의 고대 검 자루 위에 다소곳이 앉아 평화로운 들판의 석양을 바라보는 석탄 요정
+     • [산/절벽/협곡]: 바람 부는 웅장한 침엽수 고산지대 절벽 끝에서 휘날리는 안개구름 바다를 내려다보는 석탄 요정
+     • [바다/심해/해저]: 맑고 푸른 바닷속에서 발광 해파리와 산호초 사이를 방울방울 공기방울 타고 헤엄치는 석탄 요정
+     • [바람/꽃/초원]: 샛노란 민들레 홀씨를 쥐고 산들바람에 실려 꽃밭 위를 둥실둥실 날아다니는 석탄 요정
+     • [불/열정/벽난로]: 캘시퍼 같은 따스한 벽난로 화톳불 곁에서 붉은 장작 불꽃과 튀는 불씨를 호기심 가득 지켜보는 석탄 요정
+     • [기차/철길/정거장]: 바다 위를 달리는 해저열차 철길 침목을 따라 석양빛을 받으며 총총 걸어가는 석탄 요정
 4. 씬의 전개:
    - Scene 1 (도입부): 아늑한 지브리풍 공간 속에서 석탄 요정이 뽈뽈거리며 걸어 나오는 오프닝 씬
    - Scene 2 (1절/프리코러스): 가사의 소재와 서사를 만나 신기해하며 탐험하는 석탄 요정의 씬
@@ -540,9 +550,21 @@ def generate_scene_prompts_for_duration(
 2. <센과 치히로의 행방불명>에 나오는 동글동글 귀여운 검은 석탄 요정(Susuwatari / Soot Sprite)을 모든 씬의 '고정 주인공'으로 일관되게 등장:
    - 외형 고정: 몽실몽실하고 둥근 검은 털 뭉치 요정, 호기심 가득한 땡그란 흰 눈동자, 앙증맞은 가는 손발(cute fluffy round black soot sprite Susuwatari with big curious round white eyes and tiny stick legs).
    - 캐릭터의 외형은 씬 전체에서 완전히 고정되며, 가사의 무드와 흐름에 맞춰 지브리풍 배경 속을 아장아장 걷거나 뛰거나 머물며 탐험합니다.
-3. 가사 텍스트와 석탄 요정 모험의 1:1 직결 연출:
-   - 가사의 실제 단어, 소재, 오브제, 공간적 배경과 석탄 요정의 행동을 1:1로 직접 연결하세요.
-   - 예: 비/우산 가사 -> 초록 나뭇잎 우산을 쓰고 물웅덩이를 건너뛰는 석탄 요정, 밤하늘/별빛 -> 언덕 잔디밭에서 별똥별을 올려다보는 석탄 요정, 바다/파도 -> 모래사장에서 부서지는 파도를 구경하는 석탄 요정, 바람/꽃 -> 꽃잎이나 민들레 씨앗에 매달려 날아가는 석탄 요정 등.
+3. 가사 텍스트와 석탄 요정 모험의 1:1 직결 연출 (다채롭고 웅장한 지브리 세계관 확장):
+   - 가사의 실제 단어, 소재, 오브제, 공간적 배경과 석탄 요정의 행동을 1:1로 직접 연결하세요. 서정적인 일상부터 웅장한 모험, 판타지, 우주, 시공간까지 폭넓게 확장합니다:
+     • [비/우산/물]: 커다란 토토로 잎사귀 우산을 쓰고 빗방울 물웅덩이를 건너뛰는 석탄 요정
+     • [눈/겨울/얼음]: 새하얀 눈사람 머리 위에 올라앉아 펑펑 내리는 눈송이를 호기심 가득 바라보는 석탄 요정
+     • [우주/별/은하]: 별빛 흐르는 푸른 은하수 위를 종이배 타고 항해하며 별똥별을 만지는 석탄 요정
+     • [시공간/차원/태엽]: 거대한 고대 태엽 시계탑 톱니바퀴 사이를 탐험하거나 빛나는 시공간 문을 들여다보는 석탄 요정
+     • [용/비행/하늘]: 백룡(하쿠)의 비늘 등 뒤에 살포시 얹혀 뭉게구름 하늘을 가르며 날아가는 석탄 요정
+     • [과거/고대유적/성]: 천공의 성 라퓨타 같은 덩굴 우거진 고대 돌사원 유적의 이끼 낀 거신병 어깨 위를 걷는 석탄 요정
+     • [용사/검/기사/전쟁]: 이끼 덮인 전설의 거대한 검 자루 위에 다소곳이 앉아 평화로운 들판의 석양을 바라보는 석탄 요정
+     • [산/절벽/협곡]: 웅장한 안개 낀 침엽수 고산지대 절벽 끝에서 구름바다를 내려다보는 석탄 요정
+     • [바다/심해/해저]: 맑고 푸른 심해에서 빛나는 야광 해파리와 산호초 사이를 공기방울 타고 헤엄치는 석탄 요정
+     • [바람/꽃/초원]: 샛노란 민들레 홀씨를 쥐고 산들바람에 실려 꽃밭 위를 둥실둥실 날아다니는 석탄 요정
+     • [불/열정/벽난로]: 캘시퍼 같은 따스한 벽난로 화톳불 곁에서 붉은 장작 불꽃과 튀는 불씨를 지켜보는 석탄 요정
+     • [기차/철길/정거장]: 바다 위를 달리는 해저열차 철길 침목을 따라 석양빛을 받으며 총총 걸어가는 석탄 요정
+     • [마을/골목/시장]: 아늑한 등불이 켜진 시골 시장 골목을 아장아장 산책하는 석탄 요정
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
 5. 프롬프트 형식: 각 씬마다 영문으로 작성:
    "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, [가사 해당 파트에 기반한 석탄 요정의 행동 및 지브리 수채화 배경 연출], lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
@@ -581,7 +603,7 @@ def generate_scene_prompts_for_duration(
             except Exception as e:
                 print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
 
-    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (지브리 석탄 요정 고정 주연)
+    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (지브리 석탄 요정 방대한 세계관 매핑)
     print(f"[Scene Engine] 가사 실제 구절을 분석하여 {num_scenes}개 씬 시퀀스를 빌드합니다.")
     clean_lines = [l.strip() for l in lyrics.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
     if not clean_lines:
@@ -591,7 +613,7 @@ def generate_scene_prompts_for_duration(
         "cinematic slow camera tracking shot, gentle whimsical breeze, soft warm ambient lighting",
         "wide atmospheric shot capturing the tiny soot sprite in breathtaking vast Ghibli landscape",
         "medium close-up showing cute curious round white eyes, charming animation movement",
-        "dynamic low angle shot, floating petals and dandelion seeds, playful fairytale mood",
+        "dynamic low angle shot, floating magical embers and dandelion seeds, playful fairytale mood",
         "epic sunset golden hour backlighting, glowing watercolor sky, peaceful nostalgic atmosphere"
     ]
 
@@ -601,27 +623,43 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 가사 단어 기반 석탄 요정(스스와타리) 행동 및 배경 매핑
-        if any(w in target_line for w in ["비", "빗", "물", "적시"]):
-            visual_theme = "holding a large green leaf umbrella in gentle rain, hopping over glistening water puddles on a cobblestone village path"
+        # 가사 단어 기반 석탄 요정(스스와타리) 행동 및 배경 정밀 매핑 (우주/시공간/용/과거/용사/산/바다 등 확장)
+        if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
+            visual_theme = "riding peacefully on the back of a majestic white flying dragon spirit with glowing scales soaring through pastel fluffy clouds in golden sky"
+        elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
+            visual_theme = "sitting quietly on the hilt of an ancient moss-covered legendary hero sword embedded in a peaceful green grassy hill under sunset glow"
+        elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억", "차원"]):
+            visual_theme = "exploring the intricate brass clockwork cogs and glowing pendulum gears inside a gigantic magical time-tower, golden clock particles"
+        elif any(w in target_line for w in ["우주", "은하", "성운", "행성", "궤도"]):
+            visual_theme = "sailing in a small origami paper boat across a celestial starry river of glowing blue stardust and colorful nebulae in deep cosmos"
+        elif any(w in target_line for w in ["성", "유적", "고대", "탑", "라퓨타", "신전"]):
+            visual_theme = "waddling upon the mossy stone shoulder of an ancient peaceful garden robot sentinel among overgrown ivy vines in floating ruins"
+        elif any(w in target_line for w in ["산", "절벽", "바위", "협곡", "봉우리"]):
+            visual_theme = "standing atop a majestic misty mountain cliff edge, gazing out at an endless sea of rolling fog and pine valleys at dawn"
+        elif any(w in target_line for w in ["심해", "해저", "산호", "해파리"]):
+            visual_theme = "floating gently inside an iridescent water bubble drifting through a tranquil deep ocean kingdom of glowing jellyfish and turquoise coral reefs"
+        elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변"]):
+            visual_theme = "standing near colorful sea glass and seashells on a sun-drenched sandy beach at twilight, watching foamy ocean waves gently wash in"
+        elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼"]):
+            visual_theme = "trotting along a sunken railway track where shallow clear water covers the rails at orange sunset, distant train whistle"
+        elif any(w in target_line for w in ["눈", "겨울", "얼음", "시리", "추위"]):
+            visual_theme = "perched on the head of a cute little snowman in a peaceful snow-covered pine village, watching fluffy white snowflakes drift down"
+        elif any(w in target_line for w in ["비", "빗", "물", "적시"]):
+            visual_theme = "holding a large green leaf umbrella in gentle rain, happily hopping over glistening water puddles on a rustic cobblestone path"
         elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = "sitting on a cozy wooden roof edge, gazing up at vast glowing starry night sky filled with shooting stars and soft nebula"
-        elif any(w in target_line for w in ["바다", "파도", "수평선", "모래"]):
-            visual_theme = "standing near sea glass and shells on sandy shore at twilight, watching gentle foamy ocean waves rolling in"
-        elif any(w in target_line for w in ["바람", "흔들", "풀", "나무"]):
-            visual_theme = "waddling through tall green grass and swaying wildflowers on a sunlit hillside, wind gently rustling its fuzzy body"
-        elif any(w in target_line for w in ["꽃", "봄", "피어"]):
-            visual_theme = "sitting inside a blooming wildflower cup, delicate pastel petals dancing in warm spring sunlight"
-        elif any(w in target_line for w in ["길", "골목", "발자국", "정거장"]):
-            visual_theme = "trotting along a quiet rustic countryside railway track at golden hour, amber lanterns glowing gently"
-        elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침"]):
-            visual_theme = "basking on a sunlit wooden window sill as warm morning sunbeams illuminate the peaceful room, stretch and blink"
-        elif any(w in target_line for w in ["불", "타오", "열정", "폭발"]):
-            visual_theme = "dancing excitedly around a cozy glowing hearth fireplace with warm crackling embers and flying sparks"
+            visual_theme = "sitting on a rustic wooden rooftop edge, gazing in wonder at a vast indigo night sky overflowing with sparkling shooting stars"
+        elif any(w in target_line for w in ["바람", "흔들", "풀", "나무", "숲"]):
+            visual_theme = "waddling through a sun-dappled mossy ancient forest with giant cedar trees and glowing spirits, gentle breeze rustling leaves"
+        elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
+            visual_theme = "holding onto a fluffy dandelion seed parachute, drifting delightfully across a vibrant pastel wildflower meadow under warm sunlight"
+        elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침", "태양"]):
+            visual_theme = "basking lazily on a sun-warmed wooden window sill as brilliant morning sunbeams fill the cozy countryside cottage"
+        elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염"]):
+            visual_theme = "joyfully dancing around a warm magical hearth fireplace with a cheerful fire spirit Calcifer, glowing crackling embers and cozy sparks"
         elif base_prompts and len(base_prompts) > i:
-            visual_theme = f"exploring {base_prompts[i]}"
+            visual_theme = f"curiously exploring {base_prompts[i]}"
         else:
-            visual_theme = f"curiously exploring the scenery of '{target_line}', peaceful whimsical mood"
+            visual_theme = f"curiously wandering through a breathtaking landscape of '{target_line}', peaceful whimsical mood"
 
         cam_mod = cam_variations[i % len(cam_variations)]
         full_p = (
