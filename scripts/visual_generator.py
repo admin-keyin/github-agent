@@ -12,10 +12,12 @@ import re
 import json
 import math
 import time
+import shutil
 import random
 import urllib.parse
 import subprocess
 import requests
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from pydub import AudioSegment
 
@@ -892,4 +894,110 @@ def extract_video_frame(
     subprocess.run(cmd, check=True)
     print(f"[Thumbnail Engine] 영상({video_path}) {timestamp_sec:.1f}초 지점에서 프레임 추출 완료 -> {output_path}")
     return output_path
+
+
+def calculate_eyecatching_score(image_path: str) -> tuple:
+    """
+    이미지의 채도(Saturation), 명암 대비(Contrast), 윤곽 디테일(Edge energy), 밝기 적절성을 종합 점수화합니다.
+    """
+    try:
+        with Image.open(image_path) as img:
+            arr = np.array(img.convert("RGB"), dtype=np.float32)
+    except Exception:
+        return 0.0, 0.0, 0.0, 0.0
+
+    # 1. 휘도 및 대비 (Contrast)
+    lum = 0.299 * arr[:, :, 0] + 0.587 * arr[:, :, 1] + 0.114 * arr[:, :, 2]
+    mean_lum = float(np.mean(lum))
+    std_lum = float(np.std(lum))
+
+    # 극단적으로 어둡거나(< 40) 타버린 흰색(> 225) 페널티
+    if mean_lum < 40:
+        brightness_factor = max(0.05, mean_lum / 40.0)
+    elif mean_lum > 225:
+        brightness_factor = max(0.05, (255.0 - mean_lum) / 30.0)
+    else:
+        brightness_factor = 1.0
+
+    # 2. 채도 및 생동감 (Saturation in HSV)
+    max_c = np.max(arr, axis=2)
+    min_c = np.min(arr, axis=2)
+    sat = (max_c - min_c) / (max_c + 1e-5)
+    mean_sat = float(np.mean(sat))
+
+    # 3. 엣지 디테일 (손그림 2D 만화 선화 및 질감 선명도)
+    dx = np.abs(lum[:, 1:] - lum[:, :-1])
+    dy = np.abs(lum[1:, :] - lum[:-1, :])
+    edge_energy = float((np.mean(dx) + np.mean(dy)) / 2.0)
+
+    # 종합 주목도 점수 (눈길이 가는 화려하고 선명하며 대비 높은 장면 우선)
+    total_score = brightness_factor * (std_lum * 0.40 + (mean_sat * 100.0) * 0.40 + edge_energy * 0.20)
+    return total_score, mean_lum, mean_sat, std_lum
+
+
+def select_most_eyecatching_frame(
+    video_path: str,
+    duration_sec: float,
+    output_image_path: str,
+    width: int = 1280,
+    height: int = 720,
+    is_shorts: bool = False
+) -> str:
+    """
+    비디오의 여러 주요 구간(후렴, 클라이맥스, 하이라이트 등)에서 후보 프레임들을 추출하고,
+    시각적 주목도(채도, 대비, 선명도, 밝기 밸런스)가 가장 높은 1컷을 자동 선별합니다.
+    """
+    os.makedirs(os.path.dirname(os.path.abspath(output_image_path)), exist_ok=True)
+    temp_dir = os.path.join(os.path.dirname(os.path.abspath(output_image_path)), "thumb_candidates")
+    os.makedirs(temp_dir, exist_ok=True)
+
+    if is_shorts:
+        candidate_ts = [
+            5.0, 10.0, 15.0, 20.0, 25.0, 32.0, 38.0
+        ]
+    else:
+        # 풀버전: 기승전결 주요 지점 샘플링 (Verse 1 후반, 후렴 1, Verse 2, 브릿지, 최종 후렴 클라이맥스)
+        candidate_ts = [
+            duration_sec * 0.18,
+            duration_sec * 0.32,
+            duration_sec * 0.40,
+            duration_sec * 0.50,
+            duration_sec * 0.65,
+            duration_sec * 0.75,
+            duration_sec * 0.82
+        ]
+
+    valid_candidates = [min(max(1.0, t), max(1.0, duration_sec - 1.0)) for t in candidate_ts]
+    # 중복 제거 및 정렬
+    valid_candidates = sorted(list(set(valid_candidates)))
+
+    print(f"\n[Thumbnail Selector] 영상({video_path})에서 시선을 사로잡는 최적의 썸네일 후보 {len(valid_candidates)}컷 분석 중...")
+    best_candidate_path = None
+    best_score = -1.0
+    best_ts = valid_candidates[0]
+
+    for idx, ts in enumerate(valid_candidates):
+        cand_img = os.path.join(temp_dir, f"cand_{idx}.jpg")
+        extract_video_frame(
+            video_path=video_path,
+            timestamp_sec=ts,
+            output_path=cand_img,
+            width=width,
+            height=height
+        )
+        score, lum, sat, contrast = calculate_eyecatching_score(cand_img)
+        print(f" - [후보 {idx+1}/{len(valid_candidates)}] {ts:.1f}초: 주목도 {score:.1f}점 (밝기: {lum:.1f}, 채도: {sat*100:.1f}%, 대비: {contrast:.1f})")
+
+        if score > best_score:
+            best_score = score
+            best_candidate_path = cand_img
+            best_ts = ts
+
+    if best_candidate_path and os.path.exists(best_candidate_path):
+        shutil.copy(best_candidate_path, output_image_path)
+        print(f"[Thumbnail Winner] 가장 눈길을 사로잡는 {best_ts:.1f}초 컷(주목도 {best_score:.1f}점)이 최종 썸네일 프레임으로 채택되었습니다! -> {output_image_path}\n")
+    else:
+        extract_video_frame(video_path, valid_candidates[0], output_image_path, width, height)
+
+    return output_image_path
 

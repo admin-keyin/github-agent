@@ -35,6 +35,7 @@ try:
         calculate_scene_durations,
         create_professional_thumbnail,
         extract_video_frame,
+        select_most_eyecatching_frame,
         parse_lyrics_timeline,
         render_lyric_animation_assets,
         render_full_cinematic_mv,
@@ -53,6 +54,7 @@ except ImportError:
         calculate_scene_durations,
         create_professional_thumbnail,
         extract_video_frame,
+        select_most_eyecatching_frame,
         parse_lyrics_timeline,
         render_lyric_animation_assets,
         render_full_cinematic_mv,
@@ -341,24 +343,25 @@ def main():
         best_full_scene = scene_full_paths[min(2, len(scene_full_paths)-1)] if scene_full_paths else "temp/bg.jpg"
         best_shorts_scene = best_full_scene
     else:
-        # 완성된 비디오 배경 영상에서 직접 하이라이트 씬 프레임 추출 (가짜 외부 이미지 생성 배제)
-        print("\n[Step 4] 완성된 16:9 비디오 영상에서 직접 최적의 하이라이트 프레임 추출 중 (썸네일용)...")
-        highlight_sec = min(max(5.0, duration_sec * 0.35), duration_sec - 2.0)
+        # 완성된 비디오 배경 영상에서 여러 후보 컷을 분석하여 가장 눈길을 사로잡는 최적의 하이라이트 프레임 자동 선별
+        print("\n[Step 4] 완성된 16:9 비디오 영상에서 가장 눈길을 사로잡는 최상의 썸네일 컷 선별 중...")
         best_full_scene = "temp/video_frame_full.jpg"
-        extract_video_frame(
+        select_most_eyecatching_frame(
             video_path=bg_full_video_path,
-            timestamp_sec=highlight_sec,
-            output_path=best_full_scene,
+            duration_sec=duration_sec,
+            output_image_path=best_full_scene,
             width=1280,
-            height=720
+            height=720,
+            is_shorts=False
         )
         best_shorts_scene = "temp/video_frame_shorts.jpg"
-        extract_video_frame(
+        select_most_eyecatching_frame(
             video_path=bg_full_video_path,
-            timestamp_sec=highlight_sec,
-            output_path=best_shorts_scene,
+            duration_sec=duration_sec,
+            output_image_path=best_shorts_scene,
             width=1080,
-            height=1920
+            height=1920,
+            is_shorts=True
         )
 
     # 4. 프로페셔널 유튜브 썸네일 그래픽 합성 (영상에서 추출한 실 프레임 기반)
@@ -418,6 +421,28 @@ def main():
         start_sec=start_sec,
         duration=shorts_duration
     )
+
+    if os.path.exists(output_shorts):
+        print("\n[Step 8-B] 제작된 9:16 세로 쇼츠 영상에서 가장 눈길을 사로잡는 프레임 선별 및 썸네일 합성...")
+        final_shorts_frame = "temp/final_shorts_frame.jpg"
+        select_most_eyecatching_frame(
+            video_path=output_shorts,
+            duration_sec=shorts_duration,
+            output_image_path=final_shorts_frame,
+            width=1080,
+            height=1920,
+            is_shorts=True
+        )
+        create_professional_thumbnail(
+            bg_image_path=final_shorts_frame,
+            title=title,
+            subtitle=extra_meta.get("shorts_concept", f"{title} 킬링파트"),
+            genre_name=genre_display,
+            output_path=thumb_shorts,
+            width=1080,
+            height=1920,
+            is_shorts=True
+        )
 
 
     # 9. 유튜브 고품격 스토리텔링 메타데이터 저장 (풀버전용)
