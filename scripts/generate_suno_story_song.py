@@ -34,6 +34,7 @@ try:
         build_multi_scene_video_concat,
         calculate_scene_durations,
         create_professional_thumbnail,
+        extract_video_frame,
         parse_lyrics_timeline,
         render_lyric_animation_assets,
         render_full_cinematic_mv,
@@ -51,6 +52,7 @@ except ImportError:
         build_multi_scene_video_concat,
         calculate_scene_durations,
         create_professional_thumbnail,
+        extract_video_frame,
         parse_lyrics_timeline,
         render_lyric_animation_assets,
         render_full_cinematic_mv,
@@ -317,7 +319,7 @@ def main():
     scene_full_paths = []
 
     if not use_video_bg_full:
-        print("\n[Step 3-Fallback] 이미지 멀티 씬 일러스트 생성 중 (폴백 및 썸네일용)...")
+        print("\n[Step 3-Fallback] 비디오 미생성으로 정지 이미지 멀티 씬 일러스트 생성 중 (폴백용)...")
         scene_full_paths = generate_multi_scene_artworks(
             scene_prompts=scene_prompts,
             output_dir=scenes_full_dir,
@@ -336,28 +338,34 @@ def main():
             transition_dur=0.8,
             is_shorts=False
         )
+        best_full_scene = scene_full_paths[min(2, len(scene_full_paths)-1)] if scene_full_paths else "temp/bg.jpg"
+        best_shorts_scene = best_full_scene
     else:
-        # 비디오 생성이 성공했더라도 썸네일 추출용 일러스트 확보
-        scene_full_paths = generate_multi_scene_artworks(
-            scene_prompts=[scene_prompts[0], scene_prompts[min(2, len(scene_prompts)-1)]],
-            output_dir=scenes_full_dir,
+        # 완성된 비디오 배경 영상에서 직접 하이라이트 씬 프레임 추출 (가짜 외부 이미지 생성 배제)
+        print("\n[Step 4] 완성된 16:9 비디오 영상에서 직접 최적의 하이라이트 프레임 추출 중 (썸네일용)...")
+        highlight_sec = min(max(5.0, duration_sec * 0.35), duration_sec - 2.0)
+        best_full_scene = "temp/video_frame_full.jpg"
+        extract_video_frame(
+            video_path=bg_full_video_path,
+            timestamp_sec=highlight_sec,
+            output_path=best_full_scene,
             width=1280,
-            height=720,
-            song_type=cat_type,
-            is_shorts=False
+            height=720
+        )
+        best_shorts_scene = "temp/video_frame_shorts.jpg"
+        extract_video_frame(
+            video_path=bg_full_video_path,
+            timestamp_sec=highlight_sec,
+            output_path=best_shorts_scene,
+            width=1080,
+            height=1920
         )
 
-    if scene_full_paths:
-        shutil.copy(scene_full_paths[0], "temp/bg.jpg")
-
-    # 4. 프로페셔널 유튜브 썸네일 생성
-    print("\n[Step 4] 최고 품질의 프로페셔널 썸네일 디자인 합성 중...")
+    # 4. 프로페셔널 유튜브 썸네일 그래픽 합성 (영상에서 추출한 실 프레임 기반)
     thumb_full = "temp/thumbnail.jpg"
     thumb_shorts = "temp/thumbnail_shorts.jpg"
     genre_display = extra_meta.get("genre_name", "Original Track")
     sub_text = extra_meta.get("story_description", "").split("\n")[0][:36] or "Inkey Studio Original"
-
-    best_full_scene = scene_full_paths[min(2, len(scene_full_paths)-1)] if scene_full_paths else "temp/bg.jpg"
 
     create_professional_thumbnail(
         bg_image_path=best_full_scene,
@@ -370,9 +378,9 @@ def main():
         is_shorts=False
     )
     create_professional_thumbnail(
-        bg_image_path=best_full_scene,
+        bg_image_path=best_shorts_scene,
         title=title,
-        subtitle=extra_meta.get("shorts_concept", f"{title} 하이라이트"),
+        subtitle=extra_meta.get("shorts_concept", f"{title} 킬링파트"),
         genre_name=genre_display,
         output_path=thumb_shorts,
         width=1080,

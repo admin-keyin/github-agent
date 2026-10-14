@@ -287,16 +287,21 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트에 맞춘 감성 동물 / 자연 / 우주 / 풍경 애니메이션 씬 프롬프트 (scene_prompts)]
-※ 가장 중요한 연출 규칙 (★사람 얼굴 클로즈업 배제, 동물/자연/우주/풍경 중심★):
-1. 어색한 사람 얼굴을 억지로 등장시키지 마세요! 가사의 감정과 분위기에 어울리는 '귀엽거나 신비로운 동물(예: 길고양이, 철새 무리, 여우, 고래, 나비 등)', '웅장한 자연환경(비 내리는 숲, 파도치는 바다, 노을빛 언덕)', 또는 '환상적인 우주와 밤하늘(은하수, 오로라, 별똥별, 네온 도시 야경)'을 적극 활용하세요.
-2. 특정 고정된 캐릭터에 얽매이지 말고, 가사 전개에 따라 배경과 피사체가 자유롭고 유기적으로 바뀌도록 연출하세요:
-   - Scene 1 (도입부): 가사의 시작 분위기를 여는 자연/도시 정경 (예: 비 내리는 창가에 앉아 바깥을 바라보는 작은 고양이, 빗방울 떨어지는 수면)
-   - Scene 2 (1절): 가사의 전개와 서사 (예: 숲속을 천천히 거니는 사슴, 나뭇잎 사이로 쏟아지는 햇살, 바람에 흔들리는 풀잎)
-   - Scene 3 (후렴): 감정의 폭발과 환상적인 클라이맥스 (예: 밤하늘 가득 터지는 찬란한 오로라와 은하수 바다를 유영하는 거대한 우주 고래, 쏟아지는 별똥별)
-   - Scene 4 (2절/브릿지): 깊고 몽환적인 분위기 반전 (예: 네온 불빛이 번지는 심야 도시 지붕 위를 달리는 검은 고양이, 안개 자욱한 호숫가)
-   - Scene 5 (아웃트로): 따스한 위로와 여운의 피날레 (예: 황금빛 일출이 번지는 바다 수평선 위로 날아오르는 새들, 평화롭고 광활한 자연)
-(형식: "masterpiece 2D anime music video visual, [가사 분위기에 맞는 동물/자연/우주 묘사], breathtaking scenery, atmospheric depth, cinematic lighting, no human face")
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 구체적 시네마틱 애니메이션 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (가사와 1:1 직결, 상투적 감성 클리셰 금지, 사람 얼굴 클로즈업 배제):
+1. 막연한 '감성'이나 뻔한 동물 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
+   - 당신이 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간, 서사를 직접 1:1로 시각화하세요.
+   - 예: 가사에 바다가 나오면 파도/수평선/해변, 골목길이나 도시가 나오면 가로등/비에 젖은 아스팔트/네온사인, 꽃이나 계절이 나오면 들꽃/낙엽/눈꽃, 밤하늘이나 우주가 나오면 별무리/달빛/오로라 등 가사의 실제 텍스트 소재를 1:1로 직접 묘사하세요.
+2. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
+   - no human face close-up, no human face
+   - 인물이 등장해야 한다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 신체 일부(손, 발걸음)나 풍경 속 원경으로만 처리하고, 기본적으로는 풍경, 사물, 공간의 영화적 미장센 위주로 연출하세요.
+3. 씬의 전개:
+   - Scene 1 (도입부): 인트로 및 1절 초반 가사의 공간적 배경을 여는 와이드 샷
+   - Scene 2 (1절/프리코러스): 가사의 행동과 감정이 전개되는 디테일 샷
+   - Scene 3 (후렴): 후렴 가사의 감정 폭발과 클라이맥스 시각화
+   - Scene 4 (2절/브릿지): 브릿지 가사의 내면적 분위기 반전 샷
+   - Scene 5 (아웃트로): 아웃트로 가사의 깊은 여운을 남기는 풀샷 피날레
+(형식: "masterpiece 2D anime music video visual, [가사 파트에 기반한 구체적 공간/사물/빛 연출], breathtaking scenery, atmospheric depth, cinematic lighting, no human face")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -519,35 +524,33 @@ def generate_scene_prompts_for_duration(
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
                 prompt_instruction = f"""
-당신은 최고급 2D 시네마틱 애니메이션 뮤직비디오 비주얼 디렉터입니다.
-이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초 단위 비디오 씬을 총 {num_scenes}개 생성해야 합니다.
-노래의 기승전결(도입부 -> 1절 -> 후렴 -> 2절/브릿지 -> 클라이맥스 후렴 -> 아웃트로)과 가사 내용에 맞춰,
-각 10초 구간(총 {num_scenes}개 씬)의 애니메이션 프롬프트를 작성해주세요.
+당신은 대한민국 최고 수준의 2D 애니메이션 뮤직비디오 비주얼 디렉터입니다.
+이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
 
-[가사]:
-{lyrics[:1800]}
+[가사 전문]:
+{lyrics}
 
-[★ 절대 준수 연출 규칙]:
-1. 사람 얼굴 클로즈업 절대 금지 (no human face close-up, no human face):
-   가사의 감정과 정서에 부합하는 동물(고양이, 사슴, 여우, 고래, 나비, 철새 등), 아름다운 자연 풍경(비, 숲, 바다, 석양, 호수, 들꽃), 신비로운 우주/밤하늘(은하수, 오로라, 별똥별, 네온 도시 풍경)을 가사의 분위기에 맞게 가변적으로 배치하세요.
-2. 씬 흐름이 시간에 따라 자연스럽게 발전하며 기승전결이 있도록 구성하세요:
-   - 0~20s: 잔잔하고 서정적인 도입부 정경 (예: 비 내리는 창가의 고양이, 빗방울 수면)
-   - 중간: 가사의 감정선과 리듬에 맞춘 역동적이거나 따뜻한 풍경 (예: 숲속 사슴, 바람 부는 해안가)
-   - 후렴/클라이맥스: 웅장한 은하수, 오로라, 유성우, 빛나는 바다를 유영하는 우주 고래 등 환상적인 비주얼 폭발
-   - 마지막 씬: 따스한 여운을 주는 일출/노을 피날레
-3. 모든 프롬프트는 영문으로 작성하며, 다음 형식을 준수하세요:
-   "masterpiece 2D anime music video visual, [구체적 동물/자연/우주 묘사], atmospheric depth, beautiful cinematic lighting, no human face"
+[★ 가사 1:1 직결 연출 절대 규칙 (상투적 감성 클리셰 엄격 금지)]:
+1. 막연한 '감성'이나 뻔한 클리셰(모든 곡에 고양이나 우주 고래가 반복 등장하는 것)를 엄격히 금지합니다!
+   - 반드시 위에 제공된 [가사 전문]의 실제 단어, 소재, 오브제, 공간적 배경, 서사를 직접 1:1로 시각화하세요.
+   - 예: 가사에 비나 우산이 나오면 빗방울 맺힌 유리창/물웅덩이, 골목길이나 가로등이 나오면 밤의 가로등 불빛/아스팔트, 들꽃이나 바람이 나오면 바람에 흔들리는 꽃밭, 바다나 파도가 나오면 수평선/부서지는 파도, 기차나 역이 나오면 플랫폼/철길, 밤하늘이 나오면 달빛/별무리 등 가사의 실제 텍스트 소재를 직접 묘사하세요.
+2. 사람 얼굴 클로즈업 절대 금지 (인체 왜곡 방지):
+   - no human face close-up, no human face
+   - 사람이 필요하다면 뒷모습 실루엣(silhouette from behind walking into distance) 또는 발걸음/손/원경으로만 처리하고, 기본적으로는 풍경, 사물, 빛과 그림자, 공간의 영화적 미장센 위주로 연출하세요.
+3. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
+4. 프롬프트 형식: 각 씬마다 영문으로 작성:
+   "masterpiece 2D anime music video visual, [가사 해당 파트의 구체적 공간/사물/빛 연출], dynamic composition, beautiful lighting, cinematic art style, no human face"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
-  "씬 1 영문 프롬프트 (0~10s)",
-  "씬 2 영문 프롬프트 (10~20s)",
+  "Scene 1 영문 프롬프트 (0~10s)",
+  "Scene 2 영문 프롬프트 (10~20s)",
   ... (정확히 {num_scenes}개의 문자열 리스트)
 ]
 """
                 payload = {
                     "contents": [{"parts": [{"text": prompt_instruction}]}],
-                    "generationConfig": {"temperature": 0.8}
+                    "generationConfig": {"temperature": 0.7}
                 }
                 resp = requests.post(url, json=payload, timeout=25)
                 if resp.status_code == 200:
@@ -561,7 +564,7 @@ def generate_scene_prompts_for_duration(
 
                     parsed = json.loads(raw_text.strip())
                     if isinstance(parsed, list) and len(parsed) >= num_scenes:
-                        print(f"[Scene Engine] Gemini가 10초 단위 맞춤 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
+                        print(f"[Scene Engine] Gemini가 가사 직결 10초 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
                         return parsed[:num_scenes]
                     elif isinstance(parsed, list) and len(parsed) > 0:
                         print(f"[Scene Engine] Gemini 생성 {len(parsed)}개 수령, 목표치 {num_scenes}개로 확장합니다.")
@@ -572,25 +575,11 @@ def generate_scene_prompts_for_duration(
             except Exception as e:
                 print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
 
-    # 폴백: 지능형 시네마틱 팔레트 순차 생성
-    print(f"[Scene Engine] 내장 시네마틱 팔레트로 {num_scenes}개 씬 시퀀스를 빌드합니다.")
-    palette = [
-        "quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, cinematic atmospheric lighting, no human face",
-        "cute little cat sheltering under a glowing bus stop in gentle evening rain, puddles reflecting city lights, heartwarming mood, no human face",
-        "misty morning pine forest with a gentle white deer walking softly through sunbeams filtering through trees, serene atmosphere, no human face",
-        "sunlight breaking through green canopy leaves, gentle breeze swaying lush meadow wildflowers, cinematic depth, no human face",
-        "coastal cliffs overlooking endless sapphire ocean with distant glowing lighthouse and soft foaming waves, golden hour lighting, no human face",
-        "flock of migrating birds soaring across warm amber sunset clouds towards horizon, epic cinematic view, no human face",
-        "evening city skyline transition to deep purple twilight with neon glow reflections on rain-soaked rooftops, quiet black cat silhouette, no human face",
-        "glowing jellyfish gracefully drifting through starry night sky clouds, surreal whimsical fantasy art, no human face",
-        "breathtaking starry galaxy night sky with blooming vibrant aurora borealis and falling shooting stars, cosmic fantasy landscape, no human face",
-        "majestic cosmic whale swimming silently through glittering stardust and glowing nebula clouds in deep cosmos, majestic scale, no human face",
-        "meteor shower trailing across midnight blue sky over snow-capped mountains and tranquil reflective lake, sparkling starlight, no human face",
-        "golden flower field on a high hill overlooking endless sunrise ocean, warm morning glow, floating dandelion seeds, inspiring peaceful ending, no human face"
-    ]
-
-    source_pool = list(base_prompts) if base_prompts else []
-    source_pool.extend(palette)
+    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드
+    print(f"[Scene Engine] 가사 실제 구절을 분석하여 {num_scenes}개 씬 시퀀스를 빌드합니다.")
+    clean_lines = [l.strip() for l in lyrics.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
+    if not clean_lines:
+        clean_lines = ["빛나는 계절", "어두운 밤하늘", "불어오는 바람", "지나온 시간들", "새벽의 온기"]
 
     cam_variations = [
         "slow cinematic camera push-in",
@@ -603,9 +592,34 @@ def generate_scene_prompts_for_duration(
 
     result_prompts = []
     for i in range(num_scenes):
-        base_p = source_pool[i % len(source_pool)]
+        line_idx = int((i / num_scenes) * len(clean_lines))
+        line_idx = min(line_idx, len(clean_lines) - 1)
+        target_line = clean_lines[line_idx]
+
+        # 가사 단어 기반 구체적 비주얼 테마 매핑
+        if any(w in target_line for w in ["비", "빗", "물", "적시"]):
+            visual_theme = "rain puddles reflecting soft city streetlights, gentle ripples in water, rain mist"
+        elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
+            visual_theme = "starry midnight sky with glowing celestial starlight and soft moonlight breaking through clouds"
+        elif any(w in target_line for w in ["바다", "파도", "수평선", "모래"]):
+            visual_theme = "rolling ocean waves washing ashore at twilight, distant glowing horizon and soft foam"
+        elif any(w in target_line for w in ["바람", "흔들", "풀", "나무"]):
+            visual_theme = "green grass and wildflowers swaying in gentle afternoon breeze, sunlight filtering through leaves"
+        elif any(w in target_line for w in ["꽃", "봄", "피어"]):
+            visual_theme = "delicate wildflowers blooming on a sunlit hillside, soft petals floating in light"
+        elif any(w in target_line for w in ["길", "골목", "발자국", "정거장"]):
+            visual_theme = "quiet evening street corner with glowing warm streetlight and empty railway platform"
+        elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침"]):
+            visual_theme = "warm golden morning sunbeams breaking through mist over rolling hills, new dawn"
+        elif any(w in target_line for w in ["불", "타오", "열정", "폭발"]):
+            visual_theme = "vibrant glowing sparks and blazing neon embers rising into dark cinematic night"
+        elif base_prompts and len(base_prompts) > i:
+            visual_theme = base_prompts[i]
+        else:
+            visual_theme = f"poetic atmospheric scene expressing '{target_line}', dramatic cinematic lighting"
+
         cam_mod = cam_variations[i % len(cam_variations)]
-        full_p = f"masterpiece 2D anime music video visual, {base_p}, {cam_mod}"
+        full_p = f"masterpiece 2D anime music video visual, {visual_theme}, {cam_mod}, no human face"
         result_prompts.append(full_p)
 
     return result_prompts

@@ -867,3 +867,29 @@ def extract_shorts_from_full_video(
     ]
     subprocess.run(cmd, check=True)
     print(f"[Shorts Success] 원본 영상 기반 9:16 쇼츠 추출 완료: {output_shorts_path}")
+
+
+def extract_video_frame(
+    video_path: str,
+    timestamp_sec: float,
+    output_path: str,
+    width: int = 1280,
+    height: int = 720
+) -> str:
+    """
+    완성된 영상에서 지정된 시점(timestamp_sec)의 고화질 정지 프레임을 1장 추출합니다.
+    """
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+    cmd = [
+        "ffmpeg", "-y",
+        "-ss", str(max(0.5, timestamp_sec)),
+        "-i", video_path,
+        "-vframes", "1",
+        "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
+        "-q:v", "2",
+        output_path
+    ]
+    subprocess.run(cmd, check=True)
+    print(f"[Thumbnail Engine] 영상({video_path}) {timestamp_sec:.1f}초 지점에서 프레임 추출 완료 -> {output_path}")
+    return output_path
+
