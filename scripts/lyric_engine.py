@@ -287,15 +287,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 완벽히 일치하는 오리지널 애니메이션 씬 프롬프트 (scene_prompts)]
-※ 가장 중요한 규칙: 당신이 방금 위에서 작사한 [lyrics]의 각 섹션 가사 내용, 인물의 행동, 구체적인 상황을 직접 읽고, 그 가사에 100% 어울리는 장면을 영문으로 묘사하세요!
-가사에서 비를 맞는다면 비를 맞고, 가사에서 밤거리를 달린다면 밤거리를 달리고, 가사에서 눈물을 닦거나 미소 짓는다면 그 행동을 프롬프트에 그대로 담아야 합니다:
-1. Scene 1 (도입부/Intro 가사 연출): Intro 구간의 분위기와 배경 설정, 인물의 첫 등장 모습
-2. Scene 2 (1절/Verse 1 가사 맞춤 연출): Verse 1 가사 본문에 나오는 구체적인 상황/장소/인물의 동작 묘사
-3. Scene 3 (후렴/Chorus 가사 맞춤 연출): Chorus 가사의 핵심 메시지와 감정 폭발, 가장 역동적인 하이라이트 액션 묘사
-4. Scene 4 (2절·브릿지/Bridge 가사 맞춤 연출): Verse 2 또는 Bridge 가사에서 일어나는 상황 반전 및 인물의 감정 변화
-5. Scene 5 (아웃트로/Outro 가사 맞춤 연출): Outro 마지막 가사의 여운을 담은 클로징 장면
-(형식: "original modern anime aesthetic, high-end 2D anime music video style, [구체적인 가사 상황 및 인물 행동 묘사], clean line art, stylish expressive character design, beautiful cinematic lighting")
+[★ 3. 작사된 가사 파트와 1:1로 일치하며 N개 씬이 자연스럽게 이어지는 오리지널 애니메이션 씬 프롬프트 (scene_prompts)]
+※ 핵심 규칙: 당신이 작사한 [lyrics]의 각 섹션 가사 상황과 인물 동작을 직접 반영하되, 10초 단위의 여러 씬(Scene 1 ~ Scene 5)이 결합될 때 영상이 뚝뚝 끊기지 않고 하나의 완성된 애니메이션 단편처럼 자연스럽게 이어지도록 '시각적 연속성(Visual Continuity)'을 부여하세요!
+1. 주인공 캐릭터의 기본 외형(헤어스타일, 의상 컬러)을 씬 전체에서 일관되게 유지하세요.
+2. 씬과 씬 사이의 카메라 무빙이 유기적으로 이어지도록 묘사하세요:
+   - Scene 1 (도입부): 카메라가 천천히 배경을 훑으며 인물에게 다가가는 와이드 오프닝 샷 (Slow camera push-in)
+   - Scene 2 (1절): 인물이 가사의 행동을 시작하며 이동하는 미디엄 트래킹 샷 (Smooth tracking camera)
+   - Scene 3 (후렴): 감정이 폭발하며 역동적으로 전환되는 다이내믹 클로즈업/로우앵글 샷 (Dynamic low angle, fast motion, soaring visual)
+   - Scene 4 (2절/브릿지): 차분하게 감정을 정리하는 오버더숄더/측면 샷 (Cinematic side profile, ambient lighting)
+   - Scene 5 (아웃트로): 인물이 빛을 향해 걸어가며 서서히 멀어지는 풀샷 피날레 (Slow camera pull-back, fading into warm light)
+(형식: "original modern anime aesthetic, high-end 2D anime music video style, [동일 캐릭터 외형 묘사], [가사 상황 및 부드러운 카메라 무빙 묘사], seamless scene continuity, clean line art, stylish cinematic lighting")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:

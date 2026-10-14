@@ -48,32 +48,34 @@ class KieVideoGenerator:
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
         
-        # Kling 3.0 Omni (할인 중, 크레딧 절약 최우선) -> Wan 3.0 순차 시도
+        # ByteDance SeaDance V1 Pro (초당 2.8 크레딧, 가성비 끝판왕) -> Kling Omni -> Wan 순차 시도
         candidate_models = [
+            "bytedance/v1-pro-text-to-video",
             "kling-3.0-omni/text-to-video",
-            "kling-3.0/video",
             "wan/3-0-video"
         ]
 
         task_id = None
-        # Kling Omni / Wan 규격 맞춤 (기본 720p 또는 480P)
-        norm_resolution = "720p" if "kling" in candidate_models[0] else (resolution.upper() if resolution.lower().endswith("p") else resolution)
-        # 크레딧 절약을 위해 클립당 최대 길이를 5~10초로 제한
-        safe_duration = min(10, max(5, int(duration)))
+        target_res = "480p"  # 가장 경제적이고 안정적인 480p
 
         for model in candidate_models:
             input_params = {
                 "prompt": anime_prompt[:2500],
-                "duration": safe_duration,
-                "resolution": norm_resolution,
-                "aspect_ratio": aspect_ratio
+                "aspect_ratio": aspect_ratio,
+                "resolution": target_res
             }
-            if "kling" in model:
+            if "bytedance" in model:
+                # SeaDance 규격: duration은 "10s", camera_fixed: false
+                input_params["duration"] = "10s"
+                input_params["camera_fixed"] = False
+            elif "kling" in model:
+                input_params["duration"] = "10"
                 input_params["audio"] = False
-                input_params["duration"] = str(safe_duration)
-            elif model == "wan/3-0-video":
-                input_params["audio"] = False
+                input_params["resolution"] = "720p"
+            elif "wan" in model:
+                input_params["duration"] = 10
                 input_params["resolution"] = "480P"
+                input_params["audio"] = False
 
             payload = {
                 "model": model,

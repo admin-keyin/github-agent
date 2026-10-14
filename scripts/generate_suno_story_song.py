@@ -227,26 +227,18 @@ def main():
 
     shorts_durations = calculate_scene_durations(shorts_duration, len(shorts_scene_prompts), is_shorts=True, shorts_duration=shorts_duration)
 
-    # Kie.ai API 키가 있는 경우 Kling 3.0 Omni (할인 모드) 애니메이션 비디오 클립 생성 시도
+    # Kie.ai API 키가 있는 경우 ByteDance SeaDance V1 Pro (초당 2.8 크레딧 가성비) 10초 씬 생성
     if kie_video_client.has_api_key():
-        print(f"\n[Step 3] Kie.ai Kling 3.0 Omni 할인 엔진으로 애니메이션 비디오 생성 (크레딧 절약 모드)...")
+        print(f"\n[Step 3] Kie.ai ByteDance SeaDance V1 Pro 엔진으로 10초 애니메이션 씬 {len(scene_prompts)}개 생성 중 (480P 가성비 모드)...")
         os.makedirs("temp/videos_full", exist_ok=True)
 
-        # 크레딧 절약: 핵심 3개 씬(도입부, 클라이맥스 후렴, 피날레)만 5~8초로 생성 후 연결
-        target_scenes = [scene_prompts[0]]
-        if len(scene_prompts) > 2:
-            target_scenes.append(scene_prompts[2])  # 후렴구 클라이맥스
-        if len(scene_prompts) > 1:
-            target_scenes.append(scene_prompts[-1]) # 결말
-
-        for idx, p_text in enumerate(target_scenes):
+        for idx, p_text in enumerate(scene_prompts):
             v_clip_path = f"temp/videos_full/scene_{idx}.mp4"
-            clip_dur = 6  # 6초 짧고 임팩트 있게 생성 (크레딧 최소화)
-            print(f" - [Scene {idx+1}/{len(target_scenes)}] Kling O3 비디오 요청 ({clip_dur}초): {p_text[:60]}...")
+            print(f" - [Scene {idx+1}/{len(scene_prompts)}] SeaDance V1 Pro 10초 렌더링 요청: {p_text[:65]}...")
             res_v = kie_video_client.generate_video_clip(
                 prompt=p_text,
-                duration=clip_dur,
-                resolution="720p",
+                duration=10,
+                resolution="480p",
                 aspect_ratio="16:9",
                 output_path=v_clip_path
             )
