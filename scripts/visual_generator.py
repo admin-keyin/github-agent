@@ -403,13 +403,92 @@ def create_professional_thumbnail(
     return True
 
 
-# ----------------------------------------------------------------------
-# 4. 가사 타임라인 파서 및 지능적 시간 동기화
-# ----------------------------------------------------------------------
-def parse_lyrics_timeline(lyrics_text: str, total_duration: float, is_shorts: bool = False, shorts_start: float = 40.0, shorts_duration: float = 45.0):
+def align_original_lyrics_with_audio(lyrics_text: str, audio_path: str, total_duration: float) -> list:
     """
-    가사 텍스트를 분석하여 각 가사 라인의 (start_sec, end_sec, text, section) 타임라인을 계산합니다.
+    Whisper를 활용하여 오디오에서 보컬 발화 시간(start, end)을 정밀 감지하고,
+    표시할 텍스트는 Whisper 인식 오타 대신 우리가 가지고 있는 '원본 정확한 가사'를 순서대로 1:1 매핑합니다.
+    Whisper 미설치 또는 실패 시 정교한 지능형 박자 타임라인으로 자동 폴백합니다.
     """
+    lines = [l.strip() for l in lyrics_text.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
+    if not lines:
+        return []
+
+    whisper_segments = []
+    try:
+        import whisper
+        print("[Lyric Sync Engine] Whisper 모델(base) 로딩 및 보컬 발화 구간 감지 중...")
+        model = whisper.load_model("base")
+        result = model.transcribe(audio_path, language="ko", fp16=False)
+        for seg in result.get("segments", []):
+            st = float(seg.get("start", 0))
+            et = float(seg.get("end", 0))
+            if et - st > 0.8:
+                whisper_segments.append((st, et))
+        print(f"[Lyric Sync Engine] Whisper가 보컬 발화 구간 {len(whisper_segments)}개를 성공적으로 감지했습니다!")
+    except Exception as e:
+        print(f"[Lyric Sync Info] Whisper 음성 인식 라이브러리 미사용/스킵 (지능형 타임라인 엔진 적용): {e}")
+
+    timeline = []
+    # 1. Whisper 구간이 감지된 경우: 감지된 타이밍에 원본 가사를 순차 매핑
+    if whisper_segments and len(whisper_segments) >= len(lines) * 0.5:
+        num_target = len(lines)
+        num_segs = len(whisper_segments)
+        for idx, text in enumerate(lines):
+            # 발화 구간 인덱스 비례 매핑
+            seg_idx = int((idx / num_target) * num_segs)
+            seg_idx = min(seg_idx, num_segs - 1)
+            st, et = whisper_segments[seg_idx]
+            
+            # 발화 간격 다듬기
+            dur = max(2.5, min(8.0, et - st))
+            st_clean = max(0.0, st)
+            et_clean = min(total_duration, st_clean + dur)
+            timeline.append({
+                "start": round(st_clean, 2),
+                "end": round(et_clean, 2),
+                "duration": round(et_clean - st_clean, 2),
+                "text": text,
+                "section": "Lyrics"
+            })
+        print(f"[Lyric Sync Success] 원본 가사 {len(timeline)}줄을 Whisper 보컬 타이밍에 1:1 싱크 정렬 완료!")
+        return timeline
+
+    # 2. 폴백: 4마디/8마디 대중가요 음악 구조 기반 지능형 박자 타임라인 계산
+    intro_time = min(14.0, max(8.0, total_duration * 0.08))
+    outro_time = min(12.0, max(6.0, total_duration * 0.06))
+    effective_duration = max(30.0, total_duration - intro_time - outro_time)
+
+    char_counts = [max(6, len(t)) for t in lines]
+    sum_chars = sum(char_counts)
+
+    cur_time = intro_time
+    for idx, text in enumerate(lines):
+        dur = (char_counts[idx] / sum_chars) * effective_duration
+        dur = max(2.5, min(7.5, dur))
+        st = cur_time
+        et = cur_time + dur
+        timeline.append({
+            "start": round(st, 2),
+            "end": round(et, 2),
+            "duration": round(dur, 2),
+            "text": text,
+            "section": "Lyrics"
+        })
+        cur_time = et
+
+    return timeline
+
+
+def parse_lyrics_timeline(lyrics_text: str, total_duration: float, audio_path: str = "", is_shorts: bool = False, shorts_duration: float = 45.0):
+    """
+    가사 텍스트를 오디오와 동기화하여 (start_sec, end_sec, text, section) 타임라인을 계산합니다.
+    """
+    if audio_path and os.path.exists(audio_path) and not is_shorts:
+        tl = align_original_lyrics_with_audio(lyrics_text, audio_path, total_duration)
+        if tl:
+            return tl
+
+    # 기본 파싱 로직
     lines = lyrics_text.splitlines()
     sections = []
     current_section = "Intro"
@@ -438,37 +517,6 @@ def parse_lyrics_timeline(lyrics_text: str, total_duration: float, is_shorts: bo
         sections = [("Song", all_lines)]
 
     timeline = []
-
-    if is_shorts:
-        chorus_lines = []
-        for s_name, s_lines in sections:
-            if "chorus" in s_name.lower() or "climax" in s_name.lower():
-                chorus_lines.extend(s_lines)
-
-        if not chorus_lines:
-            all_l = []
-            for _, sl in sections:
-                all_l.extend(sl)
-            mid = len(all_l) // 2
-            chorus_lines = all_l[max(0, mid - 3):min(len(all_l), mid + 4)]
-
-        n = max(1, len(chorus_lines))
-        line_dur = shorts_duration / n
-        t = 0.5
-        for idx, line in enumerate(chorus_lines):
-            st = t
-            et = min(shorts_duration, t + line_dur)
-            timeline.append({
-                "start": round(st, 2),
-                "end": round(et, 2),
-                "duration": round(et - st, 2),
-                "text": line,
-                "section": "Chorus"
-            })
-            t = et
-        return timeline
-
-    # 풀버전 (16:9)
     intro_time = min(12.0, total_duration * 0.08)
     outro_time = min(10.0, total_duration * 0.06)
     effective_duration = max(30.0, total_duration - intro_time - outro_time)

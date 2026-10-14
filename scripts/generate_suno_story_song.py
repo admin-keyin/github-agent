@@ -332,9 +332,9 @@ def main():
         is_shorts=True
     )
 
-    # 5. 가사 타임라인 파싱 및 키네틱 가사 애니메이션 렌더링
-    print("\n[Step 5] 작사된 가사 타임라인 파싱 및 키네틱 가사 애니메이션 에셋 렌더링...")
-    timeline_full = parse_lyrics_timeline(display_lyrics, duration_sec, is_shorts=False)
+    # 5. 가사 타임라인 파싱 및 키네틱 가사 애니메이션 렌더링 (Whisper 보컬 발화 시간 감지 & 원본 가사 매핑)
+    print("\n[Step 5] 오디오 보컬 타이밍 분석 및 원본 가사 타임라인 정밀 동기화 중...")
+    timeline_full = parse_lyrics_timeline(display_lyrics, duration_sec, audio_path=audio_path, is_shorts=False)
     concat_txt_full = render_lyric_animation_assets(timeline_full, 1280, 720, "temp", is_shorts=False)
 
     # 6. 상단 미니 오버레이 카드 생성
