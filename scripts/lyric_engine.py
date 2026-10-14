@@ -287,15 +287,15 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 가사 전개 맞춤형 오리지널 현대 애니메이션 멀티 씬 스토리보드 (scene_prompts)]
-가사의 흐름(기승전결)에 맞춰 장면이 전환될 수 있도록 서로 다른 5개의 영문 애니메이션 프롬프트 배열을 작성하세요.
-특정 기존 애니메이션(너의 이름은, 지브리 등)을 뻔하게 모방하지 않고, 세련되고 감각적인 독창적 2D 애니메이션 뮤직비디오 스타일로 작성합니다:
-1. Scene 1 (도입부/기): 서사의 시작 배경 (예: original anime aesthetic, coastal platform at twilight, quiet ocean horizon, cool evening breeze, stylish moody lighting)
-2. Scene 2 (1절/승): 인물의 서사와 감정 (예: original anime aesthetic, charismatic youth standing under city lights in gentle rain, natural and stylish facial features, subtle emotive gaze, cinematic composition)
-3. Scene 3 (후렴/전/클라이맥스): 감정의 폭발과 역동적 연출 (예: original anime aesthetic, vibrant city rooftop at night, glowing neon reflections, swirling light trails and dynamic wind, soaring energy, stylish colors)
-4. Scene 4 (2절·브릿지/전환): 몽환적이고 깊은 분위기 (예: original anime aesthetic, walking down a quiet night alleyway with warm cafe lights, falling flower petals, atmospheric depth)
-5. Scene 5 (아웃트로/결): 따스한 여운과 결말 (예: original anime aesthetic, standing against golden sunrise, gentle sincere smile, calm morning breeze, hopeful open ending)
-(각 프롬프트는 "original modern anime aesthetic, high-end 2D anime music video style, stylish character design, clean line art, beautiful cinematic lighting" 키워드 중심 작성)
+[★ 3. 작사된 가사 파트와 1:1로 완벽히 일치하는 오리지널 애니메이션 씬 프롬프트 (scene_prompts)]
+※ 가장 중요한 규칙: 당신이 방금 위에서 작사한 [lyrics]의 각 섹션 가사 내용, 인물의 행동, 구체적인 상황을 직접 읽고, 그 가사에 100% 어울리는 장면을 영문으로 묘사하세요!
+가사에서 비를 맞는다면 비를 맞고, 가사에서 밤거리를 달린다면 밤거리를 달리고, 가사에서 눈물을 닦거나 미소 짓는다면 그 행동을 프롬프트에 그대로 담아야 합니다:
+1. Scene 1 (도입부/Intro 가사 연출): Intro 구간의 분위기와 배경 설정, 인물의 첫 등장 모습
+2. Scene 2 (1절/Verse 1 가사 맞춤 연출): Verse 1 가사 본문에 나오는 구체적인 상황/장소/인물의 동작 묘사
+3. Scene 3 (후렴/Chorus 가사 맞춤 연출): Chorus 가사의 핵심 메시지와 감정 폭발, 가장 역동적인 하이라이트 액션 묘사
+4. Scene 4 (2절·브릿지/Bridge 가사 맞춤 연출): Verse 2 또는 Bridge 가사에서 일어나는 상황 반전 및 인물의 감정 변화
+5. Scene 5 (아웃트로/Outro 가사 맞춤 연출): Outro 마지막 가사의 여운을 담은 클로징 장면
+(형식: "original modern anime aesthetic, high-end 2D anime music video style, [구체적인 가사 상황 및 인물 행동 묘사], clean line art, stylish expressive character design, beautiful cinematic lighting")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
