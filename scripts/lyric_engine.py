@@ -287,16 +287,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하며 N개 씬이 자연스럽게 이어지는 오리지널 애니메이션 씬 프롬프트 (scene_prompts)]
-※ 핵심 규칙: 당신이 작사한 [lyrics]의 각 섹션 가사 상황과 인물 동작을 직접 반영하되, 10초 단위의 여러 씬(Scene 1 ~ Scene 5)이 결합될 때 영상이 뚝뚝 끊기지 않고 하나의 완성된 애니메이션 단편처럼 자연스럽게 이어지도록 '시각적 연속성(Visual Continuity)'을 부여하세요!
-1. 주인공 캐릭터의 기본 외형(헤어스타일, 의상 컬러)을 씬 전체에서 일관되게 유지하세요.
-2. 씬과 씬 사이의 카메라 무빙이 유기적으로 이어지도록 묘사하세요:
-   - Scene 1 (도입부): 카메라가 천천히 배경을 훑으며 인물에게 다가가는 와이드 오프닝 샷 (Slow camera push-in)
-   - Scene 2 (1절): 인물이 가사의 행동을 시작하며 이동하는 미디엄 트래킹 샷 (Smooth tracking camera)
-   - Scene 3 (후렴): 감정이 폭발하며 역동적으로 전환되는 다이내믹 클로즈업/로우앵글 샷 (Dynamic low angle, fast motion, soaring visual)
-   - Scene 4 (2절/브릿지): 차분하게 감정을 정리하는 오버더숄더/측면 샷 (Cinematic side profile, ambient lighting)
-   - Scene 5 (아웃트로): 인물이 빛을 향해 걸어가며 서서히 멀어지는 풀샷 피날레 (Slow camera pull-back, fading into warm light)
-(형식: "original modern anime aesthetic, high-end 2D anime music video style, [동일 캐릭터 외형 묘사], [가사 상황 및 부드러운 카메라 무빙 묘사], seamless scene continuity, clean line art, stylish cinematic lighting")
+[★ 3. 작사된 가사 파트에 맞춘 감성 동물 / 자연 / 우주 / 풍경 애니메이션 씬 프롬프트 (scene_prompts)]
+※ 가장 중요한 연출 규칙 (★사람 얼굴 클로즈업 배제, 동물/자연/우주/풍경 중심★):
+1. 어색한 사람 얼굴을 억지로 등장시키지 마세요! 가사의 감정과 분위기에 어울리는 '귀엽거나 신비로운 동물(예: 길고양이, 철새 무리, 여우, 고래, 나비 등)', '웅장한 자연환경(비 내리는 숲, 파도치는 바다, 노을빛 언덕)', 또는 '환상적인 우주와 밤하늘(은하수, 오로라, 별똥별, 네온 도시 야경)'을 적극 활용하세요.
+2. 특정 고정된 캐릭터에 얽매이지 말고, 가사 전개에 따라 배경과 피사체가 자유롭고 유기적으로 바뀌도록 연출하세요:
+   - Scene 1 (도입부): 가사의 시작 분위기를 여는 자연/도시 정경 (예: 비 내리는 창가에 앉아 바깥을 바라보는 작은 고양이, 빗방울 떨어지는 수면)
+   - Scene 2 (1절): 가사의 전개와 서사 (예: 숲속을 천천히 거니는 사슴, 나뭇잎 사이로 쏟아지는 햇살, 바람에 흔들리는 풀잎)
+   - Scene 3 (후렴): 감정의 폭발과 환상적인 클라이맥스 (예: 밤하늘 가득 터지는 찬란한 오로라와 은하수 바다를 유영하는 거대한 우주 고래, 쏟아지는 별똥별)
+   - Scene 4 (2절/브릿지): 깊고 몽환적인 분위기 반전 (예: 네온 불빛이 번지는 심야 도시 지붕 위를 달리는 검은 고양이, 안개 자욱한 호숫가)
+   - Scene 5 (아웃트로): 따스한 위로와 여운의 피날레 (예: 황금빛 일출이 번지는 바다 수평선 위로 날아오르는 새들, 평화롭고 광활한 자연)
+(형식: "masterpiece 2D anime music video visual, [가사 분위기에 맞는 동물/자연/우주 묘사], breathtaking scenery, atmospheric depth, cinematic lighting, no human face")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -471,16 +471,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"original modern anime aesthetic, high-end 2D anime music video style, coastal train platform at twilight, glowing ocean horizon, stylish atmospheric lighting",
-        f"original modern anime aesthetic, charismatic young character waiting under warm streetlight in gentle evening rain, clean stylish character design, cinematic depth",
-        f"original modern anime aesthetic, breathtaking night sky with glowing light streaks and neon reflections, dynamic wind, soaring energetic climax",
-        f"original modern anime aesthetic, walking through stylish evening city street with ambient neon and glowing storefronts, atmospheric mood",
-        f"original modern anime aesthetic, standing on grassy hill overlooking sunlit sunrise horizon, calm morning glow, inspiring hopeful ending"
+        f"masterpiece 2D anime music video visual, quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, cinematic atmospheric lighting, no human face",
+        f"masterpiece 2D anime music video visual, cute little cat sheltering under a glowing bus stop in gentle evening rain, puddles reflecting city lights, heartwarming mood, no human face",
+        f"masterpiece 2D anime music video visual, breathtaking starry galaxy night sky with blooming vibrant aurora and falling shooting stars, cosmic fantasy landscape, dynamic cinematic lighting, no human face",
+        f"masterpiece 2D anime music video visual, flock of migrating birds flying over misty forest canopy and tranquil lake at dusk, deep ambient depth, no human face",
+        f"masterpiece 2D anime music video visual, sunlit golden flower field on a high hill overlooking endless sunrise ocean, warm morning glow, inspiring peaceful ending, no human face"
     ]
     fallback_shorts_scenes = [
-        f"masterpiece, anime aesthetic, emotional character close up, dramatic lighting, high quality anime",
-        f"masterpiece, anime aesthetic, explosive concert stage or night sky with blazing vibrant fireworks, dynamic pose",
-        f"masterpiece, anime aesthetic, smiling under warm glowing stars, peaceful cinematic anime"
+        f"masterpiece 2D anime music video visual, glowing jellyfish swimming through starry night sky above peaceful clouds, no human face",
+        f"masterpiece 2D anime music video visual, radiant aurora borealis over snowy pine mountains with glowing fireflies, no human face",
+        f"masterpiece 2D anime music video visual, calm cat resting on window sill looking at soft morning sunrise, warm cinematic anime, no human face"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],

@@ -39,11 +39,11 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 특정 작품(너의 이름은/지브리 등)을 모방하지 않고, 독창적이고 세련된 오리지널 현대 2D 애니메이션 뮤직비디오 스타일
+        # 사람 대신 감성적인 동물(고양이, 여우, 철새 등), 아름다운 자연경관, 신비로운 우주/밤하늘 중심의 시네마틱 애니메이션 아트 스타일
         anime_prompt = (
-            f"original modern anime aesthetic, high-end 2D anime music video style, {prompt}, "
-            f"clean line art, expressive natural characters, stylish color palette, beautiful cinematic lighting, "
-            f"atmospheric depth, aesthetic background art, 4k master animation, smooth 24fps motion, no watermark"
+            f"masterpiece 2D anime music video visual, {prompt}, "
+            f"rich atmospheric depth, stunning scenery and nature, expressive animals or cosmic fantasy, "
+            f"stylish color palette, beautiful cinematic lighting, clean artistic lines, 4k master animation, smooth motion, no human face close-up, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"

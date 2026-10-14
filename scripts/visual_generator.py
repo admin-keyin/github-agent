@@ -717,7 +717,7 @@ def build_multi_scene_video_concat(
     height: int = 720
 ) -> str:
     """
-    Kie.ai Wan 3.0으로 생성된 여러 비디오 클립들을 받아
+    Kie.ai SeaDance V1 등으로 생성된 여러 비디오 클립들을 받아
     해상도를 정규화하고 부드러운 전환과 함께 하나의 통 배경 비디오로 결합합니다.
     """
     if not video_paths:
@@ -763,8 +763,8 @@ def render_full_cinematic_mv(
     is_video_bg: bool = False
 ):
     """
-    16:9 가로 풀버전 멀티 씬 지브리 애니메이션 영상 렌더링:
-    - 완벽한 지브리 애니메이션 배경 영상 (이퀄라이저 제거로 화면 가림 없음)
+    16:9 가로 풀버전 멀티 씬 감성 애니메이션 영상 렌더링:
+    - 감성 애니메이션 배경 영상 (이퀄라이저 제거로 화면 가림 없음)
     - 시네마틱 감성 색감 보정
     - 동적 가사 타이포그래피 애니메이션 오버레이
     - 상단 미니 타이틀 카드
@@ -795,9 +795,9 @@ def render_full_cinematic_mv(
         "-shortest", output_video_path
     ]
 
-    print(f"[Render Engine] 16:9 지브리 애니메이션 뮤직비디오 렌더링 시작 ({duration:.1f}초, 이퀄라이저 제거됨)...")
+    print(f"[Render Engine] 16:9 감성 애니메이션 뮤직비디오 렌더링 시작 ({duration:.1f}초, 이퀄라이저 제거됨)...")
     subprocess.run(cmd, check=True)
-    print(f"[Render Success] 풀버전 지브리 MV 완료: {output_video_path}")
+    print(f"[Render Success] 풀버전 감성 MV 완료: {output_video_path}")
 
 
 # ----------------------------------------------------------------------
@@ -813,8 +813,8 @@ def render_kinetic_shorts_mv(
     is_video_bg: bool = False
 ):
     """
-    9:16 세로형 쇼츠 지브리 애니메이션 영상 렌더링:
-    - 지브리 세로형 애니메이션 씬 (이퀄라이저 제거로 화면 집중도 극대화)
+    9:16 세로형 쇼츠 감성 애니메이션 영상 렌더링:
+    - 세로형 애니메이션 씬 (이퀄라이저 제거로 화면 집중도 극대화)
     - 1080x1920 세로 시네마틱 비네팅
     - 중앙 키네틱 팝업 바운스 가사 애니메이션 오버레이
     - 상단 미니 뱃지 오버레이

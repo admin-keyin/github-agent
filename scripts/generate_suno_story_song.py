@@ -202,11 +202,11 @@ def main():
     duration_sec = len(audio) / 1000.0
     print(f"[Audio Info] 음원 준비 완료: 길이 {duration_sec:.1f}초 ({int(duration_sec // 60)}분 {int(duration_sec % 60)}초)")
 
-    # 3. 가사 흐름 맞춤형 지브리 애니메이션 비디오 씬 생성 (Kie.ai Wan 3.0, 480p)
+    # 3. 가사 흐름 맞춤형 애니메이션 비디오 씬 생성 (Kie.ai SeaDance V1 Pro, 480p 10초)
     cat_type = extra_meta.get("category", "indie_band")
     scene_prompts = extra_meta.get("scene_prompts", [])
     if not scene_prompts:
-        scene_prompts = [extra_meta.get("image_prompt", "Studio Ghibli style, peaceful aesthetic")]
+        scene_prompts = [extra_meta.get("image_prompt", "peaceful anime scenery, atmospheric aesthetic")]
     shorts_scene_prompts = extra_meta.get("shorts_scene_prompts", scene_prompts[:3])
 
     kie_video_client = KieVideoGenerator()
@@ -250,7 +250,7 @@ def main():
     bg_full_input = ""
 
     if video_clips_full and len(video_clips_full) > 0:
-        print(f"[Video Pipeline] {len(video_clips_full)}개의 Wan 3.0 지브리 비디오 클립을 연결합니다.")
+        print(f"[Video Pipeline] {len(video_clips_full)}개의 SeaDance V1 애니메이션 비디오 클립을 연결합니다.")
         bg_full_video_path = "temp/bg_full_video.mp4"
         bg_full_input = build_multi_scene_video_concat(
             video_paths=video_clips_full,
@@ -338,8 +338,8 @@ def main():
     create_minimal_title_card(title, f"Inkey Studio • {genre_display}", title_png, 1280, 720)
     create_shorts_top_badge(title, shorts_badge_png, 1080, 1920)
 
-    # 7. 풀버전 16:9 지브리 애니메이션 뮤직 비디오 렌더링
-    print("\n[Step 7] 16:9 풀버전 지브리 애니메이션 리릭 MV 합성 렌더링 (이퀄라이저 제거)...")
+    # 7. 풀버전 16:9 감성 애니메이션 뮤직 비디오 렌더링
+    print("\n[Step 7] 16:9 풀버전 감성 애니메이션 리릭 MV 합성 렌더링 (이퀄라이저 제거)...")
     render_full_cinematic_mv(
         bg_input=bg_full_input,
         title_png_path=title_png,
