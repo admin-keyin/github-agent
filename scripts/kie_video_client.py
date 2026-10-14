@@ -39,13 +39,15 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 최신 트렌드 애니메이션 (체인소맨 MAPPA 스타일) 2D 셀 애니메이션 (스타일리시하고 매혹적인 여캐 비주얼)
+        # 최신 대세 애니 여주인공 비주얼 (키타가와 마린, 시키모리, 미즈하라 치즈루, 렘, 시에스타 스타일)
         anime_prompt = (
-            f"modern dark urban anime style, Chainsaw Man aesthetic, MAPPA studio anime style, {prompt}, "
-            f"stunning charismatic anime girl, sharp expressive captivating eyes, stylish messy modern hairstyle, "
-            f"cinematic dramatic lighting, dark moody urban atmosphere, high contrast shadows, filmic composition, "
-            f"vibrant hand-drawn 2D cel animation, crisp sharp outlines, clean cel shading, high quality anime visual, "
-            f"not photorealistic, not realistic photography, not 3D CGI, no live-action, no real human photo, no watermark"
+            f"modern masterpiece 2D Japanese anime style, top-tier modern romance and fantasy heroine visual, "
+            f"inspired by Marin Kitagawa, Shikimori, Chizuru Mizuhara, Rem, and Siesta aesthetic, {prompt}, "
+            f"gorgeous charismatic anime heroine, sparkling expressive gradient eyes, intricately detailed eyelashes, "
+            f"silky flowing layered hair with delicate highlights, charming fashionable outfit, soft translucent skin tones, "
+            f"clean vibrant cel shading, crisp high-end 2D anime outlines, CloverWorks and Doga Kobo studio production quality, "
+            f"cinematic ambient lighting, shallow depth of field, not photorealistic, not realistic photography, not 3D CGI, "
+            f"no live-action, no real human photo, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
