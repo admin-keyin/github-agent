@@ -498,3 +498,117 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
     return title, style_tags, lyrics, extra_meta
 
 
+def generate_scene_prompts_for_duration(
+    lyrics: str,
+    duration_sec: float,
+    clip_duration: float = 10.0,
+    base_prompts: list = None
+) -> list:
+    """
+    곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
+    가사 흐름과 감정선에 맞춘 2D 애니메이션 프롬프트 N개를 생성합니다. (사람 얼굴 배제, 동물/자연/우주 중심)
+    """
+    import math
+    num_scenes = max(1, math.ceil(duration_sec / clip_duration))
+    print(f"\n[Scene Engine] 음원 길이({duration_sec:.1f}초)에 맞춰 {clip_duration:.0f}초 단위 씬 {num_scenes}개 프롬프트 기획 시작...")
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if gemini_key:
+        models = ["gemini-2.0-flash", "gemini-1.5-flash"]
+        for m in models:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
+                prompt_instruction = f"""
+당신은 최고급 2D 시네마틱 애니메이션 뮤직비디오 비주얼 디렉터입니다.
+이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초 단위 비디오 씬을 총 {num_scenes}개 생성해야 합니다.
+노래의 기승전결(도입부 -> 1절 -> 후렴 -> 2절/브릿지 -> 클라이맥스 후렴 -> 아웃트로)과 가사 내용에 맞춰,
+각 10초 구간(총 {num_scenes}개 씬)의 애니메이션 프롬프트를 작성해주세요.
+
+[가사]:
+{lyrics[:1800]}
+
+[★ 절대 준수 연출 규칙]:
+1. 사람 얼굴 클로즈업 절대 금지 (no human face close-up, no human face):
+   가사의 감정과 정서에 부합하는 동물(고양이, 사슴, 여우, 고래, 나비, 철새 등), 아름다운 자연 풍경(비, 숲, 바다, 석양, 호수, 들꽃), 신비로운 우주/밤하늘(은하수, 오로라, 별똥별, 네온 도시 풍경)을 가사의 분위기에 맞게 가변적으로 배치하세요.
+2. 씬 흐름이 시간에 따라 자연스럽게 발전하며 기승전결이 있도록 구성하세요:
+   - 0~20s: 잔잔하고 서정적인 도입부 정경 (예: 비 내리는 창가의 고양이, 빗방울 수면)
+   - 중간: 가사의 감정선과 리듬에 맞춘 역동적이거나 따뜻한 풍경 (예: 숲속 사슴, 바람 부는 해안가)
+   - 후렴/클라이맥스: 웅장한 은하수, 오로라, 유성우, 빛나는 바다를 유영하는 우주 고래 등 환상적인 비주얼 폭발
+   - 마지막 씬: 따스한 여운을 주는 일출/노을 피날레
+3. 모든 프롬프트는 영문으로 작성하며, 다음 형식을 준수하세요:
+   "masterpiece 2D anime music video visual, [구체적 동물/자연/우주 묘사], atmospheric depth, beautiful cinematic lighting, no human face"
+
+반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
+[
+  "씬 1 영문 프롬프트 (0~10s)",
+  "씬 2 영문 프롬프트 (10~20s)",
+  ... (정확히 {num_scenes}개의 문자열 리스트)
+]
+"""
+                payload = {
+                    "contents": [{"parts": [{"text": prompt_instruction}]}],
+                    "generationConfig": {"temperature": 0.8}
+                }
+                resp = requests.post(url, json=payload, timeout=25)
+                if resp.status_code == 200:
+                    raw_text = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    if raw_text.startswith("```json"):
+                        raw_text = raw_text[7:]
+                    elif raw_text.startswith("```"):
+                        raw_text = raw_text[3:]
+                    if raw_text.endswith("```"):
+                        raw_text = raw_text[:-3]
+
+                    parsed = json.loads(raw_text.strip())
+                    if isinstance(parsed, list) and len(parsed) >= num_scenes:
+                        print(f"[Scene Engine] Gemini가 10초 단위 맞춤 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
+                        return parsed[:num_scenes]
+                    elif isinstance(parsed, list) and len(parsed) > 0:
+                        print(f"[Scene Engine] Gemini 생성 {len(parsed)}개 수령, 목표치 {num_scenes}개로 확장합니다.")
+                        prompts = list(parsed)
+                        while len(prompts) < num_scenes:
+                            prompts.append(prompts[len(prompts) % len(parsed)])
+                        return prompts[:num_scenes]
+            except Exception as e:
+                print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
+
+    # 폴백: 지능형 시네마틱 팔레트 순차 생성
+    print(f"[Scene Engine] 내장 시네마틱 팔레트로 {num_scenes}개 씬 시퀀스를 빌드합니다.")
+    palette = [
+        "quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, cinematic atmospheric lighting, no human face",
+        "cute little cat sheltering under a glowing bus stop in gentle evening rain, puddles reflecting city lights, heartwarming mood, no human face",
+        "misty morning pine forest with a gentle white deer walking softly through sunbeams filtering through trees, serene atmosphere, no human face",
+        "sunlight breaking through green canopy leaves, gentle breeze swaying lush meadow wildflowers, cinematic depth, no human face",
+        "coastal cliffs overlooking endless sapphire ocean with distant glowing lighthouse and soft foaming waves, golden hour lighting, no human face",
+        "flock of migrating birds soaring across warm amber sunset clouds towards horizon, epic cinematic view, no human face",
+        "evening city skyline transition to deep purple twilight with neon glow reflections on rain-soaked rooftops, quiet black cat silhouette, no human face",
+        "glowing jellyfish gracefully drifting through starry night sky clouds, surreal whimsical fantasy art, no human face",
+        "breathtaking starry galaxy night sky with blooming vibrant aurora borealis and falling shooting stars, cosmic fantasy landscape, no human face",
+        "majestic cosmic whale swimming silently through glittering stardust and glowing nebula clouds in deep cosmos, majestic scale, no human face",
+        "meteor shower trailing across midnight blue sky over snow-capped mountains and tranquil reflective lake, sparkling starlight, no human face",
+        "golden flower field on a high hill overlooking endless sunrise ocean, warm morning glow, floating dandelion seeds, inspiring peaceful ending, no human face"
+    ]
+
+    source_pool = list(base_prompts) if base_prompts else []
+    source_pool.extend(palette)
+
+    cam_variations = [
+        "slow cinematic camera push-in",
+        "wide atmospheric panoramic view",
+        "smooth low angle tracking shot",
+        "gentle wind motion, ethereal lighting",
+        "epic cinematic aerial view",
+        "soft ambient glow, peaceful depth"
+    ]
+
+    result_prompts = []
+    for i in range(num_scenes):
+        base_p = source_pool[i % len(source_pool)]
+        cam_mod = cam_variations[i % len(cam_variations)]
+        full_p = f"masterpiece 2D anime music video visual, {base_p}, {cam_mod}"
+        result_prompts.append(full_p)
+
+    return result_prompts
+
+
+

@@ -10,6 +10,8 @@ Suno AI API (Kie.ai, SunoApi.org, Apiframe, Cookie) 연동 음원 생성
 import os
 import sys
 import json
+import time
+import math
 import random
 import shutil
 import requests
@@ -24,7 +26,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 try:
     from scripts.suno_api_client import SunoMusicGenerator
     from scripts.kie_video_client import KieVideoGenerator
-    from scripts.lyric_engine import generate_lyric_and_style
+    from scripts.lyric_engine import generate_lyric_and_style, generate_scene_prompts_for_duration
     from scripts.visual_generator import (
         generate_artwork,
         generate_multi_scene_artworks,
@@ -41,7 +43,7 @@ try:
 except ImportError:
     from suno_api_client import SunoMusicGenerator
     from kie_video_client import KieVideoGenerator
-    from lyric_engine import generate_lyric_and_style
+    from lyric_engine import generate_lyric_and_style, generate_scene_prompts_for_duration
     from visual_generator import (
         generate_artwork,
         generate_multi_scene_artworks,
@@ -129,6 +131,54 @@ def create_shorts_top_badge(title: str, output_path: str, width=1080, height=192
     img.save(output_path, "PNG")
 
 
+def generate_all_video_scenes(
+    kie_video_client,
+    scene_prompts: list,
+    output_dir: str = "temp/videos_full",
+    max_workers: int = 3
+) -> list:
+    """
+    10초 단위 비디오 씬 N개를 병렬(최대 max_workers 스레드)로 요청/대기하여,
+    원래 씬 순서(0 ~ N-1)대로 정렬된 비디오 파일 경로 리스트를 반환합니다.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    os.makedirs(output_dir, exist_ok=True)
+    num_scenes = len(scene_prompts)
+    results = [None] * num_scenes
+
+    def _worker(idx, prompt_text):
+        v_clip_path = os.path.join(output_dir, f"scene_{idx}.mp4")
+        # 동시 폭주 요청을 방지하기 위해 각 워커 시작 시 약간의 시차 부여
+        time.sleep(idx * 0.8)
+        print(f" - [Scene {idx+1}/{num_scenes}] SeaDance V1 Pro 10초 렌더링 요청: {prompt_text[:65]}...")
+        res_v = kie_video_client.generate_video_clip(
+            prompt=prompt_text,
+            duration=10,
+            resolution="480p",
+            aspect_ratio="16:9",
+            output_path=v_clip_path
+        )
+        return idx, res_v
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_map = {executor.submit(_worker, i, p): i for i, p in enumerate(scene_prompts)}
+        for future in as_completed(future_map):
+            i = future_map[future]
+            try:
+                idx, v_path = future.result()
+                if v_path and os.path.exists(v_path):
+                    results[idx] = v_path
+                    print(f" [Scene {idx+1}/{num_scenes} 성공] 저장 완료: {v_path}")
+                else:
+                    print(f" [Scene {idx+1}/{num_scenes} 실패] 비디오가 생성되지 않음")
+            except Exception as e:
+                print(f" [Scene {i+1}/{num_scenes} 에러 발생] {e}")
+
+    valid_clips = [p for p in results if p and os.path.exists(p)]
+    print(f"\n[Video Summary] 총 {num_scenes}개 중 {len(valid_clips)}개의 10초 비디오 씬 생성 완료!")
+    return valid_clips
+
+
 def main():
     os.makedirs("temp", exist_ok=True)
 
@@ -202,11 +252,19 @@ def main():
     duration_sec = len(audio) / 1000.0
     print(f"[Audio Info] 음원 준비 완료: 길이 {duration_sec:.1f}초 ({int(duration_sec // 60)}분 {int(duration_sec % 60)}초)")
 
-    # 3. 가사 흐름 맞춤형 애니메이션 비디오 씬 생성 (Kie.ai SeaDance V1 Pro, 480p 10초)
+    # 3. 노래 길이에 맞춘 10초 단위 N개 애니메이션 비디오 씬 기획 및 생성 (Kie.ai SeaDance V1 Pro, 480p 10초)
     cat_type = extra_meta.get("category", "indie_band")
-    scene_prompts = extra_meta.get("scene_prompts", [])
-    if not scene_prompts:
-        scene_prompts = [extra_meta.get("image_prompt", "peaceful anime scenery, atmospheric aesthetic")]
+    clip_duration = 10.0
+    num_scenes = max(1, math.ceil(duration_sec / clip_duration))
+    print(f"\n[Video Strategy] 총 음원 길이 {duration_sec:.1f}초에 맞춰 10초 단위 씬 {num_scenes}개를 생성합니다 (총 {num_scenes * 10}초 분량).")
+
+    # 전체 음원 시간과 가사에 맞춰 정확히 num_scenes개의 씬 프롬프트 생성 (동물/자연/우주 중심, 인물 얼굴 배제)
+    scene_prompts = generate_scene_prompts_for_duration(
+        lyrics=display_lyrics,
+        duration_sec=duration_sec,
+        clip_duration=clip_duration,
+        base_prompts=extra_meta.get("scene_prompts", [])
+    )
     shorts_scene_prompts = extra_meta.get("shorts_scene_prompts", scene_prompts[:3])
 
     kie_video_client = KieVideoGenerator()
@@ -227,23 +285,16 @@ def main():
 
     shorts_durations = calculate_scene_durations(shorts_duration, len(shorts_scene_prompts), is_shorts=True, shorts_duration=shorts_duration)
 
-    # Kie.ai API 키가 있는 경우 ByteDance SeaDance V1 Pro (초당 2.8 크레딧 가성비) 10초 씬 생성
+    # Kie.ai API 키가 있는 경우 ByteDance SeaDance V1 Pro (초당 2.8 크레딧 가성비) 10초 씬 N개 병렬 생성
     if kie_video_client.has_api_key():
-        print(f"\n[Step 3] Kie.ai ByteDance SeaDance V1 Pro 엔진으로 10초 애니메이션 씬 {len(scene_prompts)}개 생성 중 (480P 가성비 모드)...")
+        print(f"\n[Step 3] Kie.ai ByteDance SeaDance V1 Pro 엔진으로 10초 애니메이션 씬 {num_scenes}개 병렬 렌더링 시작 (480P 가성비 모드)...")
         os.makedirs("temp/videos_full", exist_ok=True)
-
-        for idx, p_text in enumerate(scene_prompts):
-            v_clip_path = f"temp/videos_full/scene_{idx}.mp4"
-            print(f" - [Scene {idx+1}/{len(scene_prompts)}] SeaDance V1 Pro 10초 렌더링 요청: {p_text[:65]}...")
-            res_v = kie_video_client.generate_video_clip(
-                prompt=p_text,
-                duration=10,
-                resolution="480p",
-                aspect_ratio="16:9",
-                output_path=v_clip_path
-            )
-            if res_v:
-                video_clips_full.append(res_v)
+        video_clips_full = generate_all_video_scenes(
+            kie_video_client=kie_video_client,
+            scene_prompts=scene_prompts,
+            output_dir="temp/videos_full",
+            max_workers=3
+        )
 
     # 비디오가 정상 생성된 경우 하나의 결합 배경 비디오로 빌드
     use_video_bg_full = False
