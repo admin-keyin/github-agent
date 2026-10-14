@@ -329,17 +329,18 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하는 사이버펑크 글래머러스 여캐(최애의 아이 스타일) 2D 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (최애의 아이 Oshi no Ko 스타일 스타 아이즈, 매혹적이고 약간 글래머러스한 사이버펑크 애니메이션 여주인공 고정, 네온 시티 & 서사 탐험, 가사와 1:1 직결):
-1. 일본 최정상급 2D 애니메이션 화풍 (Oshi no Ko aesthetic, Doga Kobo production quality, Makoto Shinkai level cinematic lighting):
-   - 생동감 넘치는 고채도 네온 색감과 정교한 셀 셰이딩(vibrant high-contrast neon palette, clean cel shading, crisp dynamic 2D outlines).
-   - 실사 사진(photorealistic), 3D CGI, 기괴한 얼굴 왜곡 철저 배제(not 3D, not photorealistic, no live-action, no real human photo).
-2. '최애의 아이' 스타일의 눈부신 별빛 눈동자(Star Pupils)를 지닌 매혹적이고 약간 글래머러스한 사이버펑크 애니 여주인공을 모든 씬의 '고정 주인공'으로 전면 등장:
-   - 외형 고정: 동공 속에 박힌 상징적인 별 모양 하이라이트(iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes), 매혹적이고 세련된 표정, 우아하고 글래머러스한 체형 실루엣(gorgeous glamorous figure, stylish cyberpunk techwear outfit with luminous glowing neon accents and holographic details), 바람에 흩날리는 섬세한 헤어.
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 사이버펑크 2D 애니 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (정통 일본 2D 애니메이션 화풍 고정, 눈이 크고 귀엽고 섹시한 글래머러스 여주인공, 몸매가 드러나는 타이트한 사이버 테크웨어, 네온 시티 & 서사 탐험, 가사와 1:1 직결):
+1. 정통 일본 2D 애니메이션 화풍 (Authentic Japanese 2D anime aesthetic, CloverWorks / Kyoto Animation quality, Makoto Shinkai level cinematic lighting):
+   - 실사화나 반실사(semi-realistic)를 철저히 배제하고 순수 일본 2D 애니메이션 감성 유지.
+   - 생동감 넘치는 고채도 네온 색감과 정교한 셀 셰이딩(vibrant high-contrast anime palette, clean 2D cel shading, crisp dynamic 2D outlines).
+   - 실사 사진(photorealistic), 3D CGI, 서구권 코믹스, 기괴한 얼굴 왜곡 철저 배제(not 3D, not photorealistic, not semi-realistic, no live-action, no real human photo).
+2. '눈이 크고 글래머러스하며 몸매가 드러나는 옷을 입은 귀엽고 섹시한 예쁜 애니 여캐'를 모든 씬의 '고정 주인공'으로 전면 등장:
+   - 외형 고정: 크고 맑은 매혹적인 애니메이션 눈망울(large expressive luminous anime eyes, delicate eyelashes), 눈부시게 예쁘고 귀여운 미모(cute and sexy gorgeous face, charming smile), 우아하고 글래머러스한 볼륨감 넘치는 몸매(voluptuous hourglass figure, attractive curves), 몸매 실루엣이 확연히 드러나는 타이트한 미래형 사이버 테크웨어(stylish form-fitting body-hugging cyberpunk techwear with luminous neon accents), 찰랑이는 긴 생머리(silky long flowing hair).
    - 캐릭터 외형과 분위기는 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 감정선에 맞춰 사이버 시티 속을 걸어가거나, 노래하거나, 난간에 기대어 응시하거나, 질주합니다.
 3. 가사 텍스트와 사이버펑크 여캐 서사의 1:1 직결 연출:
    - 방금 작사한 [lyrics]의 실제 단어, 소재, 감정선, 공간적 배경과 여주인공의 감정/행동을 1:1로 매핑하세요:
-     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 반짝이는 별 눈빛으로 카메라를 응시하는 여캐
+     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 큰 눈망울로 카메라를 응시하는 여캐
      • [밤/별/우주/새벽]: 마천루 옥상 난간에 기대어 거대한 홀로그램 별들과 은하수가 수놓인 네온 스카이라인을 바라보며 바람에 머리카락을 흩날리는 여캐
      • [질주/탈출/바람/길]: 네온 라인이 빛나는 사이버 바이크에 올라타거나 고속 모노레일 창가에 서서 질주하는 바람을 맞으며 결의에 찬 눈빛을 빛내는 여캐
      • [무대/열정/불꽃/소리쳐]: 홀로그램 조명과 사이버 레이저가 쏟아지는 미래형 라이브 무대 위에서 마이크를 쥐고 열정적으로 포효하듯 노래하는 여캐
@@ -349,9 +350,9 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - Scene 1 (도입부): 푸른 네온 골목이나 고층 룸에서 여주인공이 시크하게 등장하며 시작하는 오프닝
    - Scene 2 (1절/프리코러스): 가사의 소재와 감정을 마주하며 네온 시티를 이동하거나 몰입하는 여주인공의 씬
    - Scene 3 (후렴): 후렴 훅의 벅찬 감정과 함께 가장 화려한 네온 클라이맥스(마천루 옥상 레이저, 화려한 라이브 무대 등) 속 매혹적인 여주인공 씬
-   - Scene 4 (2절/브릿지): 깊은 감정선과 아련한 별빛 눈동자의 감성 클로즈업/미디엄 씬
+   - Scene 4 (2절/브릿지): 깊은 감정선과 아련하고 예쁜 큰 눈망울의 감성 클로즈업/미디엄 씬
    - Scene 5 (아웃트로): 사이버 시티 너머로 떠오르는 여명이나 찬란한 네온 야경을 바라보며 깊은 여운을 남기는 피날레 씬
-(형식: "masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, [가사 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action")
+(형식: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating curves, glowing luminous neon accents, silky long flowing hair, [가사 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -528,16 +529,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, standing on high skyscraper rooftop terrace looking out at vast futuristic neon metropolis under starry galaxy night sky, flowing detailed hair caught in wind, vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, holding a transparent holographic umbrella on rainy neon Tokyo street, glowing pink and cyan puddle reflections, stylish futuristic cyberpunk techwear, vibrant cyberpunk cityscape background, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, singing passionately with microphone on glowing neon cyber live concert stage, laser beams and holographic digital stars bursting around her, glamorous figure and charismatic aura, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, riding a sleek glowing cyber-bike along an elevated highway, city lights streaking past in neon motion blur, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, leaning against panoramic glass window of penthouse as pink pastel sunrise illuminates the cyberpunk city skyline, gentle hopeful smile, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action"
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear outfit accentuating curves, standing on high skyscraper rooftop terrace looking out at vast futuristic neon metropolis under starry galaxy night sky, flowing detailed hair caught in wind, vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, holding a transparent holographic umbrella on rainy neon Tokyo street, glowing pink and cyan puddle reflections, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating silhouette, vibrant cyberpunk cityscape background, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, singing passionately with microphone on glowing neon cyber live concert stage, laser beams and holographic digital stars bursting around her, wearing alluring form-fitting cyberpunk outfit, charismatic aura, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, riding a sleek glowing cyber-bike along an elevated highway, form-fitting techwear hugging her body curves, city lights streaking past in neon motion blur, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo",
+        f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, leaning against panoramic glass window of penthouse as pink pastel sunrise illuminates the cyberpunk city skyline, gentle charming smile, form-fitting cyber techwear, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
     ]
     fallback_shorts_scenes = [
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic techwear with luminous neon details, singing into microphone on high-tech stage, dynamic angle, dazzling digital laser sparkles, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, no live-action",
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, rooftop night view with neon city skyline, gentle breeze blowing hair, warm neon reflections, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, no live-action",
-        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, gazing through rain-streaked neon window, emotional expression, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, no live-action"
+        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy anime girl protagonist, big expressive luminous anime eyes, stunningly pretty face, glamorous figure, wearing stylish form-fitting cyberpunk techwear accentuating curves with luminous neon details, singing into microphone on high-tech stage, dynamic angle, dazzling digital laser sparkles, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action",
+        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy anime girl protagonist, big expressive luminous anime eyes, stunningly pretty face, charming smile, glamorous curvy figure in form-fitting techwear, rooftop night view with neon city skyline, gentle breeze blowing hair, warm neon reflections, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action",
+        f"masterpiece Japanese 2D anime visual, gorgeous cute and sexy anime girl protagonist, big expressive luminous anime eyes, captivating emotional gaze, pretty face, form-fitting body-hugging cyber outfit, gazing through rain-streaked neon window, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, not semi-realistic, no live-action"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],
@@ -563,7 +564,7 @@ def generate_scene_prompts_for_duration(
 ) -> list:
     """
     곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
-    최애의 아이 스타일 별빛 눈동자(Star Pupils)를 지닌 글래머러스 사이버펑크 여캐 애니메이션 프롬프트 N개를 생성합니다.
+    눈이 크고 귀엽고 섹시한 글래머러스 여캐(몸매가 드러나는 사이버 테크웨어) 일본 2D 애니메이션 프롬프트 N개를 생성합니다.
     """
     import math
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
@@ -576,22 +577,22 @@ def generate_scene_prompts_for_duration(
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
                 prompt_instruction = f"""
-당신은 <최애의 아이 (Oshi no Ko)> 작화와 감각적인 사이버펑크 2D 애니메이션의 최고 비주얼 총괄 디렉터입니다.
+당신은 최고 수준의 정통 일본 2D TV 애니메이션 비주얼 총괄 디렉터입니다.
 이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
 
 [가사 전문]:
 {lyrics}
 
-[★ 사이버펑크 감성 + 최애의 아이 스타일 스타 아이즈(별 눈빛) 글래머러스 여캐 고정 주인공 규칙]:
-1. 최정상급 2D 일본 애니메이션 화풍 (Oshi no Ko aesthetic, Doga Kobo production quality, Makoto Shinkai cinematic lighting):
-   - 고채도 네온 컬러 팔레트, 정교한 셀 셰이딩, 역동적인 2D 애니메이션 선화.
-   - 실사 사진(photorealistic), 3D CGI, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, no live-action).
-2. '최애의 아이' 스타일 눈부신 별빛 눈동자(Star Pupils)와 우아하고 약간 글래머러스한 체형의 사이버펑크 여주인공 고정:
-   - 외형 고정: 눈동자 속 상징적인 별 모양 스파클 하이라이트(iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes), 매혹적이고 세련된 표정, 우아하고 글래머러스한 체형 실루엣(gorgeous glamorous figure, stylish cyberpunk techwear outfit with luminous glowing neon accents and holographic details), 바람에 흩날리는 섬세한 헤어.
+[★ 정통 일본 2D 애니메이션 화풍 + 큰 눈의 귀엽고 섹시한 글래머러스 여캐 고정 주인공 규칙]:
+1. 최정상급 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, CloverWorks / Kyoto Animation quality, Makoto Shinkai cinematic lighting):
+   - 실사화나 반실사(semi-realistic)를 배제하고 확실한 2D 애니메이션 작화(clean 2D cel shading, vibrant anime palette, crisp anime linework) 유지.
+   - 실사 사진(photorealistic), 3D CGI, 서양 코믹스, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, not semi-realistic, no live-action, no real human photo).
+2. '눈이 크고 글래머러스하며 몸매가 드러나는 옷을 입은 귀엽고 섹시한 예쁜 애니 여캐' 고정:
+   - 외형 고정: 눈이 크고 맑은 매혹적인 애니메이션 눈망울(large expressive luminous anime eyes, delicate eyelashes), 눈부시게 예쁘고 귀여운 미모(cute and sexy gorgeous pretty face, charming sweet smile), 우아하고 볼륨감 넘치는 글래머러스 체형(voluptuous hourglass figure, attractive curves), 몸매 굴곡이 그대로 드러나는 타이트한 미래형 사이버 테크웨어(stylish form-fitting body-hugging cyberpunk techwear with luminous neon accents), 찰랑이는 긴 생머리(silky long flowing hair).
    - 캐릭터 외형과 매력은 모든 씬에서 일관되게 유지됩니다.
 3. 가사 텍스트와 사이버펑크 여캐 서사의 1:1 직결 연출:
    - 가사의 실제 단어, 감정, 분위기에 맞춰 여주인공의 표정, 행동, 공간을 정밀하게 연출:
-     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 반짝이는 별 눈빛으로 카메라를 응시하는 여캐
+     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 큰 눈망울로 카메라를 응시하는 여캐
      • [밤/별/우주/새벽]: 마천루 옥상 난간에 기대어 거대한 홀로그램 별들과 은하수가 수놓인 네온 스카이라인을 바라보며 바람에 머리카락을 흩날리는 여캐
      • [질주/탈출/바람/길]: 네온 라인이 빛나는 사이버 바이크에 올라타거나 고속 모노레일 창가에 서서 질주하는 바람을 맞으며 결의에 찬 눈빛을 빛내는 여캐
      • [무대/열정/불꽃/소리쳐]: 홀로그램 조명과 사이버 레이저가 쏟아지는 미래형 라이브 무대 위에서 마이크를 쥐고 열정적으로 포효하듯 노래하는 여캐
@@ -599,7 +600,7 @@ def generate_scene_prompts_for_duration(
      • [기억/시간/시계/어제]: 디지털 홀로그램 기억 조각들이 부유하는 아늑한 사이버룸 창가에서 헤드폰을 끼고 아련한 눈빛으로 회상하는 여캐
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
 5. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, [가사 해당 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action"
+   "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating curves, glowing luminous neon accents, silky long flowing hair, [가사 해당 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -655,11 +656,11 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 가사 단어 기반 사이버펑크 글래머러스 여캐(최애의 아이 스타일) 행동 및 배경 정밀 매핑
+        # 가사 단어 기반 사이버펑크 귀엽고 섹시한 글래머러스 여캐 행동 및 배경 정밀 매핑
         if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
             visual_theme = "standing on high rooftop as a colossal glowing holographic neon dragon glides majestically through the futuristic night sky behind her"
         elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
-            visual_theme = "wielding a glowing magenta cyber energy blade with fierce determined star eyes, wind whipping her stylish techwear outfit on skyscraper ledge"
+            visual_theme = "wielding a glowing magenta cyber energy blade with fierce determined big anime eyes, wind whipping her form-fitting techwear outfit on skyscraper ledge"
         elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억", "차원"]):
             visual_theme = "surrounded by floating golden holographic clockwork cogs and shimmering digital memory fragments in a high-tech observatory, wistful gaze"
         elif any(w in target_line for w in ["우주", "은하", "성운", "행성", "궤도"]):
@@ -669,7 +670,7 @@ def generate_scene_prompts_for_duration(
         elif any(w in target_line for w in ["산", "절벽", "바위", "협곡", "봉우리"]):
             visual_theme = "standing at the edge of an ultra-high cyber tower skydeck, wind blowing her hair as misty clouds swirl below the neon megacity at dawn"
         elif any(w in target_line for w in ["심해", "해저", "산호", "해파리"]):
-            visual_theme = "visiting a massive futuristic underwater bio-dome, watching glowing turquoise jellyfish and coral lights reflect across her radiant star eyes"
+            visual_theme = "visiting a massive futuristic underwater bio-dome, watching glowing turquoise jellyfish and coral lights reflect across her large expressive anime eyes"
         elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변"]):
             visual_theme = "standing on a coastal cyber walkway at purple twilight, gentle ocean breeze blowing her hair as bioluminescent waves roll in"
         elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼"]):
@@ -679,11 +680,11 @@ def generate_scene_prompts_for_duration(
         elif any(w in target_line for w in ["비", "빗", "물", "적시"]):
             visual_theme = "holding a transparent holographic umbrella on a rain-soaked neon street, pink and cyan streetlight puddles shimmering under her feet"
         elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = "sitting on high rooftop railing overlooking endless glowing city lights, looking up at vast starry indigo sky with sparkling star pupils"
+            visual_theme = "sitting on high rooftop railing overlooking endless glowing city lights, looking up at vast starry indigo sky with big luminous anime eyes"
         elif any(w in target_line for w in ["바람", "흔들", "풀", "나무", "숲"]):
-            visual_theme = "walking through an illuminated rooftop greenhouse garden, gentle breeze fluttering her glamorous techwear and vibrant hair"
+            visual_theme = "walking through an illuminated rooftop greenhouse garden, gentle breeze fluttering her glamorous form-fitting techwear and vibrant hair"
         elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
-            visual_theme = "gently cupping glowing holographic cherry blossom petals dancing in neon night air, soft enchanting smile with dazzling star eyes"
+            visual_theme = "gently cupping glowing holographic cherry blossom petals dancing in neon night air, soft enchanting smile with big beautiful anime eyes"
         elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침", "태양"]):
             visual_theme = "basking on penthouse balcony as warm pink morning sunlight illuminates her glamorous silhouette against the futuristic city horizon"
         elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염"]):
@@ -691,17 +692,17 @@ def generate_scene_prompts_for_duration(
         elif base_prompts and len(base_prompts) > i:
             visual_theme = f"charismatically standing in {base_prompts[i]}"
         else:
-            visual_theme = f"reflecting the emotional scene of '{target_line}' in stunning cyberpunk setting, star eyes gleaming"
+            visual_theme = f"reflecting the emotional scene of '{target_line}' in stunning cyberpunk setting, big beautiful anime eyes gleaming"
 
         cam_mod = cam_variations[i % len(cam_variations)]
         full_p = (
-            f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, "
-            f"gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, "
-            f"stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, "
+            f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+            f"gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, "
+            f"glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating curves, glowing luminous neon accents, silky long flowing hair, "
             f"{visual_theme}, "
             f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, "
-            f"{cam_mod}, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, "
-            f"not photorealistic, not 3D CGI, no live-action"
+            f"{cam_mod}, clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, "
+            f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
         )
         result_prompts.append(full_p)
 

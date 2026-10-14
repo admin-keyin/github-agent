@@ -39,15 +39,16 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 사이버펑크 감성 + 최애의 아이 스타일 스타 아이즈(별 눈빛) 글래머러스 애니메이션 여캐 고정 주인공
+        # 정통 일본 2D 애니메이션 화풍 + 큰 눈의 귀엽고 섹시한 글래머러스 여캐 고정 주인공 (몸매가 드러나는 사이버 테크웨어)
         anime_prompt = (
-            f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, "
-            f"gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, "
-            f"stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, "
+            f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+            f"gorgeous cute and sexy anime girl protagonist, stunningly beautiful pretty face, large expressive luminous anime eyes, captivating gaze, "
+            f"glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting body-hugging cyberpunk techwear accentuating attractive silhouette, "
+            f"glowing luminous neon accents, silky long flowing hair, "
             f"{prompt}, "
             f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, "
-            f"clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, "
-            f"not photorealistic, not realistic photography, not 3D CGI, no live-action, no real human photo, no watermark"
+            f"clean 2D cel shading, crisp dynamic anime linework, CloverWorks animation quality, "
+            f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
@@ -67,7 +68,7 @@ class KieVideoGenerator:
                 "prompt": anime_prompt[:2500],
                 "aspect_ratio": aspect_ratio,
                 "resolution": target_res,
-                "negative_prompt": "photorealistic, real life, realistic photography, live action footage, camera selfie, 3D CGI, 3D render, deformed, disfigured, blurry, ugly, watermark"
+                "negative_prompt": "photorealistic, realistic photography, real life photograph, live action footage, camera selfie, 3D CGI, 3D render, semi-realistic, real human skin, western comic, deformed, disfigured, bad anatomy, bad hands, blurry, low quality, ugly, watermark"
             }
             if "bytedance" in model:
                 # SeaDance 규격: duration은 "10s", camera_fixed: false
