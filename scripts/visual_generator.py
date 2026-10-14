@@ -414,19 +414,31 @@ def align_original_lyrics_with_audio(lyrics_text: str, audio_path: str, total_du
         return []
 
     whisper_segments = []
+    # 1. faster-whisper 시도 (설치 속도 4배 빠르고 빌드 에러 없음)
     try:
-        import whisper
-        print("[Lyric Sync Engine] Whisper 모델(base) 로딩 및 보컬 발화 구간 감지 중...")
-        model = whisper.load_model("base")
-        result = model.transcribe(audio_path, language="ko", fp16=False)
-        for seg in result.get("segments", []):
-            st = float(seg.get("start", 0))
-            et = float(seg.get("end", 0))
-            if et - st > 0.8:
-                whisper_segments.append((st, et))
-        print(f"[Lyric Sync Engine] Whisper가 보컬 발화 구간 {len(whisper_segments)}개를 성공적으로 감지했습니다!")
-    except Exception as e:
-        print(f"[Lyric Sync Info] Whisper 음성 인식 라이브러리 미사용/스킵 (지능형 타임라인 엔진 적용): {e}")
+        from faster_whisper import WhisperModel
+        print("[Lyric Sync Engine] faster-whisper 모델(base, CPU) 로딩 및 보컬 발화 구간 감지 중...")
+        model = WhisperModel("base", device="cpu", compute_type="int8")
+        segments, _ = model.transcribe(audio_path, language="ko", beam_size=1)
+        for seg in segments:
+            if seg.end - seg.start > 0.8:
+                whisper_segments.append((float(seg.start), float(seg.end)))
+        print(f"[Lyric Sync Engine] faster-whisper로 보컬 발화 구간 {len(whisper_segments)}개 감지 완료!")
+    except Exception as fw_err:
+        # 2. openai-whisper 폴백 시도
+        try:
+            import whisper
+            print("[Lyric Sync Engine] Whisper 모델(base) 로딩 및 보컬 발화 구간 감지 중...")
+            model = whisper.load_model("base")
+            result = model.transcribe(audio_path, language="ko", fp16=False)
+            for seg in result.get("segments", []):
+                st = float(seg.get("start", 0))
+                et = float(seg.get("end", 0))
+                if et - st > 0.8:
+                    whisper_segments.append((st, et))
+            print(f"[Lyric Sync Engine] Whisper가 보컬 발화 구간 {len(whisper_segments)}개를 성공적으로 감지했습니다!")
+        except Exception as e:
+            print(f"[Lyric Sync Info] Whisper 음성 인식 라이브러리 미사용/스킵 (지능형 타임라인 엔진 적용): {e}")
 
     timeline = []
     # 1. Whisper 구간이 감지된 경우: 감지된 타이밍에 원본 가사를 순차 매핑
