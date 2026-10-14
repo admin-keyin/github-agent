@@ -39,15 +39,15 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 사이버펑크 감성 + 최애의 아이 스타일 스타 아이즈(별 눈빛) 글래머러스 애니메이션 여캐 고정 주인공
+        # 사이버펑크 감성 + 최애의 아이 스타일 스타 아이즈(별 눈빛) 글래머러스 애니메이션 여캐 고정 주인공 (2D/3D 하이엔드 시네마틱)
         anime_prompt = (
-            f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, "
+            f"masterpiece anime cinematic visual, Oshi no Ko inspired star eyes, "
             f"gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, "
             f"stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, "
             f"{prompt}, "
-            f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, "
-            f"clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, "
-            f"not photorealistic, not realistic photography, not 3D CGI, no live-action, no real human photo, no watermark"
+            f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic volumetric neon lighting, "
+            f"ray tracing reflections, cinematic depth of field, ultra-detailed anime rendering, Unreal Engine 5 cinematic anime aesthetic, "
+            f"no live-action, no real human photo, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
@@ -67,7 +67,7 @@ class KieVideoGenerator:
                 "prompt": anime_prompt[:2500],
                 "aspect_ratio": aspect_ratio,
                 "resolution": target_res,
-                "negative_prompt": "photorealistic, real life, realistic photography, live action footage, camera selfie, 3D CGI, 3D render, deformed, disfigured, blurry, ugly, watermark"
+                "negative_prompt": "real life photograph, live action footage, camera selfie, deformed, disfigured, bad anatomy, bad hands, blurry, low quality, ugly, watermark"
             }
             if "bytedance" in model:
                 # SeaDance 규격: duration은 "10s", camera_fixed: false
