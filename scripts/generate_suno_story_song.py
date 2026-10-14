@@ -262,12 +262,13 @@ def main():
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
     print(f"\n[Video Strategy] 총 음원 길이 {duration_sec:.1f}초에 맞춰 10초 단위 씬 {num_scenes}개를 생성합니다 (총 {num_scenes * 10}초 분량).")
 
-    # 전체 음원 시간과 가사에 맞춰 정확히 num_scenes개의 씬 프롬프트 생성 (동물/자연/우주 중심, 인물 얼굴 배제)
+    # 전체 음원 시간과 가사에 맞춰 정확히 num_scenes개의 씬 프롬프트 생성 (이번 곡의 고정 캐릭터 프로필 적용)
     scene_prompts = generate_scene_prompts_for_duration(
         lyrics=display_lyrics,
         duration_sec=duration_sec,
         clip_duration=clip_duration,
-        base_prompts=extra_meta.get("scene_prompts", [])
+        base_prompts=extra_meta.get("scene_prompts", []),
+        character_profile=extra_meta.get("character_profile")
     )
     shorts_scene_prompts = extra_meta.get("shorts_scene_prompts", scene_prompts[:3])
 

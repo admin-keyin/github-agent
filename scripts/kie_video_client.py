@@ -10,6 +10,11 @@ import json
 import requests
 from typing import Optional, Dict, Any, List
 
+try:
+    from scripts.character_profile import generate_random_character_profile, build_character_prompt
+except ImportError:
+    from character_profile import generate_random_character_profile, build_character_prompt
+
 class KieVideoGenerator:
     def __init__(self):
         self.kie_api_key = os.getenv("KIE_API_KEY", "").strip()
@@ -39,16 +44,17 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 정통 일본 2D 모에 애니메이션 화풍 + 은발/라벤더 헤어 큰 눈의 귀엽고 섹시한 글래머러스 여캐 고정 주인공 (오픈 버스트 메이드 드레스)
-        anime_prompt = (
-            f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-            f"gorgeous cute and sexy moe anime girl protagonist, adorable pretty face, large expressive luminous anime eyes with delicate eyelashes, captivating gaze, "
-            f"silky long silver-lavender hair with frilled cute maid headdress, charming sweet smile, "
-            f"extremely glamorous hourglass figure, voluptuous curves, wearing stylish form-fitting cute maid corset dress with alluring bust cutout accentuating cleavage and attractive body silhouette, "
-            f"{prompt}, "
-            f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
-            f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo, no watermark"
-        )
+        # 정통 일본 2D 모에 애니메이션 화풍 + 곡별 동적 캐릭터 프로필
+        if "Japanese 2D anime visual" in prompt or "masterpiece" in prompt:
+            anime_prompt = prompt
+        else:
+            char_prompt = build_character_prompt(generate_random_character_profile())
+            anime_prompt = (
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+                f"{char_prompt}, {prompt}, "
+                f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo, no watermark"
+            )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
         
