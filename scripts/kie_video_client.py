@@ -39,13 +39,13 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 일본 애니메이션 명작풍 2D 셀 애니메이션 스타일 (매력적인 일본 여자 캐릭터 주인공 및 가사 연출)
+        # 최신 트렌드 애니메이션 (체인소맨 MAPPA 스타일) 2D 셀 애니메이션 (스타일리시하고 매혹적인 여캐 비주얼)
         anime_prompt = (
-            f"masterpiece 2D Japanese anime style, Kyoto Animation and Makoto Shinkai aesthetic, {prompt}, "
-            f"vibrant hand-drawn 2D cel animation, beautiful expressive anime girl, delicate emotive facial features, "
-            f"flowing detailed hair, rich atmospheric cinematic lighting, painterly background scenery, bold crisp 2D outlines, "
-            f"clean cel shading, highly detailed anime visual, not photorealistic, not realistic photography, not 3D CGI, "
-            f"no live-action, no real human photo, no watermark"
+            f"modern dark urban anime style, Chainsaw Man aesthetic, MAPPA studio anime style, {prompt}, "
+            f"stunning charismatic anime girl, sharp expressive captivating eyes, stylish messy modern hairstyle, "
+            f"cinematic dramatic lighting, dark moody urban atmosphere, high contrast shadows, filmic composition, "
+            f"vibrant hand-drawn 2D cel animation, crisp sharp outlines, clean cel shading, high quality anime visual, "
+            f"not photorealistic, not realistic photography, not 3D CGI, no live-action, no real human photo, no watermark"
         )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
