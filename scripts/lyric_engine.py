@@ -329,34 +329,29 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Chorus: Final Grand Explosion, High Ad-libs]
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
-[★ 3. 작사된 가사 파트와 1:1로 일치하는 지브리 검은 석탄 요정(스스와타리) 2D 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (스튜디오 지브리 손그림 수채화 화풍, 귀여운 검은 석탄 캐릭터 고정 주인공, 서정적 배경 탐험, 가사와 1:1 직결):
-1. 스튜디오 지브리 특유의 따뜻하고 서정적인 2D 손그림 수채화 애니메이션 화풍 (Hayao Miyazaki & Studio Ghibli classic aesthetic):
-   - 부드러운 수채화 질감의 자연/도시 풍경(lush hand-painted watercolor scenery, soft nostalgic pastel palette), 유기적인 2D 외곽선과 수공예적 셀 채색.
-   - 실사 사진(photorealistic), 3D CGI, 복잡한 인물 얼굴 왜곡을 철저히 배제합니다.
-2. <센과 치히로의 행방불명>의 동글동글 귀여운 검은 석탄 요정(Susuwatari / Soot Sprite)을 모든 씬의 '고정 주인공'으로 전면 등장:
-   - 외형: 몽실몽실하고 둥근 털 뭉치 같은 검은 숯 요정, 호기심 가득한 땡그란 흰 눈동자, 앙증맞은 가는 손발(cute fluffy round black soot sprite with big curious white eyes and tiny stick legs).
-   - 캐릭터 외형은 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 흐름에 맞춰 지브리풍 배경을 아장아장 걷거나 뛰거나 머물며 탐험합니다.
-3. 가사 텍스트와 석탄 요정 모험의 1:1 직결 연출 (다채로운 지브리 세계관 확장):
-   - 방금 작사한 [lyrics]의 실제 단어, 소재, 오브제, 공간적 배경 속을 석탄 요정이 직접 탐험하게 만드세요. 지브리 특유의 서정적 일상부터 장대한 모험/판타지/SF 감성까지 가사의 스케일에 맞춰 무궁무진하게 확장합니다:
-     • [비/우산/물/눈]: 커다란 토토로 잎사귀 우산을 쓰고 빗방울 물웅덩이를 건너뛰거나, 하얀 눈 덮인 나뭇가지 위를 총총 걷는 석탄 요정
-     • [우주/별/은하]: 별빛 흐르는 은하수 강물 위를 종이배 타고 항해하거나, 신비로운 오로라 구름 속에서 별똥별을 만지는 석탄 요정
-     • [시공간/차원/태엽]: 째깍거리는 하울의 거대 태엽 시계탑 속 톱니바퀴 사이를 탐험하거나 빛나는 시공간 게이트를 들여다보는 석탄 요정
-     • [용/비행/하늘]: 백룡(하쿠)의 하얀 비늘 등 뒤에 살포시 얹혀 푸른 하늘과 뭉게구름 속을 날아가는 석탄 요정
-     • [과거/고대유적/성]: 천공의 성 라퓨타 같은 덩굴 우거진 고대 돌사원 유적의 이끼 낀 거신병 어깨 위를 아장아장 걷는 석탄 요정
-     • [용사/검/기사/전쟁]: 이끼 덮인 전설의 고대 검 자루 위에 다소곳이 앉아 평화로운 들판의 석양을 바라보는 석탄 요정
-     • [산/절벽/협곡]: 바람 부는 웅장한 침엽수 고산지대 절벽 끝에서 휘날리는 안개구름 바다를 내려다보는 석탄 요정
-     • [바다/심해/해저]: 맑고 푸른 바닷속에서 발광 해파리와 산호초 사이를 방울방울 공기방울 타고 헤엄치는 석탄 요정
-     • [바람/꽃/초원]: 샛노란 민들레 홀씨를 쥐고 산들바람에 실려 꽃밭 위를 둥실둥실 날아다니는 석탄 요정
-     • [불/열정/벽난로]: 캘시퍼 같은 따스한 벽난로 화톳불 곁에서 붉은 장작 불꽃과 튀는 불씨를 호기심 가득 지켜보는 석탄 요정
-     • [기차/철길/정거장]: 바다 위를 달리는 해저열차 철길 침목을 따라 석양빛을 받으며 총총 걸어가는 석탄 요정
+[★ 3. 작사된 가사 파트와 1:1로 일치하는 사이버펑크 글래머러스 여캐(최애의 아이 스타일) 2D 씬 프롬프트 (scene_prompts)]
+※ 절대 원칙 (최애의 아이 Oshi no Ko 스타일 스타 아이즈, 매혹적이고 약간 글래머러스한 사이버펑크 애니메이션 여주인공 고정, 네온 시티 & 서사 탐험, 가사와 1:1 직결):
+1. 일본 최정상급 2D 애니메이션 화풍 (Oshi no Ko aesthetic, Doga Kobo production quality, Makoto Shinkai level cinematic lighting):
+   - 생동감 넘치는 고채도 네온 색감과 정교한 셀 셰이딩(vibrant high-contrast neon palette, clean cel shading, crisp dynamic 2D outlines).
+   - 실사 사진(photorealistic), 3D CGI, 기괴한 얼굴 왜곡 철저 배제(not 3D, not photorealistic, no live-action, no real human photo).
+2. '최애의 아이' 스타일의 눈부신 별빛 눈동자(Star Pupils)를 지닌 매혹적이고 약간 글래머러스한 사이버펑크 애니 여주인공을 모든 씬의 '고정 주인공'으로 전면 등장:
+   - 외형 고정: 동공 속에 박힌 상징적인 별 모양 하이라이트(iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes), 매혹적이고 세련된 표정, 우아하고 글래머러스한 체형 실루엣(gorgeous glamorous figure, stylish cyberpunk techwear outfit with luminous glowing neon accents and holographic details), 바람에 흩날리는 섬세한 헤어.
+   - 캐릭터 외형과 분위기는 씬 전체에서 흔들림 없이 고정되며, 가사의 무드와 감정선에 맞춰 사이버 시티 속을 걸어가거나, 노래하거나, 난간에 기대어 응시하거나, 질주합니다.
+3. 가사 텍스트와 사이버펑크 여캐 서사의 1:1 직결 연출:
+   - 방금 작사한 [lyrics]의 실제 단어, 소재, 감정선, 공간적 배경과 여주인공의 감정/행동을 1:1로 매핑하세요:
+     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 반짝이는 별 눈빛으로 카메라를 응시하는 여캐
+     • [밤/별/우주/새벽]: 마천루 옥상 난간에 기대어 거대한 홀로그램 별들과 은하수가 수놓인 네온 스카이라인을 바라보며 바람에 머리카락을 흩날리는 여캐
+     • [질주/탈출/바람/길]: 네온 라인이 빛나는 사이버 바이크에 올라타거나 고속 모노레일 창가에 서서 질주하는 바람을 맞으며 결의에 찬 눈빛을 빛내는 여캐
+     • [무대/열정/불꽃/소리쳐]: 홀로그램 조명과 사이버 레이저가 쏟아지는 미래형 라이브 무대 위에서 마이크를 쥐고 열정적으로 포효하듯 노래하는 여캐
+     • [꽃/봄/온기/사랑]: 네온 온실이나 사이버 정원에서 빛나는 바이오루미네센스 꽃잎을 손끝에 얹고 부드럽고 매혹적인 미소를 짓는 여캐
+     • [기억/시간/시계/어제]: 디지털 홀로그램 기억 조각들이 부유하는 아늑한 사이버룸 창가에서 헤드폰을 끼고 아련한 눈빛으로 회상하는 여캐
 4. 씬의 전개:
-   - Scene 1 (도입부): 아늑한 지브리풍 공간 속에서 석탄 요정이 뽈뽈거리며 걸어 나오는 오프닝 씬
-   - Scene 2 (1절/프리코러스): 가사의 소재와 서사를 만나 신기해하며 탐험하는 석탄 요정의 씬
-   - Scene 3 (후렴): 후렴 훅의 벅찬 감정과 함께 가장 장관인 지브리 배경(별빛 언덕, 빛나는 바다 등) 속 석탄 요정의 클라이맥스 씬
-   - Scene 4 (2절/브릿지): 깊은 감정선과 따뜻한 휴식을 취하는 석탄 요정 씬
-   - Scene 5 (아웃트로): 노을이나 새벽빛을 바라보며 깊은 여운을 남기는 석탄 요정의 피날레 씬
-(형식: "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, [가사 파트에 기반한 석탄 요정의 행동 및 지브리 수채화 배경 연출], lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face")
+   - Scene 1 (도입부): 푸른 네온 골목이나 고층 룸에서 여주인공이 시크하게 등장하며 시작하는 오프닝
+   - Scene 2 (1절/프리코러스): 가사의 소재와 감정을 마주하며 네온 시티를 이동하거나 몰입하는 여주인공의 씬
+   - Scene 3 (후렴): 후렴 훅의 벅찬 감정과 함께 가장 화려한 네온 클라이맥스(마천루 옥상 레이저, 화려한 라이브 무대 등) 속 매혹적인 여주인공 씬
+   - Scene 4 (2절/브릿지): 깊은 감정선과 아련한 별빛 눈동자의 감성 클로즈업/미디엄 씬
+   - Scene 5 (아웃트로): 사이버 시티 너머로 떠오르는 여명이나 찬란한 네온 야경을 바라보며 깊은 여운을 남기는 피날레 씬
+(형식: "masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, [가사 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action")
 
 [★ 5. 유튜브 시청자를 울리는 감성 곡 설명 에세이 (story_description) 작성 규칙]
 단순한 템플릿이 아닌, 이 곡을 듣는 사람의 마음에 깊은 울림을 주는 3~5단락의 아름다운 한국어 곡 소개 에세이/시놉시스를 작성하세요:
@@ -533,16 +528,16 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 안녕, 나의 어제여."""
 
     fallback_scenes = [
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, exploring a quiet coastal train platform at twilight, glowing pastel ocean horizon, calm water reflections, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, holding a large green leaf umbrella at cozy bus stop in gentle evening rain, puddle ripples reflecting streetlights, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, sitting on a mossy hill looking up at vast starry galaxy night sky with blooming aurora and shooting stars, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, waddling through sun-dappled ancient forest path beside tranquil lake at dusk, glowing fireflies, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, holding onto a fluffy dandelion seed floating over sunlit golden wildflower field overlooking sunrise ocean, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, standing on high skyscraper rooftop terrace looking out at vast futuristic neon metropolis under starry galaxy night sky, flowing detailed hair caught in wind, vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, holding a transparent holographic umbrella on rainy neon Tokyo street, glowing pink and cyan puddle reflections, stylish futuristic cyberpunk techwear, vibrant cyberpunk cityscape background, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, singing passionately with microphone on glowing neon cyber live concert stage, laser beams and holographic digital stars bursting around her, glamorous figure and charismatic aura, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, riding a sleek glowing cyber-bike along an elevated highway, city lights streaking past in neon motion blur, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action",
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, leaning against panoramic glass window of penthouse as pink pastel sunrise illuminates the cyberpunk city skyline, gentle hopeful smile, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action"
     ]
     fallback_shorts_scenes = [
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, floating among glowing pastel starry night clouds, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, hopping across snowy wooden fence with dancing aurora in background, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face",
-        f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious white eyes, sitting on warm sunlit wooden window sill looking at morning sunrise over countryside village, lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic techwear with luminous neon details, singing into microphone on high-tech stage, dynamic angle, dazzling digital laser sparkles, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, no live-action",
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, rooftop night view with neon city skyline, gentle breeze blowing hair, warm neon reflections, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, no live-action",
+        f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, gazing through rain-streaked neon window, emotional expression, cinematic lighting, clean 2D cel shading, not photorealistic, not 3D CGI, no live-action"
     ]
     extra_meta = {
         "image_prompt": fallback_scenes[0],
@@ -568,7 +563,7 @@ def generate_scene_prompts_for_duration(
 ) -> list:
     """
     곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
-    센과 치히로의 검은 석탄 요정(스스와타리)이 지브리 수채화 배경을 탐험하는 2D 애니메이션 프롬프트 N개를 생성합니다.
+    최애의 아이 스타일 별빛 눈동자(Star Pupils)를 지닌 글래머러스 사이버펑크 여캐 애니메이션 프롬프트 N개를 생성합니다.
     """
     import math
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
@@ -581,37 +576,30 @@ def generate_scene_prompts_for_duration(
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
                 prompt_instruction = f"""
-당신은 스튜디오 지브리(미야자키 하야오) 클래식 애니메이션의 최고 수준 비주얼 총괄 디렉터입니다.
+당신은 <최애의 아이 (Oshi no Ko)> 작화와 감각적인 사이버펑크 2D 애니메이션의 최고 비주얼 총괄 디렉터입니다.
 이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
 
 [가사 전문]:
 {lyrics}
 
-[★ 지브리 검은 석탄 요정(스스와타리) 고정 주인공 및 지브리 수채화 배경 탐험 규칙]:
-1. 스튜디오 지브리 특유의 서정적이고 따뜻한 2D 손그림 수채화 화풍 (Studio Ghibli aesthetic, Hayao Miyazaki classic hand-drawn 2D animation):
-   - 부드러운 수채화 질감의 자연/마을/하늘 풍경(lush hand-painted watercolor scenery, soft nostalgic warm palette), 유기적인 2D 외곽선과 수공예적 셀 채색.
-   - 실사 사진(photorealistic), 3D CGI, 사람 얼굴 클로즈업 절대 금지(no photorealism, not 3D, no human face).
-2. <센과 치히로의 행방불명>에 나오는 동글동글 귀여운 검은 석탄 요정(Susuwatari / Soot Sprite)을 모든 씬의 '고정 주인공'으로 일관되게 등장:
-   - 외형 고정: 몽실몽실하고 둥근 검은 털 뭉치 요정, 호기심 가득한 땡그란 흰 눈동자, 앙증맞은 가는 손발(cute fluffy round black soot sprite Susuwatari with big curious round white eyes and tiny stick legs).
-   - 캐릭터의 외형은 씬 전체에서 완전히 고정되며, 가사의 무드와 흐름에 맞춰 지브리풍 배경 속을 아장아장 걷거나 뛰거나 머물며 탐험합니다.
-3. 가사 텍스트와 석탄 요정 모험의 1:1 직결 연출 (다채롭고 웅장한 지브리 세계관 확장):
-   - 가사의 실제 단어, 소재, 오브제, 공간적 배경과 석탄 요정의 행동을 1:1로 직접 연결하세요. 서정적인 일상부터 웅장한 모험, 판타지, 우주, 시공간까지 폭넓게 확장합니다:
-     • [비/우산/물]: 커다란 토토로 잎사귀 우산을 쓰고 빗방울 물웅덩이를 건너뛰는 석탄 요정
-     • [눈/겨울/얼음]: 새하얀 눈사람 머리 위에 올라앉아 펑펑 내리는 눈송이를 호기심 가득 바라보는 석탄 요정
-     • [우주/별/은하]: 별빛 흐르는 푸른 은하수 위를 종이배 타고 항해하며 별똥별을 만지는 석탄 요정
-     • [시공간/차원/태엽]: 거대한 고대 태엽 시계탑 톱니바퀴 사이를 탐험하거나 빛나는 시공간 문을 들여다보는 석탄 요정
-     • [용/비행/하늘]: 백룡(하쿠)의 비늘 등 뒤에 살포시 얹혀 뭉게구름 하늘을 가르며 날아가는 석탄 요정
-     • [과거/고대유적/성]: 천공의 성 라퓨타 같은 덩굴 우거진 고대 돌사원 유적의 이끼 낀 거신병 어깨 위를 걷는 석탄 요정
-     • [용사/검/기사/전쟁]: 이끼 덮인 전설의 거대한 검 자루 위에 다소곳이 앉아 평화로운 들판의 석양을 바라보는 석탄 요정
-     • [산/절벽/협곡]: 웅장한 안개 낀 침엽수 고산지대 절벽 끝에서 구름바다를 내려다보는 석탄 요정
-     • [바다/심해/해저]: 맑고 푸른 심해에서 빛나는 야광 해파리와 산호초 사이를 공기방울 타고 헤엄치는 석탄 요정
-     • [바람/꽃/초원]: 샛노란 민들레 홀씨를 쥐고 산들바람에 실려 꽃밭 위를 둥실둥실 날아다니는 석탄 요정
-     • [불/열정/벽난로]: 캘시퍼 같은 따스한 벽난로 화톳불 곁에서 붉은 장작 불꽃과 튀는 불씨를 지켜보는 석탄 요정
-     • [기차/철길/정거장]: 바다 위를 달리는 해저열차 철길 침목을 따라 석양빛을 받으며 총총 걸어가는 석탄 요정
-     • [마을/골목/시장]: 아늑한 등불이 켜진 시골 시장 골목을 아장아장 산책하는 석탄 요정
+[★ 사이버펑크 감성 + 최애의 아이 스타일 스타 아이즈(별 눈빛) 글래머러스 여캐 고정 주인공 규칙]:
+1. 최정상급 2D 일본 애니메이션 화풍 (Oshi no Ko aesthetic, Doga Kobo production quality, Makoto Shinkai cinematic lighting):
+   - 고채도 네온 컬러 팔레트, 정교한 셀 셰이딩, 역동적인 2D 애니메이션 선화.
+   - 실사 사진(photorealistic), 3D CGI, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, no live-action).
+2. '최애의 아이' 스타일 눈부신 별빛 눈동자(Star Pupils)와 우아하고 약간 글래머러스한 체형의 사이버펑크 여주인공 고정:
+   - 외형 고정: 눈동자 속 상징적인 별 모양 스파클 하이라이트(iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes), 매혹적이고 세련된 표정, 우아하고 글래머러스한 체형 실루엣(gorgeous glamorous figure, stylish cyberpunk techwear outfit with luminous glowing neon accents and holographic details), 바람에 흩날리는 섬세한 헤어.
+   - 캐릭터 외형과 매력은 모든 씬에서 일관되게 유지됩니다.
+3. 가사 텍스트와 사이버펑크 여캐 서사의 1:1 직결 연출:
+   - 가사의 실제 단어, 감정, 분위기에 맞춰 여주인공의 표정, 행동, 공간을 정밀하게 연출:
+     • [비/우산/물/눈물]: 네온 불빛이 젖은 아스팔트에 일렁이는 미래 도시 거리에서 투명 홀로그램 우산을 쓴 채 뒤돌아보며 반짝이는 별 눈빛으로 카메라를 응시하는 여캐
+     • [밤/별/우주/새벽]: 마천루 옥상 난간에 기대어 거대한 홀로그램 별들과 은하수가 수놓인 네온 스카이라인을 바라보며 바람에 머리카락을 흩날리는 여캐
+     • [질주/탈출/바람/길]: 네온 라인이 빛나는 사이버 바이크에 올라타거나 고속 모노레일 창가에 서서 질주하는 바람을 맞으며 결의에 찬 눈빛을 빛내는 여캐
+     • [무대/열정/불꽃/소리쳐]: 홀로그램 조명과 사이버 레이저가 쏟아지는 미래형 라이브 무대 위에서 마이크를 쥐고 열정적으로 포효하듯 노래하는 여캐
+     • [꽃/봄/온기/사랑]: 네온 온실이나 사이버 정원에서 빛나는 바이오루미네센스 꽃잎을 손끝에 얹고 부드럽고 매혹적인 미소를 짓는 여캐
+     • [기억/시간/시계/어제]: 디지털 홀로그램 기억 조각들이 부유하는 아늑한 사이버룸 창가에서 헤드폰을 끼고 아련한 눈빛으로 회상하는 여캐
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
 5. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, [가사 해당 파트에 기반한 석탄 요정의 행동 및 지브리 수채화 배경 연출], lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, whimsical fairytale atmosphere, no photorealism, not 3D, no real photo, no human face"
+   "masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, [가사 해당 파트에 기반한 여주인공의 행동/표정 및 사이버 시티 배경 연출], vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, not photorealistic, not 3D CGI, no live-action"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -636,7 +624,7 @@ def generate_scene_prompts_for_duration(
 
                     parsed = json.loads(raw_text.strip())
                     if isinstance(parsed, list) and len(parsed) >= num_scenes:
-                        print(f"[Scene Engine] Gemini가 지브리 석탄 요정 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
+                        print(f"[Scene Engine] Gemini가 사이버펑크 스타아이즈 여캐 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
                         return parsed[:num_scenes]
                     elif isinstance(parsed, list) and len(parsed) > 0:
                         print(f"[Scene Engine] Gemini 생성 {len(parsed)}개 수령, 목표치 {num_scenes}개로 확장합니다.")
@@ -647,18 +635,18 @@ def generate_scene_prompts_for_duration(
             except Exception as e:
                 print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
 
-    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (지브리 석탄 요정 방대한 세계관 매핑)
+    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (사이버펑크 글래머러스 여캐 최애의 아이 스타일)
     print(f"[Scene Engine] 가사 실제 구절을 분석하여 {num_scenes}개 씬 시퀀스를 빌드합니다.")
     clean_lines = [l.strip() for l in lyrics.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
     if not clean_lines:
         clean_lines = ["빛나는 계절", "어두운 밤하늘", "불어오는 바람", "지나온 시간들", "새벽의 온기"]
 
     cam_variations = [
-        "cinematic slow camera tracking shot, gentle whimsical breeze, soft warm ambient lighting",
-        "wide atmospheric shot capturing the tiny soot sprite in breathtaking vast Ghibli landscape",
-        "medium close-up showing cute curious round white eyes, charming animation movement",
-        "dynamic low angle shot, floating magical embers and dandelion seeds, playful fairytale mood",
-        "epic sunset golden hour backlighting, glowing watercolor sky, peaceful nostalgic atmosphere"
+        "cinematic slow camera tracking shot, floating holographic dust particles, soft glowing neon ambient lighting",
+        "wide atmospheric shot capturing the glamorous anime girl on high skyscraper ledge overlooking sprawling neon metropolis",
+        "medium close-up showing radiant star-shaped pupils glowing in mesmerizing eyes, flowing hair, breathtaking anime expression",
+        "dynamic low angle shot, glowing laser beams and digital sparks fluttering in wind, energetic anime mood",
+        "epic cyberpunk sunset golden hour backlighting, vibrant neon skyline, deeply emotional and nostalgic anime atmosphere"
     ]
 
     result_prompts = []
@@ -667,51 +655,53 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 가사 단어 기반 석탄 요정(스스와타리) 행동 및 배경 정밀 매핑 (우주/시공간/용/과거/용사/산/바다 등 확장)
+        # 가사 단어 기반 사이버펑크 글래머러스 여캐(최애의 아이 스타일) 행동 및 배경 정밀 매핑
         if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
-            visual_theme = "riding peacefully on the back of a majestic white flying dragon spirit with glowing scales soaring through pastel fluffy clouds in golden sky"
+            visual_theme = "standing on high rooftop as a colossal glowing holographic neon dragon glides majestically through the futuristic night sky behind her"
         elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
-            visual_theme = "sitting quietly on the hilt of an ancient moss-covered legendary hero sword embedded in a peaceful green grassy hill under sunset glow"
+            visual_theme = "wielding a glowing magenta cyber energy blade with fierce determined star eyes, wind whipping her stylish techwear outfit on skyscraper ledge"
         elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억", "차원"]):
-            visual_theme = "exploring the intricate brass clockwork cogs and glowing pendulum gears inside a gigantic magical time-tower, golden clock particles"
+            visual_theme = "surrounded by floating golden holographic clockwork cogs and shimmering digital memory fragments in a high-tech observatory, wistful gaze"
         elif any(w in target_line for w in ["우주", "은하", "성운", "행성", "궤도"]):
-            visual_theme = "sailing in a small origami paper boat across a celestial starry river of glowing blue stardust and colorful nebulae in deep cosmos"
+            visual_theme = "gazing up from high glass observation platform at a breathtaking celestial galaxy nebula and neon shooting stars across the cosmic night sky"
         elif any(w in target_line for w in ["성", "유적", "고대", "탑", "라퓨타", "신전"]):
-            visual_theme = "waddling upon the mossy stone shoulder of an ancient peaceful garden robot sentinel among overgrown ivy vines in floating ruins"
+            visual_theme = "exploring towering overgrown cybernetic ruins where glowing bioluminescent vines entangle futuristic steel monoliths, curious gaze"
         elif any(w in target_line for w in ["산", "절벽", "바위", "협곡", "봉우리"]):
-            visual_theme = "standing atop a majestic misty mountain cliff edge, gazing out at an endless sea of rolling fog and pine valleys at dawn"
+            visual_theme = "standing at the edge of an ultra-high cyber tower skydeck, wind blowing her hair as misty clouds swirl below the neon megacity at dawn"
         elif any(w in target_line for w in ["심해", "해저", "산호", "해파리"]):
-            visual_theme = "floating gently inside an iridescent water bubble drifting through a tranquil deep ocean kingdom of glowing jellyfish and turquoise coral reefs"
+            visual_theme = "visiting a massive futuristic underwater bio-dome, watching glowing turquoise jellyfish and coral lights reflect across her radiant star eyes"
         elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변"]):
-            visual_theme = "standing near colorful sea glass and seashells on a sun-drenched sandy beach at twilight, watching foamy ocean waves gently wash in"
+            visual_theme = "standing on a coastal cyber walkway at purple twilight, gentle ocean breeze blowing her hair as bioluminescent waves roll in"
         elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼"]):
-            visual_theme = "trotting along a sunken railway track where shallow clear water covers the rails at orange sunset, distant train whistle"
+            visual_theme = "leaning against the glass window of a sleek high-speed neon cyber-train streaking across elevated tracks over glowing city lights"
         elif any(w in target_line for w in ["눈", "겨울", "얼음", "시리", "추위"]):
-            visual_theme = "perched on the head of a cute little snowman in a peaceful snow-covered pine village, watching fluffy white snowflakes drift down"
+            visual_theme = "catching glowing cyber snowflakes on her fingertips on a snowy neon street illuminated by soft holographic aurora lanterns"
         elif any(w in target_line for w in ["비", "빗", "물", "적시"]):
-            visual_theme = "holding a large green leaf umbrella in gentle rain, happily hopping over glistening water puddles on a rustic cobblestone path"
+            visual_theme = "holding a transparent holographic umbrella on a rain-soaked neon street, pink and cyan streetlight puddles shimmering under her feet"
         elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = "sitting on a rustic wooden rooftop edge, gazing in wonder at a vast indigo night sky overflowing with sparkling shooting stars"
+            visual_theme = "sitting on high rooftop railing overlooking endless glowing city lights, looking up at vast starry indigo sky with sparkling star pupils"
         elif any(w in target_line for w in ["바람", "흔들", "풀", "나무", "숲"]):
-            visual_theme = "waddling through a sun-dappled mossy ancient forest with giant cedar trees and glowing spirits, gentle breeze rustling leaves"
+            visual_theme = "walking through an illuminated rooftop greenhouse garden, gentle breeze fluttering her glamorous techwear and vibrant hair"
         elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
-            visual_theme = "holding onto a fluffy dandelion seed parachute, drifting delightfully across a vibrant pastel wildflower meadow under warm sunlight"
+            visual_theme = "gently cupping glowing holographic cherry blossom petals dancing in neon night air, soft enchanting smile with dazzling star eyes"
         elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침", "태양"]):
-            visual_theme = "basking lazily on a sun-warmed wooden window sill as brilliant morning sunbeams fill the cozy countryside cottage"
+            visual_theme = "basking on penthouse balcony as warm pink morning sunlight illuminates her glamorous silhouette against the futuristic city horizon"
         elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염"]):
-            visual_theme = "joyfully dancing around a warm magical hearth fireplace with a cheerful fire spirit Calcifer, glowing crackling embers and cozy sparks"
+            visual_theme = "singing passionately with microphone on a dazzling cyber live stage, surrounded by burst of pyrotechnic sparks and laser beams"
         elif base_prompts and len(base_prompts) > i:
-            visual_theme = f"curiously exploring {base_prompts[i]}"
+            visual_theme = f"charismatically standing in {base_prompts[i]}"
         else:
-            visual_theme = f"curiously wandering through a breathtaking landscape of '{target_line}', peaceful whimsical mood"
+            visual_theme = f"reflecting the emotional scene of '{target_line}' in stunning cyberpunk setting, star eyes gleaming"
 
         cam_mod = cam_variations[i % len(cam_variations)]
         full_p = (
-            f"Studio Ghibli aesthetic, Hayao Miyazaki inspired hand-drawn 2D animation, "
-            f"cute little soot sprite Susuwatari character, small fluffy round black dust spirit with big curious round white eyes, "
+            f"masterpiece 2D Japanese anime visual, Oshi no Ko inspired animation style, "
+            f"gorgeous glamorous cyberpunk anime girl protagonist, iconic dazzling star-shaped sparkle highlights in pupils, mesmerizing radiant star eyes, "
+            f"stylish futuristic cyberpunk techwear outfit with glowing luminous neon accents, elegant glamorous proportions, flowing detailed hair, "
             f"{visual_theme}, "
-            f"lush hand-painted watercolor scenery, soft nostalgic warm palette, bold organic 2D outlines, clean cel shading, "
-            f"{cam_mod}, no photorealism, not 3D, no real photo, no human face"
+            f"vibrant cyberpunk cityscape background, glowing holographic signs, rainy neo-city reflections, "
+            f"{cam_mod}, clean 2D cel shading, crisp dynamic anime outlines, Doga Kobo production quality, "
+            f"not photorealistic, not 3D CGI, no live-action"
         )
         result_prompts.append(full_p)
 
