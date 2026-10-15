@@ -153,9 +153,9 @@ def generate_all_video_scenes(
     character_profile: dict = None
 ) -> list:
     """
-    10초 단위 비디오 씬 N개를 병렬로 처리합니다.
+    5초 단위 비디오 씬 N개를 병렬로 처리합니다.
     1. assets/anime_library/ 에서 동일한 캐릭터·배경·동작의 기존 클립을 우선 탐색하여 재사용 (크레딧 절약).
-    2. 재사용되지 않은 씬들만 ByteDance SeaDance V1 Pro에 요청하여 생성.
+    2. 재사용되지 않은 씬들만 ByteDance SeaDance V1 Pro에 요청하여 5초 단위로 생성 (초당 2.8크레딧, 씬당 14크레딧 절약).
     3. 새로 생성된 클립은 고유 슬러그(머리색_복장_배경_동작_해시.mp4)로 라이브러리에 저장 & manifest.json 등록.
     4. 생성 완료 후 Git 커밋 & 푸시를 시도하여 저장소에 자동 백업.
     """
@@ -167,7 +167,7 @@ def generate_all_video_scenes(
 
     # 1단계: 라이브러리에서 재사용 가능한 클립 탐색
     needed_generation = []
-    print(f"\n[Clip Library Check] 총 {num_scenes}개 씬에 대해 에셋 라이브러리 재사용 검사를 시작합니다...")
+    print(f"\n[Clip Library Check] 총 {num_scenes}개 씬(5초 단위)에 대해 에셋 라이브러리 재사용 검사를 시작합니다...")
     for idx, prompt_text in enumerate(scene_prompts):
         v_clip_path = os.path.join(output_dir, f"scene_{idx}.mp4")
         reusable_clip = find_reusable_clip(
@@ -180,7 +180,7 @@ def generate_all_video_scenes(
                 shutil.copy2(reusable_clip, v_clip_path)
                 results[idx] = v_clip_path
                 used_library_clips.append(reusable_clip)
-                print(f" 🎯 [Scene {idx+1}/{num_scenes} 재사용] 라이브러리 클립 복사 완료 (Kie.ai 28 크레딧 세이브!): {os.path.basename(reusable_clip)}")
+                print(f" 🎯 [Scene {idx+1}/{num_scenes} 재사용] 라이브러리 클립 복사 완료 (Kie.ai 크레딧 세이브!): {os.path.basename(reusable_clip)}")
             except Exception as e:
                 print(f" [Scene {idx+1} 재사용 실패] {e} -> 새로 생성으로 전환")
                 needed_generation.append((idx, prompt_text))
@@ -188,20 +188,20 @@ def generate_all_video_scenes(
             needed_generation.append((idx, prompt_text))
 
     reused_count = num_scenes - len(needed_generation)
-    print(f"[Clip Library Summary] 총 {num_scenes}개 중 {reused_count}개 씬 기존 클립 재사용! (절약된 크레딧: 약 {reused_count * 28} 크레딧)")
+    print(f"[Clip Library Summary] 총 {num_scenes}개 중 {reused_count}개 씬 기존 클립 재사용! (절약된 크레딧: 약 {reused_count * 14} 크레딧)")
 
-    # 2단계: 재사용되지 않은 씬들만 SeaDance V1 Pro API로 신규 생성
+    # 2단계: 재사용되지 않은 씬들만 SeaDance V1 Pro API로 신규 5초 클립 생성
     if needed_generation:
-        print(f"[Video Pipeline] 신규 비디오 씬 {len(needed_generation)}개 생성을 시작합니다 (병렬 {max_workers} 스레드)...")
+        print(f"[Video Pipeline] 신규 5초 비디오 씬 {len(needed_generation)}개 생성을 시작합니다 (병렬 {max_workers} 스레드)...")
         newly_created_clips = []
 
         def _worker(idx, prompt_text):
             v_clip_path = os.path.join(output_dir, f"scene_{idx}.mp4")
             time.sleep((idx % max_workers) * 0.8)
-            print(f" - [Scene {idx+1}/{num_scenes}] SeaDance V1 Pro 10초 렌더링 요청: {prompt_text[:65]}...")
+            print(f" - [Scene {idx+1}/{num_scenes}] SeaDance V1 Pro 5초 렌더링 요청: {prompt_text[:65]}...")
             res_v = kie_video_client.generate_video_clip(
                 prompt=prompt_text,
-                duration=10,
+                duration=5,
                 resolution="480p",
                 aspect_ratio="16:9",
                 output_path=v_clip_path
@@ -222,7 +222,7 @@ def generate_all_video_scenes(
                             source_clip_path=v_path,
                             character_profile=character_profile,
                             scene_prompt=p_text,
-                            duration_sec=10.0,
+                            duration_sec=5.0,
                             resolution="480p"
                         )
                         if lib_saved:
@@ -238,7 +238,7 @@ def generate_all_video_scenes(
             git_commit_and_push_library(f"chore(assets): save {len(newly_created_clips)} newly generated anime clips to library")
 
     valid_clips = [p for p in results if p and os.path.exists(p)]
-    print(f"\n[Video Summary] 총 {num_scenes}개 중 {len(valid_clips)}개의 10초 비디오 씬 준비 완료! (재사용: {reused_count}개, 신규: {len(valid_clips)-reused_count}개)")
+    print(f"\n[Video Summary] 총 {num_scenes}개 중 {len(valid_clips)}개의 5초 비디오 씬 준비 완료! (재사용: {reused_count}개, 신규: {len(valid_clips)-reused_count}개)")
     return valid_clips
 
 
@@ -315,11 +315,11 @@ def main():
     duration_sec = len(audio) / 1000.0
     print(f"[Audio Info] 음원 준비 완료: 길이 {duration_sec:.1f}초 ({int(duration_sec // 60)}분 {int(duration_sec % 60)}초)")
 
-    # 3. 노래 길이에 맞춘 10초 단위 N개 애니메이션 비디오 씬 기획 및 생성 (Kie.ai SeaDance V1 Pro, 480p 10초)
+    # 3. 노래 길이에 맞춘 5초 단위 N개 애니메이션 비디오 씬 기획 및 생성 (Kie.ai SeaDance V1 Pro, 480p 5초)
     cat_type = extra_meta.get("category", "indie_band")
-    clip_duration = 10.0
+    clip_duration = 5.0
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
-    print(f"\n[Video Strategy] 총 음원 길이 {duration_sec:.1f}초에 맞춰 10초 단위 씬 {num_scenes}개를 생성합니다 (총 {num_scenes * 10}초 분량).")
+    print(f"\n[Video Strategy] 총 음원 길이 {duration_sec:.1f}초에 맞춰 5초 단위 씬 {num_scenes}개를 생성합니다 (총 {num_scenes * 5}초 분량).")
 
     # 전체 음원 시간과 가사에 맞춰 정확히 num_scenes개의 씬 프롬프트 생성 (이번 곡의 고정 캐릭터 프로필 적용)
     scene_prompts = generate_scene_prompts_for_duration(

@@ -225,7 +225,7 @@ def save_clip_to_library(
     source_clip_path: str,
     character_profile: Optional[Dict[str, Any]],
     scene_prompt: str,
-    duration_sec: float = 10.0,
+    duration_sec: float = 5.0,
     resolution: str = "480p"
 ) -> Optional[str]:
     """

@@ -682,12 +682,12 @@ def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
 def generate_scene_prompts_for_duration(
     lyrics: str,
     duration_sec: float,
-    clip_duration: float = 10.0,
+    clip_duration: float = 5.0,
     base_prompts: list = None,
     character_profile: dict = None
 ) -> list:
     """
-    곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
+    곡의 총 재생 시간(duration_sec)을 clip_duration(5초)으로 나눈 N개의 씬에 대해,
     가사와 캐릭터 컨셉에 맞춘 [구체적인 스토리 서사(전투씬, 가수 무대, 수영선수 등)]를 선정하고,
     기승전결(도입 -> 전개 -> 절정 액션/퍼포먼스 -> 피날레 승리/환호)을 갖춘
     한 편의 완성도 높은 일본 2D TV 애니메이션 씬 시퀀스를 생성합니다.
@@ -723,7 +723,7 @@ def generate_scene_prompts_for_duration(
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={gemini_key}"
                 prompt_instruction = f"""
 당신은 최고 수준의 정통 일본 2D TV 애니메이션 비주얼 총괄 디렉터입니다.
-이 곡의 총 길이는 {duration_sec:.1f}초이며, 10초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
+이 곡의 총 길이는 {duration_sec:.1f}초이며, 5초마다 순차적으로 재생될 총 {num_scenes}개의 시네마틱 애니메이션 프롬프트가 필요합니다.
 
 [가사 전문]:
 {lyrics}

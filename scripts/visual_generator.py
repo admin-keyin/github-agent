@@ -773,19 +773,50 @@ def build_multi_scene_video_concat(
     target_duration: float,
     output_video_path: str,
     width: int = 1280,
-    height: int = 720
+    height: int = 720,
+    clip_duration: float = 5.0
 ) -> str:
     """
-    Kie.ai SeaDance V1 등으로 생성된 여러 비디오 클립들을 받아
-    해상도를 정규화하고 부드러운 전환과 함께 하나의 통 배경 비디오로 결합합니다.
+    여러 애니메이션 비디오 클립들을 받아 각 씬을 지정된 지속시간(기본 5초)으로 정규화하여
+    지루할 틈 없는 스피디하고 다이나믹한 컷 전환 뮤직비디오 배경으로 결합합니다.
+    기존 10초 라이브러리 클립도 정확히 5초 단위로 트리밍하여 5초마다 역동적으로 전환됩니다.
     """
     if not video_paths:
         return ""
     
+    os.makedirs(os.path.dirname(os.path.abspath(output_video_path)), exist_ok=True)
+    temp_trim_dir = os.path.join(os.path.dirname(os.path.abspath(output_video_path)), "trimmed_clips")
+    os.makedirs(temp_trim_dir, exist_ok=True)
+
+    # 1. 각 클립을 clip_duration(5초) 및 목표 해상도(width x height, 30fps)로 개별 정규화 트리밍
+    normalized_clips = []
+    for idx, vp in enumerate(video_paths):
+        if not vp or not os.path.exists(vp):
+            continue
+        trimmed_p = os.path.join(temp_trim_dir, f"trim_scene_{idx}_{width}x{height}.mp4")
+        trim_cmd = [
+            "ffmpeg", "-y", "-i", vp,
+            "-t", str(clip_duration),
+            "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},fps=30",
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p", "-an", trimmed_p
+        ]
+        try:
+            subprocess.run(trim_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if os.path.exists(trimmed_p) and os.path.getsize(trimmed_p) > 1000:
+                normalized_clips.append(trimmed_p)
+            else:
+                normalized_clips.append(vp)
+        except Exception as e:
+            print(f"[Video Concat Warn] 클립 {idx} 정규화 중 예외: {e}")
+            normalized_clips.append(vp)
+
+    if not normalized_clips:
+        return ""
+
     # 단일 비디오인 경우 길이 맞춤 루프/확장
-    if len(video_paths) == 1:
+    if len(normalized_clips) == 1:
         cmd = [
-            "ffmpeg", "-y", "-stream_loop", "-1", "-i", video_paths[0],
+            "ffmpeg", "-y", "-stream_loop", "-1", "-i", normalized_clips[0],
             "-t", str(target_duration),
             "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
             "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", output_video_path
@@ -793,19 +824,30 @@ def build_multi_scene_video_concat(
         subprocess.run(cmd, check=True)
         return output_video_path
 
-    # 여러 비디오 클립 Concat
+    # 여러 5초 비디오 클립 Concat (타깃 길이까지 루프 결합)
     list_txt = output_video_path + ".list.txt"
     with open(list_txt, "w", encoding="utf-8") as f:
-        for vp in video_paths:
+        for vp in normalized_clips:
             f.write(f"file '{os.path.abspath(vp)}'\n")
 
     cmd = [
         "ffmpeg", "-y", "-stream_loop", "-1", "-f", "concat", "-safe", "0", "-i", list_txt,
         "-t", str(target_duration),
-        "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
-        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", output_video_path
+        "-c:v", "copy", "-an", output_video_path
     ]
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True)
+    except Exception:
+        # 코덱 copy 실패 시 트랜스코딩 폴백
+        cmd_re = [
+            "ffmpeg", "-y", "-stream_loop", "-1", "-f", "concat", "-safe", "0", "-i", list_txt,
+            "-t", str(target_duration),
+            "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", output_video_path
+        ]
+        subprocess.run(cmd_re, check=True)
+
+    print(f"[Video Concat Success] 5초 단위 다이나믹 컷 전환 배경 비디오 생성 완료: {output_video_path}")
     return output_video_path
 
 

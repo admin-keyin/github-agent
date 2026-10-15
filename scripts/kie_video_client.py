@@ -25,14 +25,14 @@ class KieVideoGenerator:
     def generate_video_clip(
         self,
         prompt: str,
-        duration: int = 15,
+        duration: int = 5,
         resolution: str = "480p",
         aspect_ratio: str = "16:9",
         output_path: str = ""
     ) -> Optional[str]:
         """
-        Kie.ai의 Wan 비디오 모델을 호출하여 비디오 클립을 생성하고 다운로드합니다.
-        duration: 5~30초 (단일 씬)
+        Kie.ai의 비디오 모델(ByteDance SeaDance V1 Pro / Kling / Wan)을 호출하여 5초 단위 비디오 클립을 생성합니다.
+        duration: 5초 기본 (스피디하고 다이나믹한 컷 전환 & 크레딧 50% 절약)
         resolution: "480p" (가장 경제적이고 효율적)
         """
         if not self.has_api_key():
@@ -67,6 +67,7 @@ class KieVideoGenerator:
 
         task_id = None
         target_res = "480p"  # 가장 경제적이고 안정적인 480p
+        dur_int = int(duration) if duration else 5
 
         for model in candidate_models:
             input_params = {
@@ -76,15 +77,15 @@ class KieVideoGenerator:
                 "negative_prompt": "photorealistic, realistic photography, real life photograph, live action footage, camera selfie, 3D CGI, 3D render, semi-realistic, real human skin, western comic, deformed, disfigured, bad anatomy, bad hands, blurry, low quality, ugly, watermark"
             }
             if "bytedance" in model:
-                # SeaDance 규격: duration은 "10s", camera_fixed: false
-                input_params["duration"] = "10s"
+                # SeaDance 규격: "5s" 또는 "10s", camera_fixed: false
+                input_params["duration"] = f"{dur_int}s"
                 input_params["camera_fixed"] = False
             elif "kling" in model:
-                input_params["duration"] = "10"
+                input_params["duration"] = str(dur_int)
                 input_params["audio"] = False
                 input_params["resolution"] = "720p"
             elif "wan" in model:
-                input_params["duration"] = 10
+                input_params["duration"] = dur_int
                 input_params["resolution"] = "480P"
                 input_params["audio"] = False
 
