@@ -52,12 +52,20 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
     캐릭터 프로필과 씬 프롬프트 텍스트에서
     머리색(hair), 복장(outfit), 배경(bg), 동작(action) 슬러그를 추출합니다.
     """
-    # 1. 머리색 슬러그
+    # 1. 머리색 / 아키타입 슬러그
     hair_slug = "silver_lavender"
     if character_profile:
+        arch = character_profile.get("archetype", "").lower()
         h_en = character_profile.get("hair_en", "").lower()
         h_ko = character_profile.get("hair_ko", "").lower()
-        if "pink" in h_en or "핑크" in h_ko:
+
+        if arch == "reze" or "레제" in h_ko or "violet-purple" in h_en:
+            hair_slug = "reze_violet_bob"
+        elif arch == "makima" or "마키마" in h_ko or "braid" in h_en or "auburn" in h_en:
+            hair_slug = "makima_red_braid"
+        elif arch == "power" or "파워" in h_ko or "horns" in h_en or "strawberry blonde" in h_en:
+            hair_slug = "power_blonde_horns"
+        elif "pink" in h_en or "핑크" in h_ko:
             hair_slug = "pink_twintails"
         elif "black" in h_en or "흑발" in h_ko:
             hair_slug = "black_himecut"
@@ -85,14 +93,21 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
             hair_slug = "brown_wavy"
 
     # 2. 복장 슬러그
-    outfit_slug = "maid_dress"
+    outfit_slug = "signature_outfit"
     if character_profile:
         o_en = character_profile.get("outfit_en", "").lower()
         o_type = character_profile.get("outfit_type", "").lower()
-        if "bikini" in o_en or "monokini" in o_en or "수영복" in o_type:
+        o_ko = character_profile.get("outfit_ko", "").lower()
+        if "sleeveless" in o_en or "민소매" in o_ko:
+            outfit_slug = "reze_sleeveless_tie"
+        elif "trousers" in o_en or "오피스" in o_type or "수트" in o_ko or "blazer" in o_en:
+            outfit_slug = "makima_suit_tie"
+        elif "oversized" in o_en and "tie" in o_en or "루즈핏" in o_ko:
+            outfit_slug = "power_loose_shirt"
+        elif "bikini" in o_en or "monokini" in o_en or "수영복" in o_type:
             outfit_slug = "swimsuit_bikini"
-        elif "sailor" in o_en or "교복" in o_type:
-            outfit_slug = "school_uniform"
+        elif "sailor" in o_en or "교복" in o_type or "캠퍼스" in o_type:
+            outfit_slug = "campus_preppy"
         elif "dolphin" in o_en or "돌핀팬츠" in o_type:
             outfit_slug = "dolphin_shorts"
         elif "sundress" in o_en or "dress" in o_en or "원피스" in o_type:

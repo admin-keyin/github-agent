@@ -621,11 +621,13 @@ def generate_scene_prompts_for_duration(
        (예: 광활한 옥상이나 언덕, 해변 풍경 속에 아주 작게 서 있는 뒷모습(back view), 실루엣(silhouette), 먼 거리 와이드 앵글)
      • [타입 3: 인물 감정 & 하이라이트 가창 (약 30%)] - 후렴구 및 클라이맥스 파트에서만 비로소 등장!
        (여주인공이 등장하여 깊고 매혹적인 눈빛으로 노래하거나 감정선 폭발)
-3. 【인물 등장 씬의 고정 여주인공 프로필 - 인물이 나오는 씬에서만 일관되게 적용】:
+3. 【인물 등장 씬의 고정 여주인공 프로필 ({character_profile.get('archetype_name', '매혹적인 여주인공')}) - 인물이 나오는 씬에서만 일관되게 적용】:
+   - 캐릭터 컨셉: {character_profile.get('vibe', '매혹적인 20대 성인 여성')}
    - 연령: 20대 초반(약 21~23세) 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty).
+   - 얼굴/눈빛: {character_profile.get('face_eyes', 'large expressive luminous anime eyes with delicate eyelashes')}
    - 헤어스타일 & 컬러: {character_profile['hair_en']} ({character_profile['hair_ko']})
    - 의상 스타일: {character_profile['outfit_en']} ({character_profile['outfit_ko']})
-   - 외형: 크고 깊은 매혹적인 애니 눈망울과 긴 속눈썹(large expressive luminous anime eyes with delicate long eyelashes), 세련된 이목구비, 성숙한 모래시계 몸매(voluptuous mature curves, graceful slender waist).
+   - 체형: 키가 크고 늘씬하며 성숙한 볼륨감의 모래시계 몸매(extremely glamorous tall hourglass figure, voluptuous mature curves, graceful slender waist).
    - 배제: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
 4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 음악과 가사의 감정선에 맞춰 [풍경/B-Roll] -> [원경/실루엣] -> [인물 감정]이 물 흐르듯 교차되도록 {num_scenes}개의 프롬프트를 작성하세요.
 5. 프롬프트 형식: 각 씬마다 영문 문자열로 작성:
