@@ -346,10 +346,12 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - 실사화나 반실사(semi-realistic)를 철저히 배제하고 순수 일본 2D 모에 애니메이션 감성 유지.
    - 생동감 넘치는 부드러운 애니메이션 색감과 정교한 셀 셰이딩(vibrant anime palette, soft pastel anime lighting, clean 2D cel shading, crisp dynamic 2D outlines).
    - 실사 사진(photorealistic), 3D CGI, 서구권 코믹스, 기괴한 얼굴 왜곡 철저 배제(not 3D, not photorealistic, not semi-realistic, no live-action, no real human photo).
-2. 【이번 곡의 고정 여주인공 캐릭터 설정 - 모든 씬에서 헤어와 의상을 동일하게 고정】:
+2. 【이번 곡의 고정 여주인공 캐릭터 설정 - 모든 씬에서 동일하게 고정】:
+   - 연령 및 분위기: 20대 초반(약 21~23세)의 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty). 너무 어린 아이(로리) 같거나 중년(아줌마) 느낌이 나지 않도록 유의.
    - 헤어스타일 & 컬러: {char_profile['hair_en']} ({char_profile['hair_ko']})
    - 의상 스타일: {char_profile['outfit_en']} ({char_profile['outfit_ko']})
-   - 외형: 크고 맑은 매혹적인 보랏빛/자연스러운 애니 눈망울(large expressive luminous anime eyes with delicate eyelashes), 사랑스럽고 예쁜 미모와 달콤한 미소(gorgeous cute and sexy moe anime girl, adorable pretty face, charming sweet smile), 우아하고 글래머러스한 볼륨감 넘치는 몸매(extremely glamorous hourglass figure, voluptuous curves, attractive body silhouette).
+   - 외형: 크고 맑은 깊은 매혹적인 애니 눈망울과 섬세한 속눈썹(large expressive luminous anime eyes with delicate long eyelashes), 세련되고 매혹적인 이목구비와 자신감 넘치는 은은한 미소(refined captivating face, subtle confident charming smile), 키가 크고 늘씬하며 우아하고 성숙한 볼륨감의 모래시계 몸매(extremely glamorous tall hourglass figure, voluptuous mature curves, graceful slender waist, alluring silhouette).
+   - 배제 키워드: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
    - 캐릭터 외형, 헤어 컬러, 의상은 이 곡의 씬 전체에서 흔들림 없이 고정됩니다!
 3. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 얽매이지 않고 곡의 감성에 맞춘 자유로운 배경):
    - 방금 작사한 [lyrics]의 실제 단어, 소재, 감정선, 공간적 배경과 여주인공의 감정/행동을 1:1로 매핑하세요:
@@ -607,10 +609,12 @@ def generate_scene_prompts_for_duration(
 1. 최정상급 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, Kyoto Animation / CloverWorks quality, Makoto Shinkai cinematic lighting):
    - 실사화나 반실사(semi-realistic)를 배제하고 확실한 2D 애니메이션 작화(clean 2D cel shading, soft pastel lighting, vibrant anime palette, crisp anime linework) 유지.
    - 실사 사진(photorealistic), 3D CGI, 서양 코믹스, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, not semi-realistic, no live-action, no real human photo).
-2. 【이번 곡의 고정 여주인공 캐릭터 설정 - {num_scenes}개 모든 씬에서 헤어와 의상을 동일하게 고정】:
+2. 【이번 곡의 고정 여주인공 캐릭터 설정 - {num_scenes}개 모든 씬에서 동일하게 고정】:
+   - 연령 및 분위기: 20대 초반(약 21~23세)의 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty). 너무 어린 아이(로리) 같거나 중년(아줌마) 느낌이 나지 않도록 유의.
    - 헤어스타일 & 컬러: {character_profile['hair_en']} ({character_profile['hair_ko']})
    - 의상 스타일: {character_profile['outfit_en']} ({character_profile['outfit_ko']})
-   - 외형: 크고 맑은 매혹적인 애니 눈망울(large expressive luminous anime eyes with delicate eyelashes), 사랑스럽고 예쁜 미모와 달콤한 미소(gorgeous cute and sexy moe anime girl, adorable pretty face, charming sweet smile), 우아하고 글래머러스한 볼륨감 넘치는 몸매(extremely glamorous hourglass figure, voluptuous curves, attractive body silhouette).
+   - 외형: 크고 맑은 깊은 매혹적인 애니 눈망울과 섬세한 긴 속눈썹(large expressive luminous anime eyes with delicate long eyelashes), 세련되고 매혹적인 이목구비와 자신감 넘치는 은은한 미소(refined captivating face, subtle confident charming smile), 키가 크고 늘씬하며 우아하고 성숙한 볼륨감의 모래시계 몸매(extremely glamorous tall hourglass figure, voluptuous mature curves, graceful slender waist, alluring silhouette).
+   - 배제 키워드: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
    - 캐릭터 외형, 헤어 컬러, 의상은 이 곡의 {num_scenes}개 씬 전체에서 흔들림 없이 고정됩니다!
 3. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 한정되지 않고 곡의 정서에 맞춘 다채로운 감성 배경):
    - 가사의 실제 단어, 감정, 분위기에 맞춰 여주인공의 표정, 행동, 공간을 정밀하게 연출:
@@ -666,7 +670,7 @@ def generate_scene_prompts_for_duration(
 
     cam_variations = [
         "cinematic slow camera tracking shot, soft floating dust motes, warm ambient lighting, emotional anime mood",
-        "wide atmospheric shot capturing the glamorous maid anime girl on an antique scenic terrace under vast beautiful sky",
+        "wide atmospheric shot capturing the glamorous alluring anime woman on an antique scenic terrace under vast beautiful sky",
         "medium close-up showing large luminous anime eyes with delicate eyelashes, pretty face, charming captivating expression",
         "dynamic low angle shot, floating flower petals dancing in gentle wind, heartwarming anime mood",
         "epic sunset golden hour backlighting, deeply emotional and nostalgic anime atmosphere"
