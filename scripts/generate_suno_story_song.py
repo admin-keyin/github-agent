@@ -42,6 +42,11 @@ try:
         extract_shorts_from_full_video,
         get_korean_font
     )
+    from scripts.clip_library import (
+        find_reusable_clip,
+        save_clip_to_library,
+        git_commit_and_push_library
+    )
 except ImportError:
     from suno_api_client import SunoMusicGenerator
     from kie_video_client import KieVideoGenerator
@@ -60,6 +65,11 @@ except ImportError:
         render_full_cinematic_mv,
         extract_shorts_from_full_video,
         get_korean_font
+    )
+    from clip_library import (
+        find_reusable_clip,
+        save_clip_to_library,
+        git_commit_and_push_library
     )
 
 
@@ -139,47 +149,96 @@ def generate_all_video_scenes(
     kie_video_client,
     scene_prompts: list,
     output_dir: str = "temp/videos_full",
-    max_workers: int = 3
+    max_workers: int = 3,
+    character_profile: dict = None
 ) -> list:
     """
-    10초 단위 비디오 씬 N개를 병렬(최대 max_workers 스레드)로 요청/대기하여,
-    원래 씬 순서(0 ~ N-1)대로 정렬된 비디오 파일 경로 리스트를 반환합니다.
+    10초 단위 비디오 씬 N개를 병렬로 처리합니다.
+    1. assets/anime_library/ 에서 동일한 캐릭터·배경·동작의 기존 클립을 우선 탐색하여 재사용 (크레딧 절약).
+    2. 재사용되지 않은 씬들만 ByteDance SeaDance V1 Pro에 요청하여 생성.
+    3. 새로 생성된 클립은 고유 슬러그(머리색_복장_배경_동작_해시.mp4)로 라이브러리에 저장 & manifest.json 등록.
+    4. 생성 완료 후 Git 커밋 & 푸시를 시도하여 저장소에 자동 백업.
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
     os.makedirs(output_dir, exist_ok=True)
     num_scenes = len(scene_prompts)
     results = [None] * num_scenes
+    used_library_clips = []
 
-    def _worker(idx, prompt_text):
+    # 1단계: 라이브러리에서 재사용 가능한 클립 탐색
+    needed_generation = []
+    print(f"\n[Clip Library Check] 총 {num_scenes}개 씬에 대해 에셋 라이브러리 재사용 검사를 시작합니다...")
+    for idx, prompt_text in enumerate(scene_prompts):
         v_clip_path = os.path.join(output_dir, f"scene_{idx}.mp4")
-        # 동시 폭주 요청을 방지하기 위해 각 워커 시작 시 약간의 시차 부여
-        time.sleep(idx * 0.8)
-        print(f" - [Scene {idx+1}/{num_scenes}] SeaDance V1 Pro 10초 렌더링 요청: {prompt_text[:65]}...")
-        res_v = kie_video_client.generate_video_clip(
-            prompt=prompt_text,
-            duration=10,
-            resolution="480p",
-            aspect_ratio="16:9",
-            output_path=v_clip_path
+        reusable_clip = find_reusable_clip(
+            character_profile=character_profile,
+            scene_prompt=prompt_text,
+            exclude_paths=used_library_clips
         )
-        return idx, res_v
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_map = {executor.submit(_worker, i, p): i for i, p in enumerate(scene_prompts)}
-        for future in as_completed(future_map):
-            i = future_map[future]
+        if reusable_clip and os.path.exists(reusable_clip):
             try:
-                idx, v_path = future.result()
-                if v_path and os.path.exists(v_path):
-                    results[idx] = v_path
-                    print(f" [Scene {idx+1}/{num_scenes} 성공] 저장 완료: {v_path}")
-                else:
-                    print(f" [Scene {idx+1}/{num_scenes} 실패] 비디오가 생성되지 않음")
+                shutil.copy2(reusable_clip, v_clip_path)
+                results[idx] = v_clip_path
+                used_library_clips.append(reusable_clip)
+                print(f" 🎯 [Scene {idx+1}/{num_scenes} 재사용] 라이브러리 클립 복사 완료 (Kie.ai 28 크레딧 세이브!): {os.path.basename(reusable_clip)}")
             except Exception as e:
-                print(f" [Scene {i+1}/{num_scenes} 에러 발생] {e}")
+                print(f" [Scene {idx+1} 재사용 실패] {e} -> 새로 생성으로 전환")
+                needed_generation.append((idx, prompt_text))
+        else:
+            needed_generation.append((idx, prompt_text))
+
+    reused_count = num_scenes - len(needed_generation)
+    print(f"[Clip Library Summary] 총 {num_scenes}개 중 {reused_count}개 씬 기존 클립 재사용! (절약된 크레딧: 약 {reused_count * 28} 크레딧)")
+
+    # 2단계: 재사용되지 않은 씬들만 SeaDance V1 Pro API로 신규 생성
+    if needed_generation:
+        print(f"[Video Pipeline] 신규 비디오 씬 {len(needed_generation)}개 생성을 시작합니다 (병렬 {max_workers} 스레드)...")
+        newly_created_clips = []
+
+        def _worker(idx, prompt_text):
+            v_clip_path = os.path.join(output_dir, f"scene_{idx}.mp4")
+            time.sleep((idx % max_workers) * 0.8)
+            print(f" - [Scene {idx+1}/{num_scenes}] SeaDance V1 Pro 10초 렌더링 요청: {prompt_text[:65]}...")
+            res_v = kie_video_client.generate_video_clip(
+                prompt=prompt_text,
+                duration=10,
+                resolution="480p",
+                aspect_ratio="16:9",
+                output_path=v_clip_path
+            )
+            return idx, res_v, prompt_text
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_map = {executor.submit(_worker, i, p): i for i, p in needed_generation}
+            for future in as_completed(future_map):
+                i = future_map[future]
+                try:
+                    idx, v_path, p_text = future.result()
+                    if v_path and os.path.exists(v_path):
+                        results[idx] = v_path
+                        print(f" [Scene {idx+1}/{num_scenes} 성공] 저장 완료: {v_path}")
+                        # 3단계: 라이브러리에 고유 슬러그로 보관 및 메타데이터 기록
+                        lib_saved = save_clip_to_library(
+                            source_clip_path=v_path,
+                            character_profile=character_profile,
+                            scene_prompt=p_text,
+                            duration_sec=10.0,
+                            resolution="480p"
+                        )
+                        if lib_saved:
+                            newly_created_clips.append(lib_saved)
+                    else:
+                        print(f" [Scene {idx+1}/{num_scenes} 실패] 비디오가 생성되지 않음")
+                except Exception as e:
+                    print(f" [Scene {i+1}/{num_scenes} 에러 발생] {e}")
+
+        # 4단계: 신규 클립이 있다면 Git 커밋 & 푸시 시도
+        if newly_created_clips:
+            print(f"\n[Git Sync] 신규 생성된 {len(newly_created_clips)}개 클립을 GitHub 저장소로 동기화합니다...")
+            git_commit_and_push_library(f"chore(assets): save {len(newly_created_clips)} newly generated anime clips to library")
 
     valid_clips = [p for p in results if p and os.path.exists(p)]
-    print(f"\n[Video Summary] 총 {num_scenes}개 중 {len(valid_clips)}개의 10초 비디오 씬 생성 완료!")
+    print(f"\n[Video Summary] 총 {num_scenes}개 중 {len(valid_clips)}개의 10초 비디오 씬 준비 완료! (재사용: {reused_count}개, 신규: {len(valid_clips)-reused_count}개)")
     return valid_clips
 
 
@@ -298,7 +357,8 @@ def main():
             kie_video_client=kie_video_client,
             scene_prompts=scene_prompts,
             output_dir="temp/videos_full",
-            max_workers=3
+            max_workers=3,
+            character_profile=extra_meta.get("character_profile")
         )
 
     # 비디오가 정상 생성된 경우 하나의 결합 배경 비디오로 빌드
