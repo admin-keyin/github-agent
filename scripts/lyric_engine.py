@@ -574,6 +574,83 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
     return title, style_tags, lyrics, extra_meta
 
 
+def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
+    """
+    가사 텍스트와 캐릭터 의상/성향을 분석하여 뮤직비디오의 메인 스토리 서사(Storyline Arc)를 결정합니다.
+    - battle_action: 타격감 넘치는 다이나믹 전투 액션 (체인소 맨 세계관, 격투, 폭발, 피의 무기)
+    - swimmer_athlete: 수영선수 챔피언십 레이스 드라마 (스타트대 다이빙, 물살 가르기, 물보라, 승리의 터치패드)
+    - stage_singer: 무대 위 열정적인 디바 / 락스타 콘서트 (화려한 스테이지 조명, 마이크 열창, 관객 환호)
+    - cyberpunk_chase: 심야 네온 고속 질주 & 탈출 액션 (바이크 체이스, 마천루 도약)
+    - emotional_drama: 시네마틱 감성 청춘 서사 (비 오는 날 우산, 노을빛 바다, 옥상 풍경)
+    """
+    lyric_lower = lyrics.lower()
+    outfit_type = ""
+    outfit_ko = ""
+    outfit_en = ""
+    if character_profile:
+        outfit_type = character_profile.get("outfit_type", "").lower()
+        outfit_ko = character_profile.get("outfit_ko", "").lower()
+        outfit_en = character_profile.get("outfit_en", "").lower()
+
+    # 1. 수영선수 / 워터 스포츠 서사 체크 (의상이 수영복이거나 수영 관련 가사)
+    is_swim_outfit = "수영복" in outfit_type or "수영복" in outfit_ko or "bikini" in outfit_en or "monokini" in outfit_en
+    swim_keywords = ["수영", "다이빙", "물속", "스트로크", "접영", "자유형", "레인", "터치패드", "물살", "풀장", "수면", "물보라", "헤엄"]
+    has_swim_words = any(k in lyrics for k in swim_keywords)
+
+    if is_swim_outfit or has_swim_words:
+        return {
+            "arc_type": "swimmer_athlete",
+            "name_ko": "불꽃 튀는 수영선수의 도전과 승리 (Swimmer Championship Arc)",
+            "theme_en": "competitive champion swimmer athletic journey, indoor Olympic aquatic stadium, fierce swimming sprint, crystal splashes and thrilling victory",
+            "keywords": ["swimming", "dive", "stroke", "water splash", "aquatic center"]
+        }
+
+    # 2. 타격감 넘치는 다이나믹 배틀 액션 서사 체크
+    battle_keywords = [
+        "싸움", "전투", "칼", "검", "피", "폭발", "화염", "악마", "체인소", "격돌", "타격",
+        "타오", "전쟁", "적", "사냥", "사이다", "결전", "분노", "오기", "박차", "쳐부수",
+        "불꽃", "핏빛", "흉터", "승리", "돌파", "파괴", "격파", "베어", "날려", "강타"
+    ]
+    if any(k in lyrics for k in battle_keywords):
+        return {
+            "arc_type": "battle_action",
+            "name_ko": "타격감 넘치는 다이나믹 배틀 액션 (Dynamic Chainsaw Man Anime Combat Arc)",
+            "theme_en": "high octane anime combat action choreography, lethal martial arts strike, explosive hit sparks, shattered urban battlefield, epic anime fight scene",
+            "keywords": ["battle", "combat strike", "explosion", "hit sparks", "shockwaves"]
+        }
+
+    # 3. 무대 위의 열정적인 디바 / 락밴드 보컬 서사 체크
+    stage_keywords = [
+        "노래", "무대", "마이크", "밴드", "기타", "드럼", "소리쳐", "샤우팅", "조명",
+        "스테이지", "콘서트", "환호", "멜로디", "박수", "음악", "청춘", "꿈", "페스티벌", "보컬"
+    ]
+    if any(k in lyrics for k in stage_keywords):
+        return {
+            "arc_type": "stage_singer",
+            "name_ko": "무대 위 열정적인 디바 / 락스타 콘서트 (Passionate Stage Diva & Rock Star Arc)",
+            "theme_en": "electrifying live concert stage performance, blazing spotlights, passionate singing with microphone, shouting high notes, cheering crowd",
+            "keywords": ["stage", "concert", "microphone singing", "spotlight", "rockstar"]
+        }
+
+    # 4. 심야 네온 고속 질주 / 탈출 액션 체크
+    chase_keywords = ["질주", "고속도로", "밤", "도망", "탈출", "자유", "네온", "속도", "엔진", "달려", "시속", "바이크", "아스팔트"]
+    if any(k in lyrics for k in chase_keywords):
+        return {
+            "arc_type": "cyberpunk_chase",
+            "name_ko": "심야 네온 고속 질주 & 도심 탈출 액션 (Midnight Cyberpunk Speed & Chase Arc)",
+            "theme_en": "high-speed midnight motorcycle chase across neon cyberpunk metropolis, drifting through rainy asphalt, neon light trails, exhilarating speed",
+            "keywords": ["speed", "motorcycle", "neon city", "chase", "highway"]
+        }
+
+    # 5. 기본 감성 청춘 멜로드라마
+    return {
+        "arc_type": "emotional_drama",
+        "name_ko": "시네마틱 감성 청춘 서사 (Cinematic Emotional Youth Drama)",
+        "theme_en": "cinematic emotional youth narrative, poetic storytelling montage, bittersweet memories, sunlit horizons and heartwarming sentiment",
+        "keywords": ["cinematic", "storytelling", "scenic", "nostalgia", "emotional"]
+    }
+
+
 def generate_scene_prompts_for_duration(
     lyrics: str,
     duration_sec: float,
@@ -583,16 +660,32 @@ def generate_scene_prompts_for_duration(
 ) -> list:
     """
     곡의 총 재생 시간(duration_sec)을 clip_duration(10초)으로 나눈 N개의 씬에 대해,
-    이번 곡 전용 캐릭터 비주얼(머리색/의상)을 모든 씬에서 일관되게 유지하는 일본 2D 애니메이션 프롬프트 N개를 생성합니다.
+    가사와 캐릭터 컨셉에 맞춘 [구체적인 스토리 서사(전투씬, 가수 무대, 수영선수 등)]를 선정하고,
+    기승전결(도입 -> 전개 -> 절정 액션/퍼포먼스 -> 피날레 승리/환호)을 갖춘
+    한 편의 완성도 높은 일본 2D TV 애니메이션 씬 시퀀스를 생성합니다.
     """
     import math
     if not character_profile:
         character_profile = generate_random_character_profile()
     char_prompt_base = build_character_prompt(character_profile)
 
+    # 1. 스토리 서사(Storyline Arc) 탐지
+    story_arc = detect_storyline_arc(lyrics, character_profile)
+    arc_type = story_arc["arc_type"]
+    arc_name_ko = story_arc["name_ko"]
+    arc_theme_en = story_arc["theme_en"]
+
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
     print(f"\n[Scene Engine] 음원 길이({duration_sec:.1f}초)에 맞춰 {clip_duration:.0f}초 단위 씬 {num_scenes}개 프롬프트 기획 시작...")
     print(f" -> 이번 곡 고정 캐릭터: {character_profile.get('korean_summary', '2D 모에 미소녀')}")
+    print(f" -> 뮤직비디오 스토리 서사 테마: ★ {arc_name_ko} ★")
+
+    combat = character_profile.get("combat_actions", {
+        "prep": "standing ready in combat stance, eyes sharp with determination",
+        "strike": "delivering a powerful dynamic strike with high-impact shockwaves and fiery sparks",
+        "climax": "unleashing a devastating ultimate attack, explosive hit sparks and cinematic blast ripples",
+        "finish": "standing triumphant amidst dissipating smoke with an alluring confident smile"
+    })
 
     gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     if gemini_key:
@@ -607,34 +700,40 @@ def generate_scene_prompts_for_duration(
 [가사 전문]:
 {lyrics}
 
-[★ 정통 일본 2D 애니메이션 화풍 + 시네마틱 뮤직비디오 스토리텔링 몽타주 규칙]:
-1. 최정상급 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic by MAPPA - Chainsaw Man anime visual style, Makoto Shinkai cinematic lighting):
-   - 실사화나 반실사(semi-realistic)를 배제하고 확실한 2D 애니메이션 작화(clean 2D cel shading, soft pastel lighting, vibrant anime palette, crisp anime linework) 유지.
-   - 실사 사진(photorealistic), 3D CGI, 서양 코믹스, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, not semi-realistic, no live-action, no real human photo).
-2. 【★ 핵심 원칙: '사람다음사람' 인물 얼굴 나열 절대 금지! 한 편의 영화 같은 몽타주 리듬】:
-   - 모든 씬에 사람 얼굴/상반신만 크게 반복해서 나오는 단조롭고 답답한 구도를 철저히 금지합니다.
-   - 뮤직비디오의 서사와 호흡을 위해 아래 3가지 타입의 샷을 {num_scenes}개 씬 전체에 걸쳐 유기적으로 교차 배치하세요:
-     • [타입 1: 감성 풍경 & 상징 오브제 B-Roll 컷 (약 40%)] - 인물 얼굴 없음!
-       (예: 비 내리는 창가, 노을빛 철길, 흩날리는 벚꽃, 별똥별 밤하늘, 피아노 건반을 누르는 손, 잔잔한 파도 거품, 앤티크 시계, 김이 피어오르는 찻잔 등 순수 시네마틱 풍경/정물)
-       * 프롬프트에 {char_prompt_base}를 넣지 말고, 순수 풍경 및 오브제 묘사 위주로 구성 (no people 명시).
-     • [타입 2: 원경 / 환경 롱샷 / 뒷모습 실루엣 (약 30%)] - 인물이 화면에 크게 나오지 않음!
-       (예: 광활한 옥상이나 언덕, 해변 풍경 속에 아주 작게 서 있는 뒷모습(back view), 실루엣(silhouette), 먼 거리 와이드 앵글)
-     • [타입 3: 인물 감정 & 하이라이트 가창 (약 30%)] - 후렴구 및 클라이맥스 파트에서만 비로소 등장!
-       (여주인공이 등장하여 깊고 매혹적인 눈빛으로 노래하거나 감정선 폭발)
-3. 【인물 등장 씬의 고정 여주인공 프로필 ({character_profile.get('archetype_name', '체인소 맨 공식 히로인')}) - 인물이 나오는 씬에서만 일관되게 적용】:
+[★ 이번 뮤직비디오의 메인 스토리 서사 테마]:
+- 서사 장르: {arc_name_ko} ({arc_type})
+- 서사 디렉션: {arc_theme_en}
+
+[★ 정통 일본 2D 애니메이션 화풍 + 기승전결 스토리텔링 규칙]:
+1. 최정상급 일본 2D 애니메이션 작화 (Authentic Japanese 2D TV anime aesthetic by MAPPA - Chainsaw Man anime visual style, Makoto Shinkai cinematic lighting):
+   - 실사화/반실사/3D CGI/실사 사진 철저 배제 (clean 2D cel shading, crisp dynamic anime linework, authentic MAPPA anime quality, not 3D, no real photo).
+2. 【★ 핵심 원칙: '사람다음사람' 인물 얼굴 단순 나열 절대 금지! 한 편의 애니메이션 명장면 몽타주】:
+   - 모든 씬에 사람 얼굴만 연속으로 나오는 단조로운 배치를 절대 금지합니다.
+   - 이야기의 서사와 호흡을 살리기 위해 아래 3가지 타입의 샷을 {num_scenes}개 씬 전체에 걸쳐 유기적으로 교차 배치하세요:
+     • [타입 1: 현장감 넘치는 B-Roll & 환경 이펙트 컷 (약 40%)] - 인물 얼굴 없음!
+       (예: 전투면 부서진 아스팔트 잔해/흩날리는 불꽃 스파크, 수영이면 푸른 레인 수면/튀는 물보라, 무대면 무빙 라이트/관객 야광봉 바다 등 no people 명시)
+     • [타입 2: 원경 / 환경 롱샷 / 광활한 공간 컷 (약 30%)] - 인물이 배경 속에 아주 작게 실루엣으로 녹아듦
+       (예: 폐허 도심 속 멀리 대치한 실루엣, 거대한 수영 경기장 스타트대 앞 전경, 수만 명 스타디움 무대 전체 조망)
+     • [타입 3: 인물 액션 & 퍼포먼스 클라이맥스 컷 (약 30%)] - 절정/하이라이트 파트에서 여주인공의 역동적 활약!
+       (예: 타격감 넘치는 필살기 타격/고속 대시, 역동적인 접영/자유형 폭풍 스트로크, 마이크를 움켜쥐고 포효하는 고음 열창)
+3. 【스토리의 기승전결 (Narrative Arc Progression)】:
+   - 초반(0~25%): [도입] 사건/상황의 시작, 결의를 다지는 준비, 긴장감 넘치는 분위기
+   - 중반(25~60%): [전개] 본격적인 액션/수영 다이빙/무대 공연 돌입, 스피드감과 현장감 고조
+   - 후반(60~85%): [절정/클라이맥스] 가장 폭발적인 순간! (초강력 타격감의 필살기 폭발 / 맹렬한 스퍼트 / 전율의 하이라이트 샤우팅)
+   - 종반(85~100%): [피날레] 승리/성공의 환호, 터치패드를 찍고 물 위로 솟구치며 짓는 찬란한 미소, 연기 속 쿨한 미소
+4. 【인물 등장 씬의 고정 여주인공 프로필 ({character_profile.get('archetype_name', '체인소 맨 공식 히로인')})】:
    - 공식 캐릭터 설정: {character_profile.get('official_tag', 'Chainsaw Man by MAPPA')}
    - 캐릭터 컨셉: {character_profile.get('vibe', '매혹적인 20대 성인 여성')}
-   - 연령: 20대 초반(약 21~23세) 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty).
+   - 연령: 20대 초반(약 21~23세) 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성.
    - 얼굴/눈빛: {character_profile.get('face_eyes', 'large expressive luminous anime eyes with delicate eyelashes')}
-   - 헤어스타일 & 컬러: {character_profile['hair_en']} ({character_profile['hair_ko']})
-   - 의상 스타일: {character_profile['outfit_en']} ({character_profile['outfit_ko']})
-   - 체형: 키가 크고 늘씬하며 성숙한 볼륨감의 모래시계 몸매(extremely glamorous tall hourglass figure, voluptuous mature curves, graceful slender waist).
+   - 헤어: {character_profile['hair_en']} ({character_profile['hair_ko']})
+   - 의상: {character_profile['outfit_en']} ({character_profile['outfit_ko']})
+   - 체형: 매우 풍만하고 성숙한 볼륨감의 모래시계 글래머 몸매 (extraordinarily voluptuous and ultra-glamorous hourglass figure, very large heavy bust, deep alluring cleavage, tiny snatched slender waist, wide voluptuous curvy feminine hips, mature bombshell body proportions).
    - 배제: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
-4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 음악과 가사의 감정선에 맞춰 [풍경/B-Roll] -> [원경/실루엣] -> [인물 감정]이 물 흐르듯 교차되도록 {num_scenes}개의 프롬프트를 작성하세요.
 5. 프롬프트 형식: 각 씬마다 영문 문자열로 작성:
-   - 인물 등장 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic by MAPPA studio, {char_prompt_base}, [가사 파트 행동/감정 연출], breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, MAPPA animation quality, not 3D, no real photo"
-   - 풍경/오브제 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, [시네마틱 배경/오브제 상세 묘사], no people, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and MAPPA quality, not 3D, no real photo"
-   - 원경/실루엣 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, wide environmental long shot, [광활한 풍경 속 작게 서 있는 실루엣/뒷모습 묘사], breathtaking anime lighting, clean 2D cel shading, MAPPA studio quality, not 3D, no real photo"
+   - 인물 등장 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic by MAPPA studio, {char_prompt_base}, [스토리 서사에 따른 구체적 액션/표정 연출], dynamic cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, MAPPA animation quality, not 3D, no real photo"
+   - 풍경/B-Roll 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, [스토리 배경/오브제/이펙트 상세 묘사], no people, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, MAPPA quality, not 3D, no real photo"
+   - 원경/실루엣 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, wide environmental long shot, [광활한 배경 속 작게 서 있는 실루엣 묘사], breathtaking anime lighting, clean 2D cel shading, MAPPA studio quality, not 3D, no real photo"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -659,7 +758,7 @@ def generate_scene_prompts_for_duration(
 
                     parsed = json.loads(raw_text.strip())
                     if isinstance(parsed, list) and len(parsed) >= num_scenes:
-                        print(f"[Scene Engine] Gemini가 사이버펑크 스타아이즈 여캐 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
+                        print(f"[Scene Engine] Gemini가 '{arc_name_ko}' 기반 씬 {len(parsed)}개 프롬프트를 완벽하게 기획했습니다!")
                         return parsed[:num_scenes]
                     elif isinstance(parsed, list) and len(parsed) > 0:
                         print(f"[Scene Engine] Gemini 생성 {len(parsed)}개 수령, 목표치 {num_scenes}개로 확장합니다.")
@@ -670,103 +769,131 @@ def generate_scene_prompts_for_duration(
             except Exception as e:
                 print(f"[Scene Engine Warn] Gemini 씬 프롬프트 생성 시도 중 예외: {e}")
 
-    # 폴백: 가사 실제 텍스트 구절 분석 기반 지능형 씬 시퀀스 빌드 (사이버펑크 글래머러스 여캐 최애의 아이 스타일)
-    print(f"[Scene Engine] 가사 실제 구절을 분석하여 {num_scenes}개 씬 시퀀스를 빌드합니다.")
+    # 폴백: 규칙 기반 완벽한 기승전결 스토리 아크 씬 빌더
+    print(f"[Scene Engine] 지능형 스토리 서사 엔진({arc_name_ko})으로 {num_scenes}개 씬 시퀀스를 빌드합니다.")
     clean_lines = [l.strip() for l in lyrics.splitlines() if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("(")]
     if not clean_lines:
-        clean_lines = ["빛나는 계절", "어두운 밤하늘", "불어오는 바람", "지나온 시간들", "새벽의 온기"]
-
-    cam_variations = [
-        "cinematic slow camera tracking shot, soft floating dust motes, warm ambient lighting, emotional anime mood",
-        "wide atmospheric shot capturing the glamorous alluring anime woman on an antique scenic terrace under vast beautiful sky",
-        "medium close-up showing large luminous anime eyes with delicate eyelashes, pretty face, charming captivating expression",
-        "dynamic low angle shot, floating flower petals dancing in gentle wind, heartwarming anime mood",
-        "epic sunset golden hour backlighting, deeply emotional and nostalgic anime atmosphere"
-    ]
+        clean_lines = ["빛나는 순간", "어둠을 가르는 불꽃", "뜨거운 숨결", "끝없는 질주", "승리의 환호"]
 
     result_prompts = []
     for i in range(num_scenes):
-        line_idx = int((i / num_scenes) * len(clean_lines))
-        line_idx = min(line_idx, len(clean_lines) - 1)
+        progress = i / max(1, num_scenes - 1)  # 0.0 (도입) ~ 1.0 (피날레)
+        line_idx = min(int(progress * len(clean_lines)), len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 3단계 시네마틱 몽타주 샷 타입 교차 순환 ('사람다음사람' 나열 탈피):
-        # 0: 인물 감정 및 가창 컷 (Subject Focus & Performance)
-        # 1: 감성 풍경 및 상징 오브제 B-Roll 컷 (Scenery & Macro B-Roll - 인물 없음)
-        # 2: 광활한 원경 / 환경 롱샷 / 뒷모습 실루엣 컷 (Wide Environmental Long Shot & Silhouette)
+        # 3단계 시네마틱 몽타주 샷 타입 교차:
+        # 0: 인물 액션/퍼포먼스 컷 (Subject Focus & Narrative Action)
+        # 1: 감성 풍경 & 스토리 B-Roll 이펙트 컷 (Scenery & Dynamic B-Roll - no people)
+        # 2: 광활한 원경 / 환경 롱샷 / 실루엣 컷 (Wide Environmental Long Shot)
         shot_type = i % 3
 
         if shot_type == 1:
-            # [타입 1: 감성 풍경 & 오브제 인서트 (B-Roll) - 사람 얼굴 없음]
-            if any(w in target_line for w in ["비", "빗", "물", "적시"]):
-                scene_desc = "cinematic atmospheric shot of delicate rain droplets tracing down a cozy vintage windowpane, warm amber streetlights reflecting in evening puddles, tranquil melancholic mood"
-            elif any(w in target_line for w in ["밤", "별", "하늘", "어둠", "우주", "은하"]):
-                scene_desc = "breathtaking wide cinematic shot of glowing constellations and shooting star streaks across a deep indigo night sky, gently swaying tree branches in breeze"
-            elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
-                scene_desc = "macro cinematic focus on delicate pink cherry blossom petals fluttering softly through sun-dappled air, warm gentle sunlight lens flare, peaceful spring serenity"
-            elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억"]):
-                scene_desc = "sunlight streaming through a vintage sunlit library window, antique grandfather clock with slow brass pendulum and floating golden dust motes"
-            elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변", "심해"]):
-                scene_desc = "cinematic tranquil shot of gentle ocean waves lapping against golden sandy shoreline at sunset, warm water reflections and gentle sea breeze"
-            elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼", "길"]):
-                scene_desc = "cinematic empty train tracks glowing under dramatic sunset clouds, distant town silhouettes and railway crossing signal gently blinking"
-            elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염", "무대"]):
-                scene_desc = "cinematic shot of grand stage spotlight beam cutting through theatrical haze, empty acoustic guitar resting on stand with warm golden lens flare"
-            elif any(w in target_line for w in ["눈", "겨울", "얼음", "시리", "추위"]):
-                scene_desc = "gentle white snowflakes floating quietly down through warm lamplight glow in a peaceful cobblestone alleyway"
+            # [타입 1: 현장감 넘치는 B-Roll & 환경 이펙트 (인물 얼굴 없음)]
+            if arc_type == "battle_action":
+                if progress < 0.3:
+                    broll_desc = "cinematic close-up of cracked concrete pavement in shattered urban ruins, flickering miniature fire sparks drifting through rising smoke, dramatic low angle, ominous battle tension"
+                elif progress < 0.7:
+                    broll_desc = "high-speed dynamic shot of explosive hit sparks and shockwave ripples shattering the air, flying gravel and glowing ember particles, visceral kinetic anime combat impact"
+                else:
+                    broll_desc = "breathtaking shot of smoke and swirling red ember dust slowly settling over the devastated battlefield, glowing crater under dramatic twilight sky, aftermath of epic battle"
+            elif arc_type == "swimmer_athlete":
+                if progress < 0.3:
+                    broll_desc = "macro cinematic shot of turquoise blue water surface gently rippling against competition lane markers in an Olympic indoor swimming pool, crisp bright stadium lighting"
+                elif progress < 0.7:
+                    broll_desc = "explosive high-speed macro shot of crystal water splashes bursting violently into the air in slow motion, glistening liquid droplets glowing under bright stadium floodlights"
+                else:
+                    broll_desc = "cinematic shot of electronic scoreboard flashing '1st PLACE' and the yellow finish touchpad glistening with dripping water drops, victorious athletic atmosphere"
+            elif arc_type == "stage_singer":
+                if progress < 0.3:
+                    broll_desc = "cinematic atmospheric shot of massive stadium concert stage, crisscrossing colored spotlight beams cutting through atmospheric haze, glowing ocean of audience lightsticks"
+                elif progress < 0.7:
+                    broll_desc = "dynamic visual of blazing pyrotechnic fire pillars bursting from stage corners in sync with music beat, laser beams sweeping across the arena, electrifying concert atmosphere"
+                else:
+                    broll_desc = "cinematic shot of a vintage stage microphone resting with golden spotlight beam, floating confetti falling gently from ceiling, emotional concert aftermath"
+            elif arc_type == "cyberpunk_chase":
+                if progress < 0.3:
+                    broll_desc = "cinematic atmospheric shot of rain-slicked asphalt reflecting vivid neon signs of a cyberpunk metropolis, glowing holographic billboards towering into rainy night sky"
+                elif progress < 0.7:
+                    broll_desc = "high-speed close-up of motorcycle tire leaving glowing cyan electric sparks on asphalt, blazing neon light trails streaking past in blistering velocity"
+                else:
+                    broll_desc = "panoramic vista of futuristic skyscraper skyline with flying drone lights, cool midnight breeze blowing through illuminated highway"
             else:
-                scene_desc = f"poetic cinematic scenery capturing the mood of '{target_line}', gentle breeze rustling emerald leaves, warm sunlight rays, emotional anime background"
+                broll_desc = f"poetic cinematic scenery capturing the emotion of '{target_line}', warm sunlight rays, floating cherry blossom petals, gentle tranquil breeze, emotional anime background"
 
             full_p = (
-                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-                f"{scene_desc}, no people, no character, tranquil storytelling background, "
-                f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic by MAPPA, "
+                f"{broll_desc}, no people, no character, cinematic storytelling atmosphere, "
+                f"breathtaking anime lighting, clean 2D cel shading, crisp dynamic anime linework, authentic MAPPA anime quality, "
                 f"not photorealistic, not 3D CGI, not semi-realistic, no live-action, no real human photo"
             )
 
         elif shot_type == 2:
-            # [타입 2: 원경 / 환경 롱샷 / 뒷모습 실루엣 - 사람이 배경 속에 작게 녹아듦]
-            if any(w in target_line for w in ["바다", "파도", "수평선", "해변"]):
-                env_desc = "distant back view of the young anime woman standing quietly at the edge of a scenic seaside cliff, gazing at vast ocean horizon at golden sunset"
-            elif any(w in target_line for w in ["밤", "별", "하늘", "새벽"]):
-                env_desc = "distant atmospheric silhouette of the young anime woman looking up at breathtaking starry night sky from high grassy hill, wind blowing her hair"
-            elif any(w in target_line for w in ["비", "빗", "거리", "길"]):
-                env_desc = "wide environmental long shot of the young anime woman holding an umbrella seen from behind, walking slowly down a quiet rain-soaked cobblestone street"
-            elif any(w in target_line for w in ["성", "유적", "산", "숲"]):
-                env_desc = "wide panoramic shot of ancient grand ruins overgrown with ivy, small distant silhouette of the anime woman gazing up at grand stone arches"
+            # [타입 2: 원경 / 환경 롱샷 / 광활한 공간 속 실루엣]
+            if arc_type == "battle_action":
+                env_desc = "wide environmental panoramic shot, distant silhouette of the heroic anime woman standing atop a towering ruined skyscraper, looking over vast shattered city enveloped in fiery smoke at twilight"
+            elif arc_type == "swimmer_athlete":
+                env_desc = "wide environmental long shot of the grand indoor aquatic arena, packed spectator stands, distant back view of the swimmer standing tall at lane center under bright floodlights"
+            elif arc_type == "stage_singer":
+                env_desc = "wide panoramic shot of massive concert arena, distant silhouette of the charismatic singer performing on center stage surrounded by ten thousand glowing cheering lightsticks"
+            elif arc_type == "cyberpunk_chase":
+                env_desc = "wide environmental shot of high futuristic suspension bridge, distant speeding motorcycle carving through foggy neon city lights at midnight"
             else:
-                env_desc = "wide environmental long shot, distant back view of the young anime woman standing on a high open terrace looking over expansive scenic townscape at sunset"
+                env_desc = "wide environmental long shot, distant back view of the young anime woman standing on a high open terrace gazing at breathtaking sunset horizon"
 
             full_p = (
-                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-                f"wide environmental long shot, {env_desc}, spacious cinematic composition, "
-                f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic by MAPPA, "
+                f"wide environmental long shot, {env_desc}, spacious cinematic anime composition, "
+                f"breathtaking dramatic anime lighting, clean 2D cel shading, crisp anime linework, authentic MAPPA anime quality, "
                 f"not photorealistic, not 3D CGI, not semi-realistic, no live-action, no real human photo"
             )
 
         else:
-            # [타입 0: 인물 감정 & 가창 클라이맥스 컷 - 여주인공 등장]
-            if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
-                visual_theme = "standing on stone castle balcony as a majestic white fantasy dragon glides gracefully through the twilight sky behind her"
-            elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
-                visual_theme = "holding an ornate glowing silver rapier with determined captivating anime eyes, wind whipping her ribbons on fortress wall"
-            elif any(w in target_line for w in ["무대", "열정", "노래", "소리쳐", "불꽃"]):
-                visual_theme = "singing passionately with microphone under warm golden stage lights, emotional expressive eyes, captivating stage presence"
-            elif any(w in target_line for w in ["꽃", "봄", "사랑", "온기"]):
-                visual_theme = "gently cupping blooming pink cherry blossom petals in a sunlit garden, soft enchanting smile with large expressive anime eyes"
-            elif any(w in target_line for w in ["비", "눈물", "빗", "이별"]):
-                visual_theme = "holding a transparent umbrella, gazing at camera with deep wistful large expressive anime eyes, gentle raindrops glistening"
-            elif any(w in target_line for w in ["바다", "파도", "여름"]):
-                visual_theme = "walking along picturesque seaside promenade at sunset, smiling gently towards the viewer with captivating anime eyes"
+            # [타입 0: 인물 액션 & 퍼포먼스 서사 (기승전결 진행도 반영)]
+            if arc_type == "battle_action":
+                if progress < 0.25:
+                    action_theme = combat["prep"]
+                elif progress < 0.6:
+                    action_theme = combat["strike"]
+                elif progress < 0.85:
+                    action_theme = combat["climax"]
+                else:
+                    action_theme = combat["finish"]
+            elif arc_type == "swimmer_athlete":
+                if progress < 0.25:
+                    action_theme = "standing poised on the swimming starting block, adjusting swim goggles with sharp focused eyes, determined confident breath, athletic curves glistening"
+                elif progress < 0.5:
+                    action_theme = "launching powerfully into the air from starting block in a graceful athletic dive, slicing smoothly into clear blue water, dynamic slow-motion angle"
+                elif progress < 0.8:
+                    action_theme = "powering forward with fierce explosive butterfly stroke, arms surging through water with intense athletic speed, glistening water droplets flying, passionate competitive drive"
+                else:
+                    action_theme = "touching the finish touchpad, bursting out of water and flipping wet hair back with a breathless radiant victorious smile, pumping fist in triumphant athletic glory"
+            elif arc_type == "stage_singer":
+                if progress < 0.25:
+                    action_theme = "holding microphone firmly backstage, stepping onto illuminated stage with radiant confident smile and energetic presence as crowd cheers"
+                elif progress < 0.5:
+                    action_theme = "gripping stand microphone, singing passionately with rhythmic groove, dynamic hair sway under sweeping stage lights, captivating facial expressions"
+                elif progress < 0.8:
+                    action_theme = "belting out explosive climactic high note, gripping microphone with both hands, shouting passionate lyrics with tearful radiant intensity, stage flames erupting"
+                else:
+                    action_theme = "concluding the song breathless with sparkling eyes, waving joyfully to roaring audience with a heartfelt enchanting smile under warm golden spotlights"
+            elif arc_type == "cyberpunk_chase":
+                if progress < 0.3:
+                    action_theme = "straddling a sleek high-tech sports motorcycle on rainy rooftop, revving throttle with sharp determined eyes beneath neon reflections"
+                elif progress < 0.7:
+                    action_theme = "drifting the motorcycle around tight highway corner at blistering speed, leaning low, wind whipping hair, glowing cyan tire skid sparks"
+                else:
+                    action_theme = "parking bike on high scenic overlook, removing helmet and shaking hair loose, smiling freely towards neon metropolis horizon"
             else:
-                visual_theme = f"expressing the heartfelt emotion of '{target_line}', singing softly with captivating luminous anime eyes and subtle charming smile"
+                if progress < 0.5:
+                    action_theme = f"expressing heartfelt emotion of '{target_line}', walking gracefully with deep expressive eyes"
+                else:
+                    action_theme = f"singing the climax of '{target_line}' passionately with luminous eyes and enchanting heartwarming smile"
 
-            cam_mod = cam_variations[(i // 3) % len(cam_variations)]
             full_p = (
-                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic by MAPPA, "
                 f"{char_prompt_base}, "
-                f"{visual_theme}, "
-                f"{cam_mod}, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"{action_theme}, "
+                f"dynamic cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, authentic MAPPA anime quality, "
                 f"not photorealistic, not 3D CGI, not semi-realistic, no live-action, no real human photo"
             )
 

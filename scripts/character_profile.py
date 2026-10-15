@@ -44,7 +44,13 @@ HEROINE_ARCHETYPES = {
             {"en": "wearing a revealing sophisticated dark bikini swimsuit accentuating massive voluptuous bust, deep cleavage, and curvy hourglass hips with black choker", "ko": "매혹적인 다크 비키니 수영복 & 초커 (글래머러스)", "type": "수영복"},
             {"en": "wearing a cozy off-shoulder knit sweater dress slipping off shoulder revealing deep cleavage, black choker, and voluptuous silhouette", "ko": "오프숄더 글래머 니트 스웨터 드레스", "type": "니트웨어"},
             {"en": "wearing a stylish unzipped sporty tracksuit jacket over a form-fitting sports bra accentuating cleavage and high-waisted tight joggers", "ko": "집업 트레이닝 셋업 & 스포츠 브라탑", "type": "츄리닝"}
-        ]
+        ],
+        "combat_actions": {
+            "prep": "standing ready in sleek combat stance, miniature fiery sparks and faint smoke dancing playfully around delicate fingertips, alluring confident smirk",
+            "strike": "delivering an explosive dynamic high kick enveloped in a massive burst of fiery shockwaves and blast sparks, sleek lethal martial arts movement",
+            "climax": "detonating a breathtaking fiery explosion behind her, leaping forward with explosive velocity, bomb devil fireworks and blistering hit sparks",
+            "finish": "landing gracefully amidst dissipating embers and smoke, wiping her mouth with a seductive breathless smile"
+        }
     },
     "makima": {
         "archetype": "makima",
@@ -71,7 +77,13 @@ HEROINE_ARCHETYPES = {
             {"en": "wearing an alluring elegant black one-piece monokini swimsuit with plunging neckline revealing massive voluptuous bust and attractive hourglass silhouette", "ko": "엘레강스 블랙 플런징 모노키니 수영복", "type": "수영복"},
             {"en": "wearing a sophisticated tight knit dress with deep neckline hugging extraordinarily voluptuous bust and hourglass curves", "ko": "타이트 니트 글래머 바디콘 드레스", "type": "니트웨어"},
             {"en": "wearing a chic college preppy blazer uniform with a fitted knit cardigan over blouse and pleated mini skirt accentuating curvy figure", "ko": "프레피 블레이저 & 플리츠 스커트", "type": "캠퍼스룩"}
-        ]
+        ],
+        "combat_actions": {
+            "prep": "standing composed and majestic amidst city ruins, slowly lifting right hand and forming a finger-gun pointing forward, hypnotic circular target eyes glowing",
+            "strike": "whispering 'Bang' as an invisible devastating kinetic shockwave craters the concrete ground and shatters the air with sheer atmospheric distortion",
+            "climax": "radiating an overwhelming commanding aura, invisible crushing gravity flattening the battlefield, her dark coat billowing dramatically behind her",
+            "finish": "calmly smoothing down her tie and crisp white shirt, gazing forward with an unflinching enigmatic dominant smile"
+        }
     },
     "power": {
         "archetype": "power",
@@ -98,7 +110,13 @@ HEROINE_ARCHETYPES = {
             {"en": "wearing a vibrant athletic two-piece bikini swimsuit accentuating extraordinarily voluptuous bust, deep cleavage, and curvy hourglass figure with red horns", "ko": "스포티 투피스 글래머 비키니 수영복 & 붉은 뿔", "type": "수영복"},
             {"en": "wearing a white tennis skirt with a form-fitting polo crop top accentuating very large bust and narrow waist", "ko": "테니스 스커트 & 슬림 폴로탑 (글래머핏)", "type": "테니스룩"},
             {"en": "wearing tight high-waisted denim shorts and a tight ribbed cropped tee hugging voluptuous bust and hourglass waist", "ko": "데님 숏팬츠 & 타이트 립 크롭티", "type": "스트릿캐주얼"}
-        ]
+        ],
+        "combat_actions": {
+            "prep": "laughing maniacally with sharp red fangs showing, raising both hands as crimson blood coalesces into a gargantuan jagged war hammer",
+            "strike": "leaping aggressively into the air and slamming down the massive crimson blood hammer with catastrophic impact, rock debris and red shockwaves erupting",
+            "climax": "unleashing a wild hurricane of summoned floating blood spears launching at sonic speed, crimson energy streaks tearing through the battlefield",
+            "finish": "resting the blood weapon nonchalantly over her shoulder, sticking her tongue out playfully with blood on her cheek in wild chaotic triumph"
+        }
     }
 }
 
@@ -128,6 +146,7 @@ def generate_random_character_profile() -> dict:
         "outfit_en": outfit["en"],
         "outfit_ko": outfit["ko"],
         "outfit_type": outfit["type"],
+        "combat_actions": arch.get("combat_actions", {}),
         "korean_summary": korean_summary
     }
 

@@ -128,7 +128,15 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
     # 3. 배경 슬러그 (씬 프롬프트 분석)
     p_lower = scene_prompt.lower()
     bg_slug = "scenic_terrace"
-    if "dragon" in p_lower or "castle" in p_lower:
+    if "pool" in p_lower or "swimming" in p_lower or "dive" in p_lower or "lane" in p_lower:
+        bg_slug = "olympic_swimming_pool"
+    elif "battle" in p_lower or "crater" in p_lower or "rubble" in p_lower or "shattered" in p_lower or "explosion" in p_lower:
+        bg_slug = "battlefield_ruins"
+    elif "stage" in p_lower or "concert" in p_lower or "spotlight" in p_lower or "lights" in p_lower:
+        bg_slug = "concert_stage"
+    elif "highway" in p_lower or "neon" in p_lower or "cyberpunk" in p_lower or "cityscape" in p_lower:
+        bg_slug = "neon_metropolis"
+    elif "dragon" in p_lower or "castle" in p_lower:
         bg_slug = "castle_balcony"
     elif "rapier" in p_lower or "fortress" in p_lower or "sword" in p_lower:
         bg_slug = "fortress_wall"
@@ -158,13 +166,23 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
         bg_slug = "cherry_blossom_garden"
     elif "bedroom" in p_lower or "sunlight" in p_lower:
         bg_slug = "morning_balcony"
-    elif "stage" in p_lower or "concert" in p_lower or "lights" in p_lower:
-        bg_slug = "concert_stage"
 
     # 4. 동작 슬러그
     action_slug = "gazing"
-    if "singing" in p_lower or "microphone" in p_lower:
-        action_slug = "singing"
+    if "kick" in p_lower or "hammer" in p_lower or "strike" in p_lower or "hit spark" in p_lower or "impact" in p_lower:
+        action_slug = "combat_strike"
+    elif "bang" in p_lower or "finger-gun" in p_lower or "shockwave" in p_lower:
+        action_slug = "combat_shockwave"
+    elif "combat stance" in p_lower or "ready" in p_lower or "sparks" in p_lower:
+        action_slug = "combat_prep"
+    elif "dive" in p_lower or "diving" in p_lower or "starting block" in p_lower:
+        action_slug = "swimming_dive"
+    elif "stroke" in p_lower or "freestyle" in p_lower or "butterfly" in p_lower or "water splash" in p_lower:
+        action_slug = "swimming_stroke"
+    elif "singing" in p_lower or "microphone" in p_lower or "shouting" in p_lower:
+        action_slug = "stage_singing"
+    elif "guitar" in p_lower or "solo" in p_lower:
+        action_slug = "instrument_play"
     elif "walking" in p_lower or "strolling" in p_lower:
         action_slug = "walking"
     elif "holding" in p_lower or "rapier" in p_lower or "umbrella" in p_lower:
