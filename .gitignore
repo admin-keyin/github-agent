@@ -51,4 +51,5 @@ __pycache__/
 !assets/anime_clips/skill_list.mp4
 !assets/anime_clips/skill_list2.mp4
 !assets/anime_clips/*.mp4
+!assets/anime_library/*.mp4
 *.log
