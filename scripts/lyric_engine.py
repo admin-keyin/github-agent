@@ -176,7 +176,7 @@ def resolve_category(song_type: str) -> str:
 def generate_short_title(category: str) -> str:
     """
     한계, 돌파, 플레이리스트 등 진부한 단어와 장황한 문장형 제목을 철저히 배제하고,
-    짧고 감각적인 1~2단어(2~5음절)의 순수 단어, 혼합어(합성어), 감성 신조어를 생성합니다.
+    짧고 감각적인 1~2단어(2~5음절)의 한국어, 영어, 또는 한영 혼합 감성 신조어 제목을 생성합니다.
     """
     if category in ("changpop", "battle_epic"):
         # 질주 팝록 / 애니메이션 밴드 / 파워풀 팝
@@ -184,23 +184,31 @@ def generate_short_title(category: str) -> str:
             "야간비행", "스파크런", "달빛서퍼", "네온스텝", "비행운",
             "은하질주", "새벽워프", "루미너스", "블루스텝", "플래시백",
             "스카이워크", "불꽃놀이", "찰나", "잔향", "소닉붐", "유성우",
-            "일탈", "점프컷", "선샤인", "파도타기", "빛의궤적", "스타더스트"
+            "일탈", "점프컷", "선샤인", "파도타기", "빛의궤적", "스타더스트",
+            # 세련된 영문 타이틀
+            "IGNITE", "SPARK", "FLASHBACK", "NIGHTWALK", "NEON STEP",
+            "SONIC", "BLAZE", "BLUE PULSE", "CRUSH", "OVERPASS",
+            "STARFALL", "DIVE", "RUNNER", "BREAKOUT", "AFTERSHOCK"
         ]
-        part_a = ["달빛", "별빛", "네온", "새벽", "은하", "바람", "불꽃", "구름", "푸른", "물빛", "광속", "태양"]
-        part_b = ["유영", "비행", "스텝", "서퍼", "러너", "스파크", "웨이브", "소풍", "워프", "궤도", "점프", "샤워"]
+        part_a = ["달빛", "별빛", "네온", "새벽", "은하", "바람", "불꽃", "구름", "푸른", "물빛", "광속", "태양", "Blue", "Neon", "Cyber", "Dark"]
+        part_b = ["유영", "비행", "스텝", "서퍼", "러너", "스파크", "웨이브", "소풍", "워프", "궤도", "점프", "샤워", "Pulse", "Rush", "Dive", "Flash"]
     else:
         # 서정 발라드 / 인디 밴드 / 어쿠스틱
         standalones = [
             "윤슬", "잔향", "여명", "새벽녘", "물그림자", "달그림자",
             "낮달", "소나기", "바람결", "밤안개", "별조각", "온도",
             "잔상", "귀로", "계절감", "여운", "초록", "숲결", "봄샘",
-            "노을빛", "달빛창가", "이슬길"
+            "노을빛", "달빛창가", "이슬길",
+            # 세련된 영문 타이틀
+            "BLUE", "BLOOM", "REWIND", "LAST NIGHT", "MEMORIES",
+            "STARDUST", "GLOW", "WHISPER", "DREAM", "AFTERGLOW",
+            "ECHO", "SILENCE", "SUNSET", "TRACE", "DRIFT"
         ]
-        part_a = ["달빛", "별빛", "새벽", "바람", "물빛", "꽃잎", "구름", "노을", "숲속", "기억", "안개", "풀잎"]
-        part_b = ["유영", "항해", "산책", "소풍", "조각", "스케치", "그림자", "물결", "속삭임", "발자국", "온기", "선율"]
+        part_a = ["달빛", "별빛", "새벽", "바람", "물빛", "꽃잎", "구름", "노을", "숲속", "기억", "안개", "풀잎", "Pure", "Soft", "Silent", "Deep"]
+        part_b = ["유영", "항해", "산책", "소풍", "조각", "스케치", "그림자", "물결", "속삭임", "발자국", "온기", "선율", "Wave", "Glow", "Echo", "Breeze"]
 
-    # 50% 확률로 엄선된 단독 단어/신조어, 50% 확률로 감각적인 합성어(혼합어)
-    if random.random() < 0.5:
+    # 55% 확률로 엄선된 단독 단어/신조어/영문, 45% 확률로 감각적인 합성어(혼합어)
+    if random.random() < 0.55:
         return random.choice(standalones)
     else:
         return f"{random.choice(part_a)}{random.choice(part_b)}"
@@ -315,21 +323,25 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 (주의: 추상적인 미사여구 대신 Suno 엔진이 바로 오디오 신디사이징으로 해석할 수 있는 구체적 음악 용어 위주로 작성)
 
 [★ 2. 곡 제목 (title) 및 중독적인 가사 (lyrics) 작사 규칙]
-1. 【곡 제목(title) 필수 절대 원칙 - 짧은 단어 / 혼합어 / 신조어】:
-   - 길이 및 형식: 공백 포함 2~6자 내외의 짧고 감각적인 '단어', '혼합어(합성어)', 또는 '감성 신조어'로만 지으세요.
+1. 【곡 제목(title) 필수 절대 원칙 - 짧은 단어 / 영문 / 혼합어 / 신조어】:
+   - 길이 및 형식: 공백 포함 2~8자 내외의 짧고 감각적인 한국어 단어, 세련된 영문 단어(예: SPARK, IGNITE, ECHO, BLUE, DIVE, NIGHTWALK), 또는 감성 합성어로 지으세요.
    - 절대 문장형이나 장황한 수식어구(예: '모두가 잠든 밤의 노래', '너를 향해 달리는 순간', '마지막 정거장에서' 등)로 짓지 마세요.
-   - 썸네일과 영상에 크게 박힐 때 뇌리에 단번에 꽂히는 1~2단어(2~5음절) 형태여야 합니다.
+   - 썸네일과 영상에 크게 박힐 때 뇌리에 단번에 꽂히는 1~2단어 형태여야 합니다.
    - 【절대 금지 단어】: '한계', '돌파', '플레이리스트', '하이라이트', '오버드라이브', '카운트다운' 등 진부하고 상투적인 단어는 제목과 가사 모두에서 절대 사용 금지.
    - 절대 '#1', '#91' 같은 해시태그나 임의의 트랙 번호를 붙이지 마세요.
-   - 【추천 스타일 예시】:
-     • 질주/애니록/팝: '야간비행', '스파크런', '달빛서퍼', '네온스텝', '비행운', '은하질주', '새벽워프', '찰나', '불꽃놀이', '루미너스', '블루스텝', '플래시백'
-     • 서정/인디/발라드: '윤슬', '잔향', '새벽녘', '달빛유영', '물그림자', '별조각', '여명', '바람소풍', '낮달', '소나기', '구름산책', '밤안개'
-2. 가사 본문이나 제목에 '정상화', '카운터', '신창섭' 등 특정 인터넷 밈 단어를 절대 사용하지 마세요. 대신 청춘, 일탈, 자유, 사랑, 질주, 열정 등 신선하고 몰입감 넘치는 대중가요 어휘를 사용하세요.
-3. 가사 본문이나 대괄호 섹션 태그에 특정 가수명이나 밴드명(예: 잔나비, 넬, DAY6 등)을 절대 언급하거나 포함하지 마세요. 순수 음악적 연주 지시어만 영문으로 작성하세요.
-4. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
-5. 장르가 창팝/질주록인 경우, 시원시원한 라임과 통쾌한 딕션, 따라 부르기 쉬운 킬링 파트를 만드세요.
-6. 장르가 발라드/인디인 경우, 문학적이고 시적인 서사와 먹먹한 여운을 담으세요.
-4. 섹션별로 Suno가 연주 다이내믹스를 극대화할 수 있도록 연주 지시 큐를 반드시 대괄호에 표기하세요:
+2. 【★ 가사 언어 스타일: 꼭 100% 한글이 아니어도 되며, 영어가사를 자연스럽게 섞어서(한영 혼용 / 바이링구얼 Bilingual lyrics) 작성하세요!】:
+   - K-Pop, K-Rock, J-Pop / 체인소 맨 OP 스타일처럼 중독성 있는 영어 훅(Catchy English Hooks), 킬링 파트, 코러스의 세련된 영문 라인(English Chorus Lines)을 적극적으로 섞어서 작성하세요.
+   - 코러스(Chorus)나 프리코러스(Pre-Chorus), 인트로/아웃트로 등에 강렬하고 기억하기 쉬운 영문 펀치라인을 한글 가사와 리드미컬하게 믹스하세요.
+   - 예시 (질주/록/배틀):
+     `Don't look back, we're burning in the dark! / 멈추지 마, 심장이 터질 때까지 / Break the silence, shout it out loud! / 끝없는 밤을 뚫고 날아올라`
+   - 예시 (감성/인디/발라드):
+     `'Cause in my memories you still shine, / 스쳐 지나간 너의 계절 속에 / I will never let you fade away, / 이 밤이 지나도 너를 기억해`
+3. 가사 본문이나 제목에 '정상화', '카운터', '신창섭' 등 특정 인터넷 밈 단어를 절대 사용하지 마세요. 대신 청춘, 일탈, 자유, 사랑, 질주, 열정 등 신선하고 몰입감 넘치는 대중가요 어휘를 사용하세요.
+4. 가사 본문이나 대괄호 섹션 태그에 특정 가수명이나 밴드명(예: 잔나비, 넬, DAY6 등)을 절대 언급하거나 포함하지 마세요. 순수 음악적 연주 지시어만 영문으로 작성하세요.
+5. 벌스(Verse)는 이야기하듯 호흡을 쪼개며 긴장감을 만들고, 프리코러스(Pre-Chorus)에서 감정을 고조시킨 뒤, 후렴(Chorus)에서 뇌리에 박히는 폭발적인 멜로디 훅(Catchy Hook)이 터져 나오게 쓰세요.
+6. 장르가 창팝/질주록인 경우, 시원시원한 라임과 통쾌한 딕션, 따라 부르기 쉬운 킬링 파트를 만드세요.
+7. 장르가 발라드/인디인 경우, 문학적이고 시적인 서사와 먹먹한 여운을 담으세요.
+8. 섹션별로 Suno가 연주 다이내믹스를 극대화할 수 있도록 연주 지시 큐를 반드시 대괄호에 표기하세요:
    예시:
    - [Intro: Fast Slap Bass & Driving Guitar Hook] 또는 [Intro: Gentle Piano & Acoustic Lead]
    - [Verse 1: Fast Rhythmic Phrasing]
@@ -464,85 +476,89 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 
     if spec["category"] == "changpop":
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
-        lyrics = f"""[Intro: Driving Drums & Bass Riff]
+        lyrics = f"""[Intro: Driving Drums & Electric Guitar Riff]
 [Verse 1: Fast Rhythmic Delivery]
 어둠 속에 멈춰있던 시계태엽을 감아
-답답했던 한숨 따윈 전부 뒤로 던져
+Wake up now, 더는 지체할 시간은 없어
 {selected_theme}
-눈치 보며 망설이던 시간은 이제 끝났어
+Don't look back, 망설임 따윈 전부 던져버려
 
 [Pre-Chorus: Building Tension, Drum Rolls]
+Can you feel the fire burning inside?
 심장박동이 점점 빨라져 오고
-터질 듯한 열기가 차오를 때
-더는 숨길 수 없는 우리의 진짜 목소리
-지금 이 순간, 소리쳐!
+더는 숨길 수 없는 우리의 Voice
+지금 이 순간, Shout it out loud!
 
-[Chorus: Explosive Melodic Climax, Soaring High Notes]
-달려가 거침없이 온 세상을 흔들어
-답답했던 어제를 전부 날려버려!
-타오르는 불빛 속에 마주한 우리
+[Chorus: Explosive Melodic Climax, Soaring Belting Vocals]
+Run away, 거침없이 온 세상을 흔들어!
+Break the dark, 답답했던 어제를 날려버려!
+We are burning brighter than the stars
 절대 멈추지 않아, 끝까지 날아올라!
+Never gonna stop, fly into the sky!
 
 [Verse 2: Funky Bass Groove Breakdown]
 아무도 가지 않은 길이라 해도
-우리가 밟는 순간 새로운 길이 돼
-겁먹지 마, 두려움 따윈 한순간의 연기일 뿐
+Step by step, 우리가 밟는 순간 새로운 길이 돼
+겁먹지 마, 두려움 따윈 Just fade away
 
 [Bridge: Dramatic Key Change, Blazing Guitar Solo]
 (화려한 기타 솔로와 함께 감정의 절정으로 치닫는 브릿지)
-하늘 끝까지 닿아라, 우리의 멜로디!
+하늘 끝까지 닿아라, Our melody echoing high!
 
 [Chorus: Final Grand Climax, High Energy Ad-libs]
-달려가 거침없이 온 세상을 흔들어
-답답했던 어제를 전부 날려버려!
-타오르는 불빛 속에 마주한 우리
+Run away, 거침없이 온 세상을 흔들어!
+Break the dark, 답답했던 어제를 날려버려!
+We are burning brighter than the stars
 절대 멈추지 않아, 끝까지 날아올라!
+Never gonna stop, we ignite the night!
 
 [Outro: Driving Guitar Riff & Punchy Drum Hit]
-완벽한 순간!
+This is our moment!
 지금부터가 진짜 시작이야."""
     else:
         style_tags = f"{spec['genre']}, {spec['melody_style']}, {spec['instruments']}, {spec['vocal']}, {spec['bpm']} bpm, {spec['texture']}"
-        lyrics = f"""[Intro: Acoustic & Piano Melody Lead]
+        lyrics = f"""[Intro: Soft Piano & Acoustic Guitar Lead]
 [Verse 1: Whispering Intimate Voice]
 어스름한 가로등 아래를 천천히 걸어가
-마음속 깊이 접어두었던 서랍을 조용히 열어
+In the quiet night, 서랍을 조용히 열어
 {selected_theme}
-우린 어디쯤 서서 이 긴 밤을 견디고 있었을까
+Where are we going? 긴 어둠의 터널을 지나
 
 [Pre-Chorus: Gentle Strings Buildup]
-스쳐 지나가는 찬 바람결마다
+Every breath I take, 스쳐 지나가는 바람결마다
 남겨진 너의 온기가 피어오르고
-아직 다 전하지 못한 서툰 이야기들이
+Still inside my heart, 전하지 못한 이야기들이
 가슴 깊은 곳에서 아련하게 차올라
 
 [Chorus: Soaring Emotional Climax, Full Sound]
-지나온 시간들이 눈부시게 흩어져도
-너와 함께 숨 쉬었던 그 계절은 잊지 않아
-어두운 밤하늘 길을 잃어 헤맬 때도
+'Cause in my memories you still shine,
+눈부시게 흩어지던 그 계절처럼
+Even when the shadows fall tonight,
 마음속 꺼지지 않는 선율 하나, 너를 부르고 있어
+I'll never let you fade away
 
 [Verse 2: Gentle Rhythm]
 비워낸 마음 한구석에 피어나는
-이름 모를 작은 들꽃처럼
+Like a tiny flower in the morning dew
 혼자 걷는 골목길 끝에서
 담담히 나의 이름을 다시 불러보네
 
 [Bridge: Emotional Key Change & Vocal Climax]
 눈을 감으면 번져오는 너의 맑은 미소
-모든 아픔은 지나가고
-다시 불어올 바람 속에
-우린 더 따뜻해질 테니까
+All the pain will fade into the wind
+다시 불어올 따스한 봄날 속에
+We will be shining again
 
 [Chorus: Final Grand Climax]
-지나온 시간들이 눈부시게 흩어져도
-너와 함께 숨 쉬었던 그 계절은 잊지 않아
-어두운 밤하늘 길을 잃어 헤맬 때도
+'Cause in my memories you still shine,
+눈부시게 흩어지던 그 계절처럼
+Even when the shadows fall tonight,
 마음속 꺼지지 않는 선율 하나, 너를 부르고 있어
+Forever in my heart, always by your side
 
 [Outro: Soft Fade Out]
 새벽이 걷히고 햇살이 비출 때까지...
-편안히 숨을 쉬어요.
+Until the morning comes.
 안녕, 나의 어제여."""
 
     fallback_scenes = [
@@ -577,6 +593,7 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
 def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
     """
     가사 텍스트와 캐릭터 의상/성향을 분석하여 뮤직비디오의 메인 스토리 서사(Storyline Arc)를 결정합니다.
+    한국어 및 영어 가사 키워드를 모두 인식합니다.
     - battle_action: 타격감 넘치는 다이나믹 전투 액션 (체인소 맨 세계관, 격투, 폭발, 피의 무기)
     - swimmer_athlete: 수영선수 챔피언십 레이스 드라마 (스타트대 다이빙, 물살 가르기, 물보라, 승리의 터치패드)
     - stage_singer: 무대 위 열정적인 디바 / 락스타 콘서트 (화려한 스테이지 조명, 마이크 열창, 관객 환호)
@@ -594,8 +611,11 @@ def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
 
     # 1. 수영선수 / 워터 스포츠 서사 체크 (의상이 수영복이거나 수영 관련 가사)
     is_swim_outfit = "수영복" in outfit_type or "수영복" in outfit_ko or "bikini" in outfit_en or "monokini" in outfit_en
-    swim_keywords = ["수영", "다이빙", "물속", "스트로크", "접영", "자유형", "레인", "터치패드", "물살", "풀장", "수면", "물보라", "헤엄"]
-    has_swim_words = any(k in lyrics for k in swim_keywords)
+    swim_keywords = [
+        "수영", "다이빙", "물속", "스트로크", "접영", "자유형", "레인", "터치패드", "물살", "풀장", "수면", "물보라", "헤엄",
+        "swim", "swimming", "dive", "diving", "stroke", "freestyle", "butterfly", "touchpad", "splash", "aquatic"
+    ]
+    has_swim_words = any(k in lyric_lower for k in swim_keywords)
 
     if is_swim_outfit or has_swim_words:
         return {
@@ -609,9 +629,12 @@ def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
     battle_keywords = [
         "싸움", "전투", "칼", "검", "피", "폭발", "화염", "악마", "체인소", "격돌", "타격",
         "타오", "전쟁", "적", "사냥", "사이다", "결전", "분노", "오기", "박차", "쳐부수",
-        "불꽃", "핏빛", "흉터", "승리", "돌파", "파괴", "격파", "베어", "날려", "강타"
+        "불꽃", "핏빛", "흉터", "승리", "돌파", "파괴", "격파", "베어", "날려", "강타",
+        "fight", "battle", "strike", "smash", "punch", "kick", "blast", "explosion",
+        "blood", "fire", "flame", "chainsaw", "devil", "sword", "crush", "break",
+        "shatter", "war", "burn", "ignite"
     ]
-    if any(k in lyrics for k in battle_keywords):
+    if any(k in lyric_lower for k in battle_keywords):
         return {
             "arc_type": "battle_action",
             "name_ko": "타격감 넘치는 다이나믹 배틀 액션 (Dynamic Chainsaw Man Anime Combat Arc)",
@@ -622,9 +645,11 @@ def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
     # 3. 무대 위의 열정적인 디바 / 락밴드 보컬 서사 체크
     stage_keywords = [
         "노래", "무대", "마이크", "밴드", "기타", "드럼", "소리쳐", "샤우팅", "조명",
-        "스테이지", "콘서트", "환호", "멜로디", "박수", "음악", "청춘", "꿈", "페스티벌", "보컬"
+        "스테이지", "콘서트", "환호", "멜로디", "박수", "음악", "청춘", "꿈", "페스티벌", "보컬",
+        "stage", "concert", "sing", "singing", "song", "microphone", "mic", "shout",
+        "guitar", "spotlight", "cheer", "crowd", "music", "rock", "melody", "diva"
     ]
-    if any(k in lyrics for k in stage_keywords):
+    if any(k in lyric_lower for k in stage_keywords):
         return {
             "arc_type": "stage_singer",
             "name_ko": "무대 위 열정적인 디바 / 락스타 콘서트 (Passionate Stage Diva & Rock Star Arc)",
@@ -633,8 +658,11 @@ def detect_storyline_arc(lyrics: str, character_profile: dict = None) -> dict:
         }
 
     # 4. 심야 네온 고속 질주 / 탈출 액션 체크
-    chase_keywords = ["질주", "고속도로", "밤", "도망", "탈출", "자유", "네온", "속도", "엔진", "달려", "시속", "바이크", "아스팔트"]
-    if any(k in lyrics for k in chase_keywords):
+    chase_keywords = [
+        "질주", "고속도로", "밤", "도망", "탈출", "자유", "네온", "속도", "엔진", "달려", "시속", "바이크", "아스팔트",
+        "speed", "chase", "highway", "run", "running", "engine", "motorcycle", "bike", "drift", "midnight", "neon"
+    ]
+    if any(k in lyric_lower for k in chase_keywords):
         return {
             "arc_type": "cyberpunk_chase",
             "name_ko": "심야 네온 고속 질주 & 도심 탈출 액션 (Midnight Cyberpunk Speed & Chase Arc)",
