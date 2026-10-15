@@ -341,19 +341,21 @@ Suno AI가 뻔한 곡을 만들지 않고 의도한 다이내믹 선율을 확�
    - [Outro: Energetic Guitar Riff Fade Out] 또는 [Outro: Soft Fade Out]
 
 [★ 3. 작사된 가사 파트와 1:1로 일치하는 일본 2D 애니 씬 프롬프트 (scene_prompts)]
-※ 절대 원칙 (정통 일본 2D 애니메이션 화풍 고정, 이번 곡의 고정 여주인공 비주얼 프로필 100% 일관되게 유지, 가사 감성에 맞춘 다채로운 배경 1:1 직결):
+※ 절대 원칙 (자연스러운 영화적 서사 몽타주, '사람다음사람' 나열 금지, 정통 일본 2D 애니메이션 화풍):
 1. 정통 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, Kyoto Animation / CloverWorks quality, Makoto Shinkai level cinematic lighting):
-   - 실사화나 반실사(semi-realistic)를 철저히 배제하고 순수 일본 2D 모에 애니메이션 감성 유지.
-   - 생동감 넘치는 부드러운 애니메이션 색감과 정교한 셀 셰이딩(vibrant anime palette, soft pastel anime lighting, clean 2D cel shading, crisp dynamic 2D outlines).
+   - 실사화나 반실사(semi-realistic)를 철저히 배제하고 순수 일본 2D 애니메이션 감성 유지 (clean 2D cel shading, soft pastel lighting, crisp anime linework).
    - 실사 사진(photorealistic), 3D CGI, 서구권 코믹스, 기괴한 얼굴 왜곡 철저 배제(not 3D, not photorealistic, not semi-realistic, no live-action, no real human photo).
-2. 【이번 곡의 고정 여주인공 캐릭터 설정 - 모든 씬에서 동일하게 고정】:
-   - 연령 및 분위기: 20대 초반(약 21~23세)의 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty). 너무 어린 아이(로리) 같거나 중년(아줌마) 느낌이 나지 않도록 유의.
-   - 헤어스타일 & 컬러: {char_profile['hair_en']} ({char_profile['hair_ko']})
-   - 의상 스타일: {char_profile['outfit_en']} ({char_profile['outfit_ko']})
-   - 외형: 크고 맑은 깊은 매혹적인 애니 눈망울과 섬세한 속눈썹(large expressive luminous anime eyes with delicate long eyelashes), 세련되고 매혹적인 이목구비와 자신감 넘치는 은은한 미소(refined captivating face, subtle confident charming smile), 키가 크고 늘씬하며 우아하고 성숙한 볼륨감의 모래시계 몸매(extremely glamorous tall hourglass figure, voluptuous mature curves, graceful slender waist, alluring silhouette).
-   - 배제 키워드: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
-   - 캐릭터 외형, 헤어 컬러, 의상은 이 곡의 씬 전체에서 흔들림 없이 고정됩니다!
-3. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 얽매이지 않고 곡의 감성에 맞춘 자유로운 배경):
+2. 【시네마틱 뮤직비디오 스토리텔링 몽타주 규칙 - '사람다음사람' 인물 나열 절대 금지】:
+   - 모든 씬에 사람 얼굴만 크게 연속해서 나오는 단조로운 구도를 엄격히 금지합니다.
+   - 실제 명작 애니메이션 뮤직비디오처럼 [풍경/오브제 B-Roll 컷(약 40%)] -> [원경/실루엣/뒷모습 롱샷(약 30%)] -> [인물 감정/가창 컷(약 30%)]으로 다채롭게 교차하세요:
+     • [B-Roll 풍경/오브제]: 인물 클로즈업 없이, 빗방울 창가, 노을빛 전철 철길, 바람에 날리는 벚꽃, 별빛 밤하늘, 건반을 누르는 손끝, 파도 거품 등 순수 감성 배경/정물 연출
+     • [원경/실루엣]: 인물이 화면에 크게 나오지 않고, 광활한 옥상이나 언덕 풍경 속 작게 서 있는 뒷모습(back view)이나 실루엣(silhouette), 먼 거리 롱샷
+     • [인물 감정 컷]: 후렴구나 감정 절정 파트에서 비로소 여주인공({char_profile['hair_ko']}, {char_profile['outfit_ko']})이 등장하여 깊은 눈빛과 감정을 담아 노래
+3. 【인물 등장 씬의 고정 여주인공 설정 - 인물이 나올 때만 적용】:
+   - 20대 초반(약 21~23세) 성숙하면서도 싱그럽고 매력적인 20대 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty).
+   - 헤어: {char_profile['hair_en']}, 의상: {char_profile['outfit_en']}
+   - 배제: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
+4. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 얽매이지 않고 곡의 감성에 맞춘 자유로운 배경):
    - 방금 작사한 [lyrics]의 실제 단어, 소재, 감정선, 공간적 배경과 여주인공의 감정/행동을 1:1로 매핑하세요:
      • [비/우산/물/눈물]: 촉촉이 비 내리는 감성적인 유럽풍 거리나 빗방울 맺힌 카페 창가에서 투명 우산을 쓰거나 찻잔을 든 채 큰 눈망울로 카메라를 아련하게 응시하는 여주인공
      • [밤/별/우주/새벽]: 고풍스러운 앤티크 테라스나 언덕에 서서 쏟아지는 별빛 은하수 밤하늘을 올려다보며 머리카락을 바람에 흩날리는 여주인공
@@ -605,28 +607,31 @@ def generate_scene_prompts_for_duration(
 [가사 전문]:
 {lyrics}
 
-[★ 정통 일본 2D 애니메이션 화풍 + 이번 곡의 고정 여주인공 캐릭터 규칙]:
+[★ 정통 일본 2D 애니메이션 화풍 + 시네마틱 뮤직비디오 스토리텔링 몽타주 규칙]:
 1. 최정상급 일본 2D 애니메이션 화풍 (Authentic Japanese 2D TV anime aesthetic, Kyoto Animation / CloverWorks quality, Makoto Shinkai cinematic lighting):
    - 실사화나 반실사(semi-realistic)를 배제하고 확실한 2D 애니메이션 작화(clean 2D cel shading, soft pastel lighting, vibrant anime palette, crisp anime linework) 유지.
    - 실사 사진(photorealistic), 3D CGI, 서양 코믹스, 기괴한 얼굴 왜곡 절대 금지(not 3D, no photorealism, not semi-realistic, no live-action, no real human photo).
-2. 【이번 곡의 고정 여주인공 캐릭터 설정 - {num_scenes}개 모든 씬에서 동일하게 고정】:
-   - 연령 및 분위기: 20대 초반(약 21~23세)의 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty). 너무 어린 아이(로리) 같거나 중년(아줌마) 느낌이 나지 않도록 유의.
+2. 【★ 핵심 원칙: '사람다음사람' 인물 얼굴 나열 절대 금지! 한 편의 영화 같은 몽타주 리듬】:
+   - 모든 씬에 사람 얼굴/상반신만 크게 반복해서 나오는 단조롭고 답답한 구도를 철저히 금지합니다.
+   - 뮤직비디오의 서사와 호흡을 위해 아래 3가지 타입의 샷을 {num_scenes}개 씬 전체에 걸쳐 유기적으로 교차 배치하세요:
+     • [타입 1: 감성 풍경 & 상징 오브제 B-Roll 컷 (약 40%)] - 인물 얼굴 없음!
+       (예: 비 내리는 창가, 노을빛 철길, 흩날리는 벚꽃, 별똥별 밤하늘, 피아노 건반을 누르는 손, 잔잔한 파도 거품, 앤티크 시계, 김이 피어오르는 찻잔 등 순수 시네마틱 풍경/정물)
+       * 프롬프트에 {char_prompt_base}를 넣지 말고, 순수 풍경 및 오브제 묘사 위주로 구성 (no people 명시).
+     • [타입 2: 원경 / 환경 롱샷 / 뒷모습 실루엣 (약 30%)] - 인물이 화면에 크게 나오지 않음!
+       (예: 광활한 옥상이나 언덕, 해변 풍경 속에 아주 작게 서 있는 뒷모습(back view), 실루엣(silhouette), 먼 거리 와이드 앵글)
+     • [타입 3: 인물 감정 & 하이라이트 가창 (약 30%)] - 후렴구 및 클라이맥스 파트에서만 비로소 등장!
+       (여주인공이 등장하여 깊고 매혹적인 눈빛으로 노래하거나 감정선 폭발)
+3. 【인물 등장 씬의 고정 여주인공 프로필 - 인물이 나오는 씬에서만 일관되게 적용】:
+   - 연령: 20대 초반(약 21~23세) 성숙하면서도 싱그럽고 매력적인 20대 젊은 성인 여성 (stunning young adult anime woman in early twenties, mature feminine elegance yet youthful fresh beauty).
    - 헤어스타일 & 컬러: {character_profile['hair_en']} ({character_profile['hair_ko']})
    - 의상 스타일: {character_profile['outfit_en']} ({character_profile['outfit_ko']})
-   - 외형: 크고 맑은 깊은 매혹적인 애니 눈망울과 섬세한 긴 속눈썹(large expressive luminous anime eyes with delicate long eyelashes), 세련되고 매혹적인 이목구비와 자신감 넘치는 은은한 미소(refined captivating face, subtle confident charming smile), 키가 크고 늘씬하며 우아하고 성숙한 볼륨감의 모래시계 몸매(extremely glamorous tall hourglass figure, voluptuous mature curves, graceful slender waist, alluring silhouette).
-   - 배제 키워드: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
-   - 캐릭터 외형, 헤어 컬러, 의상은 이 곡의 {num_scenes}개 씬 전체에서 흔들림 없이 고정됩니다!
-3. 가사 텍스트와 여주인공 서사의 1:1 직결 연출 (사이버펑크에 한정되지 않고 곡의 정서에 맞춘 다채로운 감성 배경):
-   - 가사의 실제 단어, 감정, 분위기에 맞춰 여주인공의 표정, 행동, 공간을 정밀하게 연출:
-     • [비/우산/물/눈물]: 빗방울 맺힌 카페 창가나 낭만적인 비 내리는 유럽풍 거리에서 우산을 쓰고 찻잔을 든 채 큰 눈망울로 카메라를 아련하게 응시하는 여주인공
-     • [밤/별/우주/새벽]: 앤티크 테라스나 언덕에 서서 쏟아지는 별빛 밤하늘을 올려다보며 머리카락을 바람에 흩날리는 여주인공
-     • [질주/탈출/바람/길]: 푸른 초원이나 해변 길을 바람을 가르며 활기차게 달리는 여주인공
-     • [무대/열정/불꽃/소리쳐]: 반짝이는 무대 조명 아래에서 마이크를 쥐고 감정을 담아 노래하는 여주인공
-     • [꽃/봄/온기/사랑]: 꽃잎이 흩날리는 따스한 야외 정원이나 창가에서 꽃을 만지며 사랑스러운 미소를 짓는 여주인공
-     • [기억/시간/시계/어제]: 따뜻한 햇살이 비치는 앤티크 룸에서 옛 추억을 회상하는 아련한 여주인공
-4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 그 타임라인에 실제로 노래되는 가사 파트의 상황과 감정선에 맞춰 유기적으로 이어지도록 씬을 기획하세요.
-5. 프롬프트 형식: 각 씬마다 영문으로 작성:
-   "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, {char_prompt_base}, [가사 해당 파트에 기반한 여주인공의 행동/표정 및 감성적인 배경 연출], breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
+   - 외형: 크고 깊은 매혹적인 애니 눈망울과 긴 속눈썹(large expressive luminous anime eyes with delicate long eyelashes), 세련된 이목구비, 성숙한 모래시계 몸매(voluptuous mature curves, graceful slender waist).
+   - 배제: not a child, not underage, not a little girl, no loli, not childish, not middle-aged, not an older woman, not matronly.
+4. 씬 전개: 각 10초 구간(0~10s, 10~20s, ..., 마지막 씬)마다 음악과 가사의 감정선에 맞춰 [풍경/B-Roll] -> [원경/실루엣] -> [인물 감정]이 물 흐르듯 교차되도록 {num_scenes}개의 프롬프트를 작성하세요.
+5. 프롬프트 형식: 각 씬마다 영문 문자열로 작성:
+   - 인물 등장 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, {char_prompt_base}, [가사 파트 행동/감정 연출], breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, not 3D, no real photo"
+   - 풍경/오브제 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, [시네마틱 배경/오브제 상세 묘사], no people, cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation quality, not 3D, no real photo"
+   - 원경/실루엣 씬: "masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, wide environmental long shot, [광활한 풍경 속 작게 서 있는 실루엣/뒷모습 묘사], breathtaking anime lighting, clean 2D cel shading, Kyoto Animation quality, not 3D, no real photo"
 
 반드시 마크다운 코드블록 없이 순수 JSON 배열만 반환하세요:
 [
@@ -682,52 +687,86 @@ def generate_scene_prompts_for_duration(
         line_idx = min(line_idx, len(clean_lines) - 1)
         target_line = clean_lines[line_idx]
 
-        # 가사 단어 기반 은발/라벤더 메이드 미소녀의 감성적인 행동 및 다채로운 배경 정밀 매핑
-        if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
-            visual_theme = "standing on stone castle balcony as a majestic white fantasy dragon glides gracefully through the twilight sky behind her"
-        elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
-            visual_theme = "holding an ornate glowing silver rapier with fierce determined big anime eyes, wind whipping her maid dress ribbons on fortress wall"
-        elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억", "차원"]):
-            visual_theme = "surrounded by floating golden clockwork cogs and shimmering light fragments in an antique sunlit clock tower library, wistful gaze"
-        elif any(w in target_line for w in ["우주", "은하", "성운", "행성", "궤도"]):
-            visual_theme = "gazing up from an antique glass observatory dome at a breathtaking celestial galaxy nebula and shooting stars across the cosmic night sky"
-        elif any(w in target_line for w in ["성", "유적", "고대", "탑", "라퓨타", "신전"]):
-            visual_theme = "exploring towering ancient mossy stone ruins where blooming wisteria and ivy drape over grand cathedral arches, curious gaze"
-        elif any(w in target_line for w in ["산", "절벽", "바위", "협곡", "봉우리"]):
-            visual_theme = "standing at the edge of a verdant mountain cliff overlooking rolling misty green valleys at dawn, breeze fluttering her silver hair"
-        elif any(w in target_line for w in ["심해", "해저", "산호", "해파리"]):
-            visual_theme = "visiting a magical aquatic hall, watching glowing turquoise jellyfish and water reflections ripple across her large expressive anime eyes"
-        elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변"]):
-            visual_theme = "walking along a picturesque seaside promenade at golden sunset, gentle ocean breeze blowing her dress as waves lap the shore"
-        elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼"]):
-            visual_theme = "leaning against the polished wooden window frame of a vintage train carriage as golden countryside scenery rolls past"
-        elif any(w in target_line for w in ["눈", "겨울", "얼음", "시리", "추위"]):
-            visual_theme = "catching soft white snowflakes on her fingertips on a snow-covered cobblestone village square with glowing warm lanterns"
-        elif any(w in target_line for w in ["비", "빗", "물", "적시"]):
-            visual_theme = "holding a transparent umbrella on a quiet cobblestone street, gentle rain ripples reflecting warm amber streetlights"
-        elif any(w in target_line for w in ["밤", "별", "하늘", "어둠"]):
-            visual_theme = "sitting on a rustic stone garden bench under a deep indigo sky, looking up at shimmering constellations with big luminous anime eyes"
-        elif any(w in target_line for w in ["바람", "흔들", "풀", "나무", "숲"]):
-            visual_theme = "strolling through an enchanted sun-dappled forest path, gentle wind rustling emerald leaves and fluttering her ribbons"
-        elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
-            visual_theme = "gently cupping blooming pink cherry blossom petals in a sunlit garden, soft enchanting smile with big beautiful anime eyes"
-        elif any(w in target_line for w in ["빛", "햇살", "새벽", "아침", "태양"]):
-            visual_theme = "basking on an antique bedroom balcony as warm morning sunlight illuminates her glamorous silhouette and flowing hair"
-        elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염"]):
-            visual_theme = "singing passionately with microphone on an illuminated grand musical stage, surrounded by burst of warm golden stage lights"
-        elif base_prompts and len(base_prompts) > i:
-            visual_theme = f"charismatically standing in {base_prompts[i]}"
-        else:
-            visual_theme = f"reflecting the emotional scene of '{target_line}' in stunning scenic setting, big beautiful anime eyes gleaming"
+        # 3단계 시네마틱 몽타주 샷 타입 교차 순환 ('사람다음사람' 나열 탈피):
+        # 0: 인물 감정 및 가창 컷 (Subject Focus & Performance)
+        # 1: 감성 풍경 및 상징 오브제 B-Roll 컷 (Scenery & Macro B-Roll - 인물 없음)
+        # 2: 광활한 원경 / 환경 롱샷 / 뒷모습 실루엣 컷 (Wide Environmental Long Shot & Silhouette)
+        shot_type = i % 3
 
-        cam_mod = cam_variations[i % len(cam_variations)]
-        full_p = (
-            f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-            f"{char_prompt_base}, "
-            f"{visual_theme}, "
-            f"{cam_mod}, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
-            f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo"
-        )
+        if shot_type == 1:
+            # [타입 1: 감성 풍경 & 오브제 인서트 (B-Roll) - 사람 얼굴 없음]
+            if any(w in target_line for w in ["비", "빗", "물", "적시"]):
+                scene_desc = "cinematic atmospheric shot of delicate rain droplets tracing down a cozy vintage windowpane, warm amber streetlights reflecting in evening puddles, tranquil melancholic mood"
+            elif any(w in target_line for w in ["밤", "별", "하늘", "어둠", "우주", "은하"]):
+                scene_desc = "breathtaking wide cinematic shot of glowing constellations and shooting star streaks across a deep indigo night sky, gently swaying tree branches in breeze"
+            elif any(w in target_line for w in ["꽃", "봄", "피어", "향기"]):
+                scene_desc = "macro cinematic focus on delicate pink cherry blossom petals fluttering softly through sun-dappled air, warm gentle sunlight lens flare, peaceful spring serenity"
+            elif any(w in target_line for w in ["시간", "시공", "과거", "시계", "태엽", "기억"]):
+                scene_desc = "sunlight streaming through a vintage sunlit library window, antique grandfather clock with slow brass pendulum and floating golden dust motes"
+            elif any(w in target_line for w in ["바다", "파도", "수평선", "모래", "해변", "심해"]):
+                scene_desc = "cinematic tranquil shot of gentle ocean waves lapping against golden sandy shoreline at sunset, warm water reflections and gentle sea breeze"
+            elif any(w in target_line for w in ["기차", "철길", "역", "정거장", "플랫폼", "길"]):
+                scene_desc = "cinematic empty train tracks glowing under dramatic sunset clouds, distant town silhouettes and railway crossing signal gently blinking"
+            elif any(w in target_line for w in ["불", "타오", "열정", "폭발", "화염", "무대"]):
+                scene_desc = "cinematic shot of grand stage spotlight beam cutting through theatrical haze, empty acoustic guitar resting on stand with warm golden lens flare"
+            elif any(w in target_line for w in ["눈", "겨울", "얼음", "시리", "추위"]):
+                scene_desc = "gentle white snowflakes floating quietly down through warm lamplight glow in a peaceful cobblestone alleyway"
+            else:
+                scene_desc = f"poetic cinematic scenery capturing the mood of '{target_line}', gentle breeze rustling emerald leaves, warm sunlight rays, emotional anime background"
+
+            full_p = (
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+                f"{scene_desc}, no people, no character, tranquil storytelling background, "
+                f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"not photorealistic, not 3D CGI, not semi-realistic, no live-action, no real human photo"
+            )
+
+        elif shot_type == 2:
+            # [타입 2: 원경 / 환경 롱샷 / 뒷모습 실루엣 - 사람이 배경 속에 작게 녹아듦]
+            if any(w in target_line for w in ["바다", "파도", "수평선", "해변"]):
+                env_desc = "distant back view of the young anime woman standing quietly at the edge of a scenic seaside cliff, gazing at vast ocean horizon at golden sunset"
+            elif any(w in target_line for w in ["밤", "별", "하늘", "새벽"]):
+                env_desc = "distant atmospheric silhouette of the young anime woman looking up at breathtaking starry night sky from high grassy hill, wind blowing her hair"
+            elif any(w in target_line for w in ["비", "빗", "거리", "길"]):
+                env_desc = "wide environmental long shot of the young anime woman holding an umbrella seen from behind, walking slowly down a quiet rain-soaked cobblestone street"
+            elif any(w in target_line for w in ["성", "유적", "산", "숲"]):
+                env_desc = "wide panoramic shot of ancient grand ruins overgrown with ivy, small distant silhouette of the anime woman gazing up at grand stone arches"
+            else:
+                env_desc = "wide environmental long shot, distant back view of the young anime woman standing on a high open terrace looking over expansive scenic townscape at sunset"
+
+            full_p = (
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+                f"wide environmental long shot, {env_desc}, spacious cinematic composition, "
+                f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"not photorealistic, not 3D CGI, not semi-realistic, no live-action, no real human photo"
+            )
+
+        else:
+            # [타입 0: 인물 감정 & 가창 클라이맥스 컷 - 여주인공 등장]
+            if any(w in target_line for w in ["용", "드래곤", "하쿠", "비늘"]):
+                visual_theme = "standing on stone castle balcony as a majestic white fantasy dragon glides gracefully through the twilight sky behind her"
+            elif any(w in target_line for w in ["검", "칼", "용사", "기사", "전쟁", "싸움", "승리"]):
+                visual_theme = "holding an ornate glowing silver rapier with determined captivating anime eyes, wind whipping her ribbons on fortress wall"
+            elif any(w in target_line for w in ["무대", "열정", "노래", "소리쳐", "불꽃"]):
+                visual_theme = "singing passionately with microphone under warm golden stage lights, emotional expressive eyes, captivating stage presence"
+            elif any(w in target_line for w in ["꽃", "봄", "사랑", "온기"]):
+                visual_theme = "gently cupping blooming pink cherry blossom petals in a sunlit garden, soft enchanting smile with large expressive anime eyes"
+            elif any(w in target_line for w in ["비", "눈물", "빗", "이별"]):
+                visual_theme = "holding a transparent umbrella, gazing at camera with deep wistful large expressive anime eyes, gentle raindrops glistening"
+            elif any(w in target_line for w in ["바다", "파도", "여름"]):
+                visual_theme = "walking along picturesque seaside promenade at sunset, smiling gently towards the viewer with captivating anime eyes"
+            else:
+                visual_theme = f"expressing the heartfelt emotion of '{target_line}', singing softly with captivating luminous anime eyes and subtle charming smile"
+
+            cam_mod = cam_variations[(i // 3) % len(cam_variations)]
+            full_p = (
+                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
+                f"{char_prompt_base}, "
+                f"{visual_theme}, "
+                f"{cam_mod}, breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
+                f"not photorealistic, not 3D CGI, not semi-realistic, no live-action, no real human photo"
+            )
+
         result_prompts.append(full_p)
 
     return result_prompts
