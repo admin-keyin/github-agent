@@ -109,8 +109,9 @@ def generate_artwork(image_prompt: str, output_path: str, width: int = 1280, hei
     곡 프롬프트에 최적화된 고화질 감성 애니메이션 일러스트 이미지를 다운로드하거나 폴백 이미지를 확보합니다.
     """
     enhanced_prompt = (
-        f"{image_prompt}, masterpiece, anime aesthetic, high quality, cinematic lighting, "
-        f"Makoto Shinkai wallpaper style, 4k resolution, beautiful composition, rich details, no watermark, no text"
+        f"{image_prompt}, masterpiece, modern Japanese anime scenery, contemporary high-end Japanese TV anime background illustration, "
+        f"breathtaking scenery, atmospheric environment, high quality, cinematic lighting, "
+        f"Makoto Shinkai wallpaper style, 4k resolution, beautiful composition, rich details, no people, no human, no characters, no watermark, no text, not retro anime, not 90s anime, not webtoon, not manhwa"
     )
     if seed is None:
         seed = random.randint(1000, 999999)

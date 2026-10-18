@@ -321,13 +321,13 @@ def main():
     num_scenes = max(1, math.ceil(duration_sec / clip_duration))
     print(f"\n[Video Strategy] 총 음원 길이 {duration_sec:.1f}초에 맞춰 5초 단위 씬 {num_scenes}개를 생성합니다 (총 {num_scenes * 5}초 분량).")
 
-    # 전체 음원 시간과 가사에 맞춰 정확히 num_scenes개의 씬 프롬프트 생성 (이번 곡의 고정 캐릭터 프로필 적용)
+    # 전체 음원 시간과 가사에 맞춰 정확히 num_scenes개의 씬 프롬프트 생성 (인물/캐릭터 배제, 순수 시네마틱 배경 모드)
     scene_prompts = generate_scene_prompts_for_duration(
         lyrics=display_lyrics,
         duration_sec=duration_sec,
         clip_duration=clip_duration,
         base_prompts=extra_meta.get("scene_prompts", []),
-        character_profile=extra_meta.get("character_profile")
+        character_profile=None
     )
     shorts_scene_prompts = extra_meta.get("shorts_scene_prompts", scene_prompts[:3])
 
@@ -349,16 +349,16 @@ def main():
 
     shorts_durations = calculate_scene_durations(shorts_duration, len(shorts_scene_prompts), is_shorts=True, shorts_duration=shorts_duration)
 
-    # Kie.ai API 키가 있는 경우 ByteDance SeaDance V1 Pro (초당 2.8 크레딧 가성비) 10초 씬 N개 병렬 생성
+    # Kie.ai API 키가 있는 경우 ByteDance SeaDance V1 Pro (초당 2.8 크레딧 가성비) 5초 배경 씬 N개 병렬 생성
     if kie_video_client.has_api_key():
-        print(f"\n[Step 3] Kie.ai ByteDance SeaDance V1 Pro 엔진으로 10초 애니메이션 씬 {num_scenes}개 병렬 렌더링 시작 (480P 가성비 모드)...")
+        print(f"\n[Step 3] Kie.ai ByteDance SeaDance V1 Pro 엔진으로 5초 감성 배경 씬 {num_scenes}개 병렬 렌더링 시작 (480P 가성비 모드)...")
         os.makedirs("temp/videos_full", exist_ok=True)
         video_clips_full = generate_all_video_scenes(
             kie_video_client=kie_video_client,
             scene_prompts=scene_prompts,
             output_dir="temp/videos_full",
             max_workers=3,
-            character_profile=extra_meta.get("character_profile")
+            character_profile=None
         )
 
     # 비디오가 정상 생성된 경우 하나의 결합 배경 비디오로 빌드

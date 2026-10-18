@@ -44,16 +44,15 @@ class KieVideoGenerator:
             "Content-Type": "application/json"
         }
 
-        # 정통 일본 2D 모에 애니메이션 화풍 + 곡별 동적 캐릭터 프로필
-        if "Japanese 2D anime visual" in prompt or "masterpiece" in prompt:
+        # 정통 일본 2D 애니메이션 배경/풍경 화풍 (인물/캐릭터 배제)
+        if "Japanese" in prompt or "masterpiece" in prompt:
             anime_prompt = prompt
         else:
-            char_prompt = build_character_prompt(generate_random_character_profile())
             anime_prompt = (
-                f"masterpiece Japanese 2D anime visual, high quality Japanese TV anime aesthetic, "
-                f"{char_prompt}, {prompt}, "
-                f"breathtaking cinematic anime lighting, clean 2D cel shading, crisp dynamic anime linework, Kyoto Animation and CloverWorks quality, "
-                f"not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo, no watermark"
+                f"masterpiece modern Japanese anime background visual, contemporary high-end Japanese TV anime scenery, "
+                f"{prompt}, "
+                f"breathtaking Makoto Shinkai cinematic lighting, atmospheric anime environment, sophisticated anime digital shading, crisp modern anime linework, Kyoto Animation, CloverWorks and MAPPA quality, "
+                f"no people, no human, no characters, no girl, no boy, not photorealistic, not realistic photography, not 3D CGI, not semi-realistic, no live-action, no real human photo, no watermark"
             )
 
         create_url = "https://api.kie.ai/api/v1/jobs/createTask"
@@ -74,7 +73,7 @@ class KieVideoGenerator:
                 "prompt": anime_prompt[:2500],
                 "aspect_ratio": aspect_ratio,
                 "resolution": target_res,
-                "negative_prompt": "photorealistic, realistic photography, real life photograph, live action footage, camera selfie, 3D CGI, 3D render, semi-realistic, real human skin, western comic, deformed, disfigured, bad anatomy, bad hands, blurry, low quality, ugly, watermark"
+                "negative_prompt": "people, person, human, girl, boy, woman, man, face, character, portrait, body, limbs, photorealistic, realistic photography, real life photograph, live action footage, camera selfie, 3D CGI, 3D render, semi-realistic, real human skin, webtoon, manhwa, korean webtoon, western comic, retro anime, 90s anime, 80s anime, vintage anime, classic anime, retro manga, old fashioned cartoon, oversized eyes, giant bug eyes, flat cel shading, goofy face, 1990s aesthetic, deformed, disfigured, bad anatomy, bad hands, blurry, low quality, ugly, watermark"
             }
             if "bytedance" in model:
                 # SeaDance 규격: "5s" 또는 "10s", camera_fixed: false

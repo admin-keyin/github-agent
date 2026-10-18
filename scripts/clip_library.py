@@ -51,10 +51,12 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
     """
     캐릭터 프로필과 씬 프롬프트 텍스트에서
     머리색(hair), 복장(outfit), 배경(bg), 동작(action) 슬러그를 추출합니다.
+    캐릭터가 없는 경우(character_profile is None) scenery / cinematic을 기본값으로 사용합니다.
     """
-    # 1. 머리색 / 아키타입 슬러그
-    hair_slug = "silver_lavender"
+    # 1. 머리색 / 아키타입 슬러그 (캐릭터 없으면 scenery)
+    hair_slug = "scenery"
     if character_profile:
+        hair_slug = "silver_lavender"
         arch = character_profile.get("archetype", "").lower()
         h_en = character_profile.get("hair_en", "").lower()
         h_ko = character_profile.get("hair_ko", "").lower()
@@ -65,6 +67,18 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
             hair_slug = "makima_red_braid"
         elif arch == "power" or "파워" in h_ko or "horns" in h_en or "strawberry blonde" in h_en:
             hair_slug = "power_blonde_horns"
+        elif arch == "violet" or "바이올렛" in h_ko:
+            hair_slug = "violet_golden_braids"
+        elif arch == "yor" or "요르" in h_ko:
+            hair_slug = "yor_black_updo"
+        elif arch == "frieren_mage" or "프리렌" in h_ko:
+            hair_slug = "frieren_silver_twintails"
+        elif arch == "hoshino" or "호시노" in h_ko:
+            hair_slug = "hoshino_magenta_sideponytail"
+        elif arch == "bocchi_rock" or "인디" in h_ko:
+            hair_slug = "bocchi_pink_loose"
+        elif arch == "cyber_lucy" or "사이버" in h_ko:
+            hair_slug = "lucy_pastel_bob"
         elif "pink" in h_en or "핑크" in h_ko:
             hair_slug = "pink_twintails"
         elif "black" in h_en or "흑발" in h_ko:
@@ -92,9 +106,10 @@ def extract_slug_parts(character_profile: Optional[Dict[str, Any]], scene_prompt
         elif "brown" in h_en or "밤색" in h_ko:
             hair_slug = "brown_wavy"
 
-    # 2. 복장 슬러그
-    outfit_slug = "signature_outfit"
+    # 2. 복장 슬러그 (캐릭터 없으면 cinematic)
+    outfit_slug = "cinematic"
     if character_profile:
+        outfit_slug = "signature_outfit"
         o_en = character_profile.get("outfit_en", "").lower()
         o_type = character_profile.get("outfit_type", "").lower()
         o_ko = character_profile.get("outfit_ko", "").lower()
@@ -320,6 +335,15 @@ def find_reusable_clip(
         if not os.path.exists(clip_path):
             continue
         if os.path.abspath(clip_path) in exclude_set:
+            continue
+
+        # 과거 레거시(옛날 셀화 및 웹툰 화풍) 클립은 재사용하지 않고 세련된 현대 일본 애니메이션 화풍으로 신규 생성 유도
+        item_prompt = item.get("prompt", "")
+        if "cel shading" in item_prompt or "large expressive" in item_prompt or "webtoon" in item_prompt or "manhwa" in item_prompt:
+            continue
+
+        # 캐릭터 없는 모드(character_profile is None)일 때 과거 캐릭터/인물 클립은 절대 재사용 배제
+        if character_profile is None and item.get("hair_slug") != "scenery":
             continue
 
         h_match = (item.get("hair_slug") == target_parts["hair"])

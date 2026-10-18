@@ -85,7 +85,7 @@ jobs:
             python scripts/upload_to_youtube.py output_shorts_video.mp4 temp/video_info_shorts.json
           fi
 
-      - name: Commit and push generated anime clips to repository
+      - name: Commit and push generated cinematic video clips to repository
         if: always()
         run: |
           python scripts/sync_manifest_and_push.py
